@@ -32,6 +32,13 @@ cd ~/osp-workspace && claude
 from the workspace), and seeds `CLAUDE.md` from the template. It is
 idempotent; re-run it to update.
 
+**Python environment (once).** The green-golden checkpoints run real code, so
+before your first session set up the scientific environment described in the
+"Environment setup" block of `marketplace/docs/IMPLEMENTATION-GUIDE.md`
+(conda/mamba with xarray, marimo, earthaccess and the domain libraries, Quarto
+for the tutorials, and an Earthdata Login in `~/.netrc` for NASA data). Without
+it, sessions boot but stall at the first golden notebook.
+
 ## Authoring a new session block
 
 When you take on new work (a new domain, a new capability), write its block
@@ -50,9 +57,12 @@ template:
 green goldens, verified concepts, a recorded test, a pushed artifact.>
 ```
 
-Use the Session 15 block (hydrology scaffold) as a worked example: it names a
-concrete scaffold, a live data audit, two concepts, and a green golden as its
-checkpoint. Keep steps small enough that `/osp-close` can walk them one by one.
+Put the autonomy mode in the header, as the later blocks do (for example
+Session 17: "Applied Pack + Canonical Home (2.5 hr; tight supervision)").
+Session 15 (hydrology scaffold) is a good worked example for the body shape:
+it names a concrete scaffold, a live data audit, two concepts, and a green
+golden as its checkpoint. Keep steps small enough that `/osp-close` can walk
+them one by one.
 
 ## The autonomy dial
 
@@ -95,16 +105,19 @@ exit test before you see the result.
 
 ## Opening "Session 20" (the next domain)
 
-1. Confirm the phase gate: has the Session-19 ablation cleared the
-   pre-registration's go conditions? If not, that is the work, not a new
-   domain.
+1. Confirm the phase gate against `phase2-preregistration.md`: the go
+   conditions are met AND the ablation is not null or reversed (stop
+   condition 1 blocks new domains on a null ablation). If the gate isn't
+   clear, diagnosing the ablation is the work, not a new domain.
 2. Write the spec detail for the new domain into `SPECIFICATION.md` (structure,
    skills, knowledge requirements, acceptance criteria), following the
    hydrology section (§10) as the model, at the scheduled spec-revision window.
-3. Author the Session 20+ blocks in `IMPLEMENTATION-GUIDE.md` and their
-   autonomy rows.
-4. Scaffold the new plugin from `plugin-template`, its bundle from
-   `knowledge-template`, and run `/osp-session 20`.
+3. Author the Session 20+ blocks in `IMPLEMENTATION-GUIDE.md`, each with an
+   autonomy mode in its header.
+4. Create the new repo and register it in `build-kit/bootstrap.sh`'s `REPOS`
+   array (so later re-bootstraps clone it), then scaffold the plugin from
+   `plugin-template`, its bundle from `knowledge-template`, and run
+   `/osp-session 20`.
 
 ## Verifying the docs stay healthy
 
