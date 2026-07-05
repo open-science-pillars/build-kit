@@ -1,0 +1,8 @@
+cff-version: 1.2.0
+message: If you use this development harness, please cite it. Tagged releases are archived to Zenodo.
+title: "Open Science Pillars: build-kit"
+type: software
+authors:
+  - name: Open Science Pillars Community
+repository-code: https://github.com/open-science-pillars/build-kit
+license: Apache-2.0
