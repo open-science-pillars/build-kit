@@ -25,7 +25,7 @@ Run the gates, then the bookkeeping. Never reorder.
    or every hit is a declared, session-scheduled placeholder.
 
 ## Bookkeeping
-7. Update marketplace/docs/PROGRESS.md: statuses with evidence,
+7. Update build-kit/PROGRESS.md: statuses with evidence,
    session-log row (date, actual hours, issues).
 8. Stage commits per repo with messages "Session N: <summary>".
    Show me the diff summary; push only after my confirmation.

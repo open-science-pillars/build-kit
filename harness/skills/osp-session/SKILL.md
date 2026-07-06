@@ -8,9 +8,9 @@ disable-model-invocation: true
 
 You are starting build session $ARGUMENTS for Open Science Pillars.
 
-1. Read marketplace/docs/IMPLEMENTATION-GUIDE.md and extract the
+1. Read build-kit/IMPLEMENTATION-GUIDE.md and extract the
    full block for Session $ARGUMENTS (goal, time, steps, checkpoint).
-2. Read marketplace/docs/PROGRESS.md. Report: items already green
+2. Read build-kit/PROGRESS.md. Report: items already green
    that this session depends on; anything red or yellow that blocks it.
    If a dependency is not green, STOP and say so.
 3. Restate, in one screen: today's goal, the ordered steps, the

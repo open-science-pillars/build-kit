@@ -13,7 +13,7 @@ WORKSPACE="${1:-$(pwd)/osp-workspace}"
 # Repos a developer needs cloned to continue the build. Add domain repos as
 # they are created (e.g. remote-sensing in Phase 3).
 REPOS=(marketplace core ocean-science hydrology tutorials \
-       plugin-template knowledge-template nasa-daac-knowledge build-kit)
+       plugin-template knowledge-template nasa-daac-knowledge evals build-kit)
 
 echo "Workspace: $WORKSPACE"
 mkdir -p "$WORKSPACE"

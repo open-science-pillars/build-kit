@@ -1,18 +1,26 @@
 # Developing Open Science Pillars
 
 How to continue building this project with an AI assistant, using the same
-harness that produced Phases 1 and 2. Read this once before your first session.
+harness that produced Phases 1 and 2. Read this once before your first session,
+alongside `build-kit/docs/development-model.md`, which is the operating model:
+now that the initial build is complete, work is spec-anchored and splits into
+bounded **initiatives** (this harness) and **standing processes** (the ingest
+loop, `docs/maintenance.md`, and governance). This guide is how to run an
+initiative.
 
 ## The idea
 
-Work happens in numbered **sessions**. Each session has a block in
-`marketplace/docs/IMPLEMENTATION-GUIDE.md` (goal, time, ordered steps,
-checkpoint) and an **autonomy mode** (how long a leash the assistant gets). A
-session starts with `/osp-session N`, which reads the block and the current
-state, restates the plan, and waits for your go. It ends with `/osp-close`,
-which runs verification gates and updates the honest status tracker. The law
-the assistant works under is the workspace `CLAUDE.md` (start from
-`CLAUDE.template.md` here).
+An initiative is a bounded piece of work with a goal and an end (historically
+these were the numbered build sessions; the harness is unchanged). Each has a
+block in `build-kit/IMPLEMENTATION-GUIDE.md` (goal, time, ordered steps,
+checkpoint) and an **autonomy mode** (how long a leash the assistant gets). It
+starts with `/osp-session N`, which reads the block and the current state,
+restates the plan, and waits for your go. It ends with `/osp-close`, which runs
+verification gates and updates the honest status tracker. The law the assistant
+works under is the workspace `CLAUDE.md` (start from `CLAUDE.template.md` here).
+Not everything is an initiative: event- or schedule-driven work (capturing a
+concept, re-verifying a dataset, reviewing a PR) is a standing process and does
+not take a session number. See `docs/development-model.md` for which is which.
 
 Nothing is "done" without its evidence: a workflow skill needs a green golden
 notebook, a high-severity gotcha needs an eval case, a completed PROGRESS item
@@ -34,7 +42,7 @@ idempotent; re-run it to update.
 
 **Python environment (once).** The green-golden checkpoints run real code, so
 before your first session set up the scientific environment described in the
-"Environment setup" block of `marketplace/docs/IMPLEMENTATION-GUIDE.md`
+"Environment setup" block of `build-kit/IMPLEMENTATION-GUIDE.md`
 (conda/mamba with xarray, marimo, earthaccess and the domain libraries, Quarto
 for the tutorials, and an Earthdata Login in `~/.netrc` for NASA data). Without
 it, sessions boot but stall at the first golden notebook.

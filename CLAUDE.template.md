@@ -13,8 +13,8 @@ discrepancy instead of silently choosing.
 
 ## Canonical documents (read before acting, cite by section)
 - marketplace/docs/SPECIFICATION.md          (what to build)
-- marketplace/docs/IMPLEMENTATION-GUIDE.md   (in what order)
-- marketplace/docs/PROGRESS.md               (current state; you update it)
+- build-kit/IMPLEMENTATION-GUIDE.md   (in what order)
+- build-kit/PROGRESS.md               (current state; you update it)
 - marketplace/docs/ARCHITECTURE.md           (why; strategy)
 - marketplace/docs/phase2-preregistration.md (go/stop conditions; a gate)
 
@@ -50,7 +50,7 @@ build-kit: this harness. .github: org files.
     seeder drafts, humans merge (draft becomes verified only through
     steward review with verified_by set).
 11. Scope discipline: the current spec revision is frozen during a build
-    arc. New ideas and discovered gaps go to marketplace/docs/PARKING.md
+    arc. New ideas and discovered gaps go to build-kit/build-record/PARKING.md
     with a one-line rationale, triaged into the next spec revision only at
     the scheduled window. The build writes the next spec revision;
     forethought does not.
