@@ -103,6 +103,38 @@ exit test before you see the result.
   frontmatter, evidence links), queue it for steward approval, and log it. See
   `marketplace/docs/knowledge-authoring-guide.md`.
 
+## How skills, knowledge, and agents divide the work
+
+The layers have clean, non-overlapping jobs, so the knowledge bundle can grow
+and improve behavior without rewriting code (the design and its measured
+proof are in `marketplace/docs/design-knowledge-coupling.md`):
+
+- **Skills are deterministic procedures plus hard refusals.** A skill carries
+  the *how* (ordered steps, invariant method) and only the safety guards that
+  must fire every time: refuse a regridded budget, gate a large download,
+  never write credentials to a repo. A skill carries no dataset facts, no
+  inlined numbers, no gotcha rules, no named-concept lists.
+- **Knowledge concepts are the single source of everything a scientist would
+  look up.** The trap, the uncertainty structure, the recipe numbers, the
+  version caveat: each lives in exactly one concept, never copied into a skill.
+- **Agents (and skills through a standing consult step) discover and consult
+  the bundle dynamically.** Given a task and a dataset, glob and read the
+  relevant concepts, reason with them, and cite them by path. A concept added
+  since the last run is found by discovery, not by a remembered list.
+
+**The rule for what stays hardcoded** (so it is a judgment, not a list): a
+behavior stays in a skill only if it passes all three tests, else it is
+knowledge. (1) Invariance: it never changes with a product version or new
+learning. (2) Response shape: the right response is refuse or gate, not inform
+or adjust. (3) Universality: violating it is wrong or unsafe regardless of the
+dataset. When uncertain, put it in knowledge; over-hardcoding freezes behavior
+and makes the bundle inert.
+
+Run `build-kit/workflows/knowledge-coupling-review.js` to classify every skill
+and agent against this rule and get a per-file migration plan; the
+knowledge-linter flags inlined concept content and inert concepts so drift is
+caught mechanically.
+
 ## Opening "Session 20" (the next domain)
 
 1. Confirm the phase gate against `phase2-preregistration.md`: the go

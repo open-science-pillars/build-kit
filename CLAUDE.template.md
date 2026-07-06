@@ -54,6 +54,17 @@ build-kit: this harness. .github: org files.
     with a one-line rationale, triaged into the next spec revision only at
     the scheduled window. The build writes the next spec revision;
     forethought does not.
+12. Knowledge coupling (see marketplace/docs/design-knowledge-coupling.md):
+    skills are deterministic procedures plus hard refusals; they carry NO
+    dataset facts, inlined numbers, gotcha rules, or named-concept lists.
+    Dataset knowledge lives in exactly one concept and is consulted
+    dynamically (agents, and skills through an agent or a standing "discover
+    and consult the bundle for this dataset" step; discover by glob, never a
+    fixed list). A behavior stays hardcoded ONLY if it passes all three
+    tests: invariant across products and time; a refusal or gate (not
+    inform/adjust); and universal (wrong or unsafe regardless of dataset).
+    When uncertain, it is knowledge. No concept content is duplicated into a
+    skill.
 
 ## Session protocol
 Start every session with /osp-session <N>. End every session with
