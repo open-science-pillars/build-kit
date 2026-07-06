@@ -36,8 +36,10 @@ done
 
 # Seed the workspace law from the template if not already present.
 if [ ! -f "$WORKSPACE/CLAUDE.md" ]; then
-  cp "$WORKSPACE/build-kit/CLAUDE.template.md" "$WORKSPACE/CLAUDE.md"
-  echo "  created CLAUDE.md from template (review the version pins before your first session)"
+  # Import, do not copy: the workspace CLAUDE.md pulls in the single tracked
+  # law via Claude Code's @-import, so it can never drift from the source.
+  printf '# Open Science Pillars workspace\n\n@build-kit/CLAUDE.template.md\n' > "$WORKSPACE/CLAUDE.md"
+  echo "  created CLAUDE.md importing build-kit/CLAUDE.template.md (single source, no drift)"
 fi
 
 cat <<EOF

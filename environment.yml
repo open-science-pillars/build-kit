@@ -1,0 +1,37 @@
+# The analysis environment the golden notebooks and verification scripts need.
+# Create it with:  conda env create -f build-kit/environment.yml
+# Regenerate the conda list with:  conda env export -n osp --from-history
+# (conda deps are from-history for portability; the pip block pins the
+# domain packages that are not on conda-forge.)
+name: osp
+channels:
+  - conda-forge
+dependencies:
+  - python=3.11
+  - xarray
+  - dask
+  - netcdf4
+  - h5netcdf
+  - scipy
+  - matplotlib
+  - cartopy
+  - rioxarray
+  - cfgrib
+  - eccodes
+  - zarr
+  - geopandas
+  - pyproj
+  - rasterio
+  - xesmf
+  - esmpy
+  - ca-certificates
+  - openssl
+  - pip
+  - pip:
+      - earthaccess==0.17.0
+      - ecco_access==0.3.1
+      - ecco_v4_py==1.8.1
+      - xmitgcm==0.5.2
+      - dataretrieval==1.2.0
+      - pymannkendall==1.4.3
+      - marimo==0.23.13

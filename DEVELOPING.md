@@ -17,7 +17,9 @@ checkpoint) and an **autonomy mode** (how long a leash the assistant gets). It
 starts with `/osp-session N`, which reads the block and the current state,
 restates the plan, and waits for your go. It ends with `/osp-close`, which runs
 verification gates and updates the honest status tracker. The law the assistant
-works under is the workspace `CLAUDE.md` (start from `CLAUDE.template.md` here).
+works under is the workspace `CLAUDE.md`, which is a thin file that imports
+the single tracked law here with `@build-kit/CLAUDE.template.md` (so it never
+drifts); edit the law in `CLAUDE.template.md`.
 Not everything is an initiative: event- or schedule-driven work (capturing a
 concept, re-verifying a dataset, reviewing a PR) is a standing process and does
 not take a session number. See `docs/development-model.md` for which is which.
@@ -35,10 +37,11 @@ cd ~/osp-workspace && claude
 > /osp-session <N>
 ```
 
-`bootstrap.sh` clones the org repos flat, links the `osp-session` and
-`osp-close` skills as project skills (so they load when you run Claude Code
-from the workspace), and seeds `CLAUDE.md` from the template. It is
-idempotent; re-run it to update.
+`bootstrap.sh` clones the org repos flat (including `evals`), links the
+`osp-session` and `osp-close` skills as project skills (so they load when you
+run Claude Code from the workspace), and writes a workspace `CLAUDE.md` that
+imports the law with `@build-kit/CLAUDE.template.md`. It is idempotent; re-run
+it to update.
 
 **Python environment (once).** The green-golden checkpoints run real code, so
 before your first session set up the scientific environment described in the

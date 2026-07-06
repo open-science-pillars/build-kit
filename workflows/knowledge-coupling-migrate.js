@@ -6,7 +6,7 @@ export const meta = {
 
 let A = args
 if (typeof A === 'string') { try { A = JSON.parse(A) } catch (e) { A = {} } }
-const ROOT = (A && A.root) || '/Users/pramirez/Development/ClaudeCode/osp'
+const ROOT = (A && A.root) || '.'
 const FILES = (A && A.files) || []
 // Existing concepts that mirror the canonical podaac bundle: NEVER edit (byte-identity).
 const PROTECTED = (A && A.protected) || 'ecco-v4r4, swot-karin, grace-fo-mascons, grace-coastal-leakage, grace-gia-correction, ghrsst-mur, rapid-mocha, ecco-native-vs-regridded, ecco-geothermal-flux, swot-calval-orbit-phases, ecco-release-mixing, ecco-mht-basin-scope, swot-crossover-unapplied, ecco-heat-budget, ecco-mht-26n, ecco-salt-budget, ecco-volume-budget'

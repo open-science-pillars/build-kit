@@ -9,7 +9,7 @@ let A = args
 if (typeof A === 'string') {
   try { A = JSON.parse(A) } catch (e) { A = {} }
 }
-const ROOT = (A && A.root) || '/Users/pramirez/Development/ClaudeCode/osp'
+const ROOT = (A && A.root) || '.'
 const FILES = (A && A.files) || []
 
 const RULE = `THE KNOWLEDGE-COUPLING RULE. A behavior stays HARDCODED in a skill only if

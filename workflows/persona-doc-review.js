@@ -9,7 +9,7 @@ export const meta = {
 }
 
 // The local workspace root holding all nine repos, read-only for this review.
-const ROOT = (args && args.root) || '/Users/pramirez/Development/ClaudeCode/osp'
+const ROOT = (args && args.root) || '.'
 
 const FINDINGS_SCHEMA = {
   type: 'object',

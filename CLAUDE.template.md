@@ -1,5 +1,14 @@
 # Open Science Pillars: Workspace
 
+<!-- This is the canonical OSP workspace law (not a fill-in-the-blanks
+     template). It is named CLAUDE.template.md, not CLAUDE.md, on purpose:
+     Claude Code lazy-loads any file literally named CLAUDE.md from a
+     subdirectory when it reads files there, so a build-kit/CLAUDE.md would
+     load a SECOND time whenever work touches build-kit/. Naming it
+     .template.md keeps it from auto-loading. The workspace-root CLAUDE.md
+     pulls it in with `@build-kit/CLAUDE.template.md`, so there is one
+     source and the root file cannot drift from it. Edit the law here. -->
+
 This directory is the build workspace for the Open Science Pillars
 organization (github.com/open-science-pillars). You are building the
 plugins, knowledge bundles, and tutorials defined by the canonical

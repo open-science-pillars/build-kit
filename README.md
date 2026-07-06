@@ -15,7 +15,7 @@ for **maintainers and future core developers** who want to extend the project
   gates, and a walkthrough for opening the next domain.
 - **[bootstrap.sh](bootstrap.sh)**: clones the org repos flat and wires the
   session harness so `/osp-session` and `/osp-close` work.
-- **[CLAUDE.template.md](CLAUDE.template.md)**: the workspace "law" template
+- **[CLAUDE.template.md](CLAUDE.template.md)**: the canonical workspace "law" (the workspace `CLAUDE.md` imports it, never copies it)
   (the non-negotiable global rules) to seed a new build workspace.
 - **[harness/skills/](harness/skills/)**: the runnable `osp-session` and
   `osp-close` skills. This is their canonical source; earlier versions lived
