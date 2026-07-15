@@ -7,6 +7,12 @@ on:
       - "scripts/roadmap.py"
       - "tests/**"
       - "ROADMAP.md"
+      - ".osp/governance.yaml"
+      - "CODEOWNERS"
+      - "bootstrap.sh"
+      - "harness/skills/**"
+      - "docs/roadmap-*.md"
+      - "build-record/osp-next-steps-codex.md"
       - ".github/workflows/roadmap.yml"
   push:
     branches: [main]
@@ -15,6 +21,12 @@ on:
       - "scripts/roadmap.py"
       - "tests/**"
       - "ROADMAP.md"
+      - ".osp/governance.yaml"
+      - "CODEOWNERS"
+      - "bootstrap.sh"
+      - "harness/skills/**"
+      - "docs/roadmap-*.md"
+      - "build-record/osp-next-steps-codex.md"
       - ".github/workflows/roadmap.yml"
   schedule:
     - cron: "17 16 1 * *"

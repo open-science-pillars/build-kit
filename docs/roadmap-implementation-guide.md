@@ -9,7 +9,8 @@ label write, ruleset change, team change, or release action for human review.
 
 **Prompt**
 
-> Read `osp-next-steps-codex.md`, `build-kit/docs/development-model.md`, the
+> Read `build-kit/build-record/osp-next-steps-codex.md`,
+> `build-kit/docs/development-model.md`, the
 > existing harness skills, organization governance, and
 > `build-kit/docs/roadmap-harness-plan.md`. Confirm that the two roadmap design
 > documents are linked from build-kit and that the old next-steps file is

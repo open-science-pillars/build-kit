@@ -32,9 +32,11 @@ The federated model separates authority:
 | Repository execution | the accepted issue and repository PRs |
 | Scientific requirements | `marketplace/docs/SPECIFICATION.md` |
 | Historical Sessions 0b-19 | `build-kit/IMPLEMENTATION-GUIDE.md` |
+| Roadmap source assessment | `build-kit/build-record/osp-next-steps-codex.md` |
 
-`osp-next-steps-codex.md` is the source assessment used to seed the portfolio.
-It is not maintained as a second roadmap.
+`build-kit/build-record/osp-next-steps-codex.md` is the archived source
+assessment used to seed the portfolio. It is not maintained as a second
+roadmap.
 
 ## Roles and review
 
@@ -129,4 +131,3 @@ available only for the historical build record.
 Phase 3 remains blocked on the powered knowledge-bundle ablation. A null or
 reversed result triggers the pre-registered pivot. The roadmap may retain
 Phase-3 context, but it does not seed Phase-3 issues until the gate clears.
-
