@@ -544,7 +544,7 @@ def command_validate(args: argparse.Namespace) -> int:
 
 def command_render(args: argparse.Namespace) -> int:
     data = load_yaml(ROADMAP_FILE)
-    errors = validate_data(data)
+    errors = validate_data(data, check_files=not args.standalone)
     if errors:
         raise RoadmapError("cannot render invalid roadmap:\n" + "\n".join(errors))
     expected = render_markdown(data)
@@ -771,6 +771,7 @@ def parser() -> argparse.ArgumentParser:
     validate.add_argument("--standalone", action="store_true", help="skip sibling repository governance files")
     render = sub.add_parser("render")
     render.add_argument("--check", action="store_true")
+    render.add_argument("--standalone", action="store_true", help="skip sibling repository governance files")
     audit = sub.add_parser("audit")
     audit.add_argument("--offline", action="store_true")
     audit.add_argument("--standalone", action="store_true", help="skip sibling repository governance files")

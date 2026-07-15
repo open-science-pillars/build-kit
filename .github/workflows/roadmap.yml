@@ -35,7 +35,7 @@ jobs:
       - name: Test harness
         run: uv run --with pyyaml==6.0.2 --with jsonschema==4.25.1 python -m unittest discover -s tests -p 'test_roadmap.py'
       - name: Check generated roadmap
-        run: uv run scripts/roadmap.py render --check
+        run: uv run scripts/roadmap.py render --check --standalone
       - name: Run offline audit
         run: uv run scripts/roadmap.py audit --offline --standalone
 
