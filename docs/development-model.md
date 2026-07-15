@@ -23,10 +23,9 @@ the organizing unit. In its place:
    not numbered. Examples: the knowledge ingest loop (a dataset peculiarity
    surfaces, so a concept is captured), maintenance sweeps, governance and
    steward review.
-2. **Initiatives** are bounded, goal-and-gate-shaped pieces of work with a real
-   end. They keep the session harness (`/osp-session`, `/osp-close`, a plan
-   block, gates) but are reframed: an initiative is named and self-contained,
-   numbered per-initiative, not a rung on one ladder toward a frozen spec.
+2. **Initiatives** contain bounded, goal-and-gate-shaped deliverables with a
+   real end. Each uses a stable roadmap ID and repository-owned issue with
+   `/osp-session` and `/osp-close`; numbered sessions are historical only.
    Examples: a new domain, a spec revision, the powered ablation, a
    cross-cutting refactor like the knowledge-coupling migration.
 
@@ -53,27 +52,24 @@ below.
 
 ## How to run an initiative
 
-An initiative is the session harness, reused. Nothing about `/osp-session` and
-`/osp-close` changes mechanically; what changes is the framing and the
-numbering.
+The federated roadmap harness coordinates initiatives without taking authority
+from repository teams.
 
-1. **Open it.** Write an initiative block in `build-kit/IMPLEMENTATION-GUIDE.md`
-   in the existing session-block format (goal, ordered steps, checkpoint,
-   autonomy mode). Number it per-initiative (the historical 0b-19 remain the
-   build; new work continues the count, but the number denotes an initiative,
-   not a position in a fixed plan). Run `/osp-session <N>`.
+1. **Propose it.** Add a stable deliverable ID to
+   `build-kit/roadmap/roadmap.yaml`, render `ROADMAP.md`, and seed a proposal
+   issue after human review. The repository maintainers decide acceptance.
 2. **Gate it.** If the initiative crosses a phase boundary (a new domain, a new
    phase), confirm the gate in `phase2-preregistration.md` first. A gate that
    is not clear stops the initiative; that is the point of pre-registration.
 3. **Do the work,** citing the spec by section, capturing knowledge as you go
    (the ingest loop never defers), and honoring the workspace law
    (`CLAUDE.template.md`).
-4. **Close it.** Run `/osp-close`: the verification gates, then bookkeeping into
-   `build-kit/PROGRESS.md`. A truthful yellow beats a false green.
+4. **Close it.** Run `/osp-close`: verification evidence goes to the repository
+   issue, then the portfolio is reconciled and rendered. A truthful blocked or
+   active state beats a false completion.
 
-Spec revisions are themselves initiatives: the build writes the next spec
-revision at a scheduled window (harness rule 11); forethought parks ideas in
-`build-kit/build-record/PARKING.md`.
+Spec revisions are roadmap deliverables. Historical parking records remain in
+`build-kit/build-record/PARKING.md`; new proposals go to the roadmap.
 
 ## How to run a standing process
 

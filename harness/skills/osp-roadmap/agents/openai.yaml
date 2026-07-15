@@ -1,0 +1,4 @@
+interface:
+  display_name: "OSP Roadmap"
+  short_description: "Audit and coordinate the federated OSP roadmap"
+  default_prompt: "Use $osp-roadmap to audit the Open Science Pillars roadmap and show the next accepted deliverables."

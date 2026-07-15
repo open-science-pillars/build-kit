@@ -1,0 +1,76 @@
+name: Roadmap integrity
+
+on:
+  pull_request:
+    paths:
+      - "roadmap/**"
+      - "scripts/roadmap.py"
+      - "tests/**"
+      - "ROADMAP.md"
+      - ".osp/governance.yaml"
+      - "CODEOWNERS"
+      - "bootstrap.sh"
+      - "harness/skills/**"
+      - "docs/roadmap-*.md"
+      - "build-record/osp-next-steps-codex.md"
+      - ".github/workflows/roadmap.yml"
+  push:
+    branches: [main]
+    paths:
+      - "roadmap/**"
+      - "scripts/roadmap.py"
+      - "tests/**"
+      - "ROADMAP.md"
+      - ".osp/governance.yaml"
+      - "CODEOWNERS"
+      - "bootstrap.sh"
+      - "harness/skills/**"
+      - "docs/roadmap-*.md"
+      - "build-record/osp-next-steps-codex.md"
+      - ".github/workflows/roadmap.yml"
+  schedule:
+    - cron: "17 16 1 * *"
+  workflow_dispatch:
+
+permissions:
+  contents: read
+  issues: read
+
+jobs:
+  integrity:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@34e114876b0b11c390a56381ad16ebd13914f8d5 # v4.3.1
+      - uses: astral-sh/setup-uv@d0cc045d04ccac9d8b7881df0226f9e82c39688e # v6.8.0
+      - name: Validate canonical data
+        run: uv run scripts/roadmap.py validate --standalone
+      - name: Test harness
+        run: uv run --with pyyaml==6.0.2 --with jsonschema==4.25.1 python -m unittest discover -s tests -p 'test_roadmap.py'
+      - name: Check generated roadmap
+        run: uv run scripts/roadmap.py render --check --standalone
+      - name: Run offline audit
+        run: uv run scripts/roadmap.py audit --offline --standalone
+
+  organization-audit:
+    if: github.event_name == 'schedule' || github.event_name == 'workflow_dispatch'
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@34e114876b0b11c390a56381ad16ebd13914f8d5 # v4.3.1
+      - uses: astral-sh/setup-uv@d0cc045d04ccac9d8b7881df0226f9e82c39688e # v6.8.0
+      - name: Clone organization repositories for local governance checks
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: ./bootstrap.sh "$RUNNER_TEMP/osp-workspace"
+      - name: Run read-only organization audit
+        working-directory: ${{ runner.temp }}/osp-workspace
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: uv run build-kit/scripts/roadmap.py audit --output roadmap-audit.md
+      - name: Upload audit report even when findings fail the audit
+        if: always()
+        uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02 # v4.6.2
+        with:
+          name: roadmap-audit
+          path: |
+            ${{ runner.temp }}/osp-workspace/roadmap-audit.md
+            ${{ runner.temp }}/osp-workspace/roadmap-audit.json

@@ -1,0 +1,16 @@
+[
+  {
+    "number": 42,
+    "html_url": "https://github.com/open-science-pillars/core/issues/42",
+    "state": "open",
+    "body": "<!-- osp-roadmap-id: codex-core-manifest -->\n<!-- osp-roadmap-managed:start -->\nRecorded proposal\n<!-- osp-roadmap-managed:end -->\n\nRepository notes remain here.",
+    "labels": [{"name": "roadmap"}, {"name": "roadmap:accepted"}]
+  },
+  {
+    "number": 43,
+    "html_url": "https://github.com/open-science-pillars/core/issues/43",
+    "state": "open",
+    "body": "Ordinary repository issue without a roadmap marker.",
+    "labels": [{"name": "enhancement"}]
+  }
+]

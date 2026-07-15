@@ -1,10 +1,13 @@
 # Open Science Pillars: Build Progress
 
-> **Build record (historical).** This is the live build-status tracker and session log, not user or contributor documentation. See [docs/README.md](README.md) for the map, or the [tutorials](https://github.com/open-science-pillars/tutorials) to get started.
+> **Historical build record.** This is no longer the live roadmap. See
+> [ROADMAP.md](ROADMAP.md), generated from `roadmap/roadmap.yaml`, for current
+> organization work. The rows below preserve the evidence and decisions from
+> numbered Sessions 0b-19.
 
 
-**Last Updated:** 2026-07-05 · **Org:** github.com/open-science-pillars
-**Phase:** 0 complete (documents final) → Phase 1 build
+**Last Updated:** 2026-07-15 · **Org:** github.com/open-science-pillars
+**Phase:** historical build complete; operate-and-evolve work is in the roadmap
 Surface columns: Cd = Claude Code, Cw = Cowork, Sc = Claude Science.
 Legend: 🟢 complete · 🟡 in progress · ⚪ not started · 🔴 blocked · 📋 proposed · n/a not applicable
 
@@ -18,7 +21,7 @@ Legend: 🟢 complete · 🟡 in progress · ⚪ not started · 🔴 blocked · 
 | BUILD-HARNESS.md | 🟢 |
 | PARKING.md (seeded, 4 items) | 🟢 |
 | PROGRESS.md (this file) | 🟢 |
-| AI-for-Science draft (Session 13; deadline 7/15) | 🟢 draft complete 2026-07-05 (workspace root, untracked pending submission) |
+| AI-for-Science draft (Session 13) | 🟢 draft completed 2026-07-05; submission declined by project owner 2026-07-15 |
 
 ## Infrastructure (Sessions 0b-1)
 
@@ -31,7 +34,7 @@ Legend: 🟢 complete · 🟡 in progress · ⚪ not started · 🔴 blocked · 
 | marketplace add works; both plugins install | 🟢 Cd 2026-07-04: add succeeds, core and ocean-science install; needed owner + source-object fixes vs SPEC §2.2 (PARKING #6); Cw/Sc install of the real marketplace waits for Session 5 |
 | knowledge/ + verification/ present; zero commands/ | 🟢 core, ocean-science, plugin-template; `find . -type d -name commands` = 0; template golden notebook green (exit 0) |
 | 5 issue templates incl. new_knowledge_concept | 🟢 .github/.github/ISSUE_TEMPLATE/{bug_report,feature_request,new_skill,new_domain_plugin,new_knowledge_concept}.yml |
-| DCO app installed org-wide (step 8) | 🟡 needs Paul in the web UI: github.com/apps/dco → install for open-science-pillars, all repositories; blocking ruleset deferred to Session 14 |
+| DCO app installed org-wide (step 8) | 🟢 verified passing on all 11 federated-roadmap PRs, 2026-07-15; protected-branch rules remain unverified |
 
 ## Core Plugin (Sessions 2-5)
 
@@ -86,7 +89,7 @@ Legend: 🟢 complete · 🟡 in progress · ⚪ not started · 🔴 blocked · 
 | steward-playbook.md + CODEOWNERS (knowledge paths) | 🟢 2026-07-05; playbook with §5.4 checklist and interview script; CODEOWNERS in core and ocean-science map /knowledge/ to @PaulMRamirez |
 | knowledge-seeder agent (drafts with evidence; never merges) | 🟢 2026-07-05 test-passed on PO.DAAC SWOT docs: 4 evidence-linked drafts, 7 open questions, redirects off-domain refused, nothing merged |
 | Demo recording + WASM companion | 🟡 script + WASM companion pushed 2026-07-05 (notebook headless-green, export linked from tutorials index); recording is Paul's take |
-| AI-for-Science submitted (≤7/15) | 🟡 draft ready for Paul's submission pass; deadline 2026-07-15 |
+| AI-for-Science submission | n/a declined by project owner 2026-07-15; no submission issue will be seeded |
 | Fresh-install ×3 surfaces; known-limitations | 🟡 Code fresh-install re-verified 2026-07-05 (add + both installs in 8 s, smoke green); known-limitations.md published; Cw/Sc install rides Paul's packet |
 | Announcement (Pangeo / Openscapes / ESIP) | 🟡 draft in docs/announcement-draft.md (success criteria stated per PARKING #1); posting is Paul's call after the human-side items land |
 
@@ -102,7 +105,7 @@ Legend: 🟢 complete · 🟡 in progress · ⚪ not started · 🔴 blocked · 
 | S18 evals runner + ocean-bundle v0.6 completion | 🟢 2026-07-05: §10.5 done (3 gotchas promoted + eval cases, core fill-value case, salt+volume recipes with MEASURED round-off residuals and green goldens); evals runner repo built (package + selftest green + scoreboard rendered from real seed grades); live N=20 sweep is the CI job |
 | S19 ablation published with intervals | 🟡 2026-07-05: harness built (ablate.sh strips knowledge/ + restores), CI wired (evals selftest + core golden, SHA-pinned, no secrets; commands green locally), N=3 Opus PILOT run (Fable 5 quota-exhausted): null ON-OFF delta exposed a design confound (skills carry the gotcha rules), logged as a pre-reg amendment. Powered N=20 on recorded model is the CI/cloud job |
 
-## Phase 2+ (proposed)
+## Phase 2+ snapshot (historical; superseded by ROADMAP.md)
 
 | Item | Status | Champion |
 |---|---|---|
