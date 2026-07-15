@@ -75,8 +75,11 @@ build-kit: this harness. .github: org files.
     When uncertain, it is knowledge. No concept content is duplicated into a
     skill.
 
-## Session protocol
-Start every session with /osp-session <N>. End every session with
-/osp-close. Do not skip the close, even on a bad day; a truthful
-yellow status beats a false green. See build-kit/DEVELOPING.md for how to
-author a new session block and set its autonomy mode.
+## Roadmap work protocol
+Start future work with `/osp-session <roadmap-id>` and end with `/osp-close`.
+Numeric sessions are historical compatibility only. Do not start an unaccepted,
+blocked, or dependency-gated deliverable. Repository maintainers own proposal
+acceptance and completion; the organization roadmap coordinates rather than
+overrides them. Do not skip the close, even on a bad day; a truthful active or
+blocked status beats a false completion. See `build-kit/DEVELOPING.md` and
+`build-kit/docs/roadmap-harness-plan.md`.

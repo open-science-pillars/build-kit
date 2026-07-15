@@ -1,0 +1,84 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://github.com/open-science-pillars/build-kit/roadmap/schema.json",
+  "title": "Open Science Pillars federated roadmap",
+  "type": "object",
+  "required": ["schema_version", "organization", "last_reviewed", "repositories", "labels", "decisions", "initiatives"],
+  "properties": {
+    "schema_version": {"const": 1},
+    "organization": {"const": "open-science-pillars"},
+    "last_reviewed": {"type": "string", "format": "date"},
+    "repositories": {"type": "array", "minItems": 1, "uniqueItems": true, "items": {"type": "string", "minLength": 1}},
+    "labels": {"type": "object", "additionalProperties": {"$ref": "#/$defs/label"}},
+    "decisions": {"type": "array", "items": {"$ref": "#/$defs/decision"}},
+    "initiatives": {"type": "array", "minItems": 1, "items": {"$ref": "#/$defs/initiative"}}
+  },
+  "additionalProperties": false,
+  "$defs": {
+    "id": {"type": "string", "pattern": "^[a-z0-9]+(?:-[a-z0-9]+)*$"},
+    "status": {"enum": ["proposed", "ready", "active", "blocked", "done", "declined"]},
+    "label": {
+      "type": "object",
+      "required": ["color", "description"],
+      "properties": {"color": {"type": "string", "pattern": "^[0-9A-Fa-f]{6}$"}, "description": {"type": "string"}},
+      "additionalProperties": false
+    },
+    "decision": {
+      "type": "object",
+      "required": ["id", "title", "status", "decided", "rationale", "seed_issue"],
+      "properties": {
+        "id": {"$ref": "#/$defs/id"}, "title": {"type": "string"}, "status": {"type": "string"},
+        "decided": {"type": "string", "format": "date"}, "rationale": {"type": "string", "minLength": 1},
+        "seed_issue": {"type": "boolean"}
+      },
+      "additionalProperties": false
+    },
+    "initiative": {
+      "type": "object",
+      "required": ["id", "title", "outcome", "status", "priority", "depends_on", "gate", "deliverables"],
+      "properties": {
+        "id": {"$ref": "#/$defs/id"}, "title": {"type": "string"}, "outcome": {"type": "string"},
+        "status": {"$ref": "#/$defs/status"}, "priority": {"enum": ["P0", "P1", "P2"]},
+        "depends_on": {"type": "array", "items": {"$ref": "#/$defs/id"}},
+        "gate": {"type": ["string", "null"]},
+        "deliverables": {"type": "array", "minItems": 1, "items": {"$ref": "#/$defs/deliverable"}}
+      },
+      "additionalProperties": false
+    },
+    "deliverable": {
+      "type": "object",
+      "required": ["id", "title", "repo", "proposal_state", "status", "priority", "depends_on", "gate", "acceptance", "evidence", "contributor", "labels", "issue"],
+      "properties": {
+        "id": {"$ref": "#/$defs/id"}, "title": {"type": "string"}, "repo": {"type": "string"},
+        "proposal_state": {"enum": ["draft", "seeded", "accepted", "deferred", "rejected"]},
+        "status": {"$ref": "#/$defs/status"}, "priority": {"enum": ["P0", "P1", "P2"]},
+        "depends_on": {"type": "array", "items": {"$ref": "#/$defs/id"}}, "gate": {"type": ["string", "null"]},
+        "acceptance": {"type": "array", "minItems": 1, "items": {"type": "string", "minLength": 1}},
+        "evidence": {"type": "array", "items": {"type": "string"}},
+        "contributor": {"$ref": "#/$defs/contributor"},
+        "labels": {"type": "array", "items": {"type": "string"}, "uniqueItems": true},
+        "issue": {"$ref": "#/$defs/issue"}
+      },
+      "additionalProperties": false
+    },
+    "contributor": {
+      "type": "object",
+      "required": ["readiness", "champion", "prerequisites"],
+      "properties": {
+        "readiness": {"enum": ["good-first", "ready", "needs-context", "owner-only"]},
+        "champion": {"type": "string"},
+        "prerequisites": {"type": "array", "items": {"type": "string"}}
+      },
+      "additionalProperties": false
+    },
+    "issue": {
+      "type": "object",
+      "required": ["seed", "number", "url"],
+      "properties": {
+        "seed": {"type": "boolean"}, "number": {"type": ["integer", "null"], "minimum": 1},
+        "url": {"type": ["string", "null"], "format": "uri"}
+      },
+      "additionalProperties": false
+    }
+  }
+}

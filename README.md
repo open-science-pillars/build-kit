@@ -10,24 +10,27 @@ for **maintainers and future core developers** who want to extend the project
 
 ## What's here
 
-- **[DEVELOPING.md](DEVELOPING.md)**: the operating manual: the session
-  protocol, how to author a new session block, the autonomy dial, the phase
-  gates, and a walkthrough for opening the next domain.
+- **[ROADMAP.md](ROADMAP.md)**: generated organization roadmap; edit
+  `roadmap/roadmap.yaml`, never this file directly.
+- **[DEVELOPING.md](DEVELOPING.md)**: the roadmap-ID work protocol, autonomy
+  dial, phase gates, and contributor workflow.
+- **[docs/roadmap-harness-plan.md](docs/roadmap-harness-plan.md)** and
+  **[docs/roadmap-implementation-guide.md](docs/roadmap-implementation-guide.md)**:
+  federated design and copy-ready Claude Code implementation sessions.
 - **[bootstrap.sh](bootstrap.sh)**: clones the org repos flat and wires the
   session harness so `/osp-session` and `/osp-close` work.
 - **[CLAUDE.template.md](CLAUDE.template.md)**: the canonical workspace "law" (the workspace `CLAUDE.md` imports it, never copies it)
   (the non-negotiable global rules) to seed a new build workspace.
-- **[harness/skills/](harness/skills/)**: the runnable `osp-session` and
-  `osp-close` skills. This is their canonical source; earlier versions lived
-  only in a personal workspace, which was a single point of failure.
+- **[harness/skills/](harness/skills/)**: the runnable `osp-roadmap`,
+  `osp-session`, and `osp-close` skills for Claude Code and Codex.
 - **[workflows/persona-doc-review.js](workflows/persona-doc-review.js)**: a
   reusable Claude Code workflow that reviews the docs through five personas.
 
 ## How this project was built
 
 Open Science Pillars was built in numbered sessions by an AI assistant working
-under a human steward, each session gated and logged. The record is public in
-`marketplace/docs/` (PROGRESS.md, IMPLEMENTATION-GUIDE.md). What made it work
+under a human steward, each session gated and logged. The historical record is
+public in `build-kit/PROGRESS.md` and `build-kit/IMPLEMENTATION-GUIDE.md`. What made it work
 was not speed but the verification loops, and they repeatedly caught real
 errors in the project's own output:
 
@@ -51,9 +54,11 @@ can pick it up and keep going.
 git clone https://github.com/open-science-pillars/build-kit
 ./build-kit/bootstrap.sh ~/osp-workspace
 cd ~/osp-workspace && claude
-> /osp-session <N>
+> /osp-roadmap audit
+> /osp-session <roadmap-id>
 ```
 
+Codex users invoke `$osp-roadmap` and `$osp-session` from the same workspace.
 Read [DEVELOPING.md](DEVELOPING.md) first, and
 `marketplace/docs/phase2-preregistration.md` before any Phase-3 domain work
 (new domains are gated on the knowledge-layer effectiveness experiment).

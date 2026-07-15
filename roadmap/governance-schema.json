@@ -1,0 +1,32 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://github.com/open-science-pillars/build-kit/roadmap/governance-schema.json",
+  "title": "Open Science Pillars repository governance",
+  "type": "object",
+  "required": ["schema_version", "repository", "maintainers", "roadmap", "reviews"],
+  "properties": {
+    "schema_version": {"const": 1},
+    "repository": {"type": "string", "minLength": 1},
+    "maintainers": {
+      "type": "object", "required": ["users", "teams", "status"],
+      "properties": {
+        "users": {"type": "array", "items": {"type": "string"}, "uniqueItems": true},
+        "teams": {"type": "array", "items": {"type": "string"}, "uniqueItems": true},
+        "status": {"enum": ["interim", "team"]}
+      }, "additionalProperties": false
+    },
+    "roadmap": {
+      "type": "object", "required": ["proposals", "authority"],
+      "properties": {"proposals": {"enum": ["enabled", "disabled"]}, "authority": {"const": "repository-maintainers"}},
+      "additionalProperties": false
+    },
+    "reviews": {
+      "type": "object", "required": ["ordinary", "cross_repository", "knowledge"],
+      "properties": {
+        "ordinary": {"type": "integer", "minimum": 1},
+        "cross_repository": {"const": "org-policy"}, "knowledge": {"const": "org-knowledge-policy"}
+      }, "additionalProperties": false
+    }
+  },
+  "additionalProperties": false
+}

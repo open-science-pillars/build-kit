@@ -1,9 +1,9 @@
 # Open Science Pillars: Claude Code Build Harness
 
 > **The runnable harness now lives in the [build-kit](https://github.com/open-science-pillars/build-kit) repo.**
-> That repo holds the canonical `osp-session` / `osp-close` skills, the
-> workspace-law template, a `bootstrap.sh`, and `DEVELOPING.md` (how to author a
-> new session block and set its autonomy mode). Use build-kit to stand up a
+> That repo now holds the canonical `osp-roadmap`, `osp-session`, and
+> `osp-close` skills, the workspace-law template, a `bootstrap.sh`, and the
+> federated roadmap design. Use build-kit to stand up a
 > workspace; this document is the design rationale, and the paste-ready blocks
 > below (§2-§4) are the original snapshot, kept for history. Where they and
 > build-kit disagree, build-kit wins.

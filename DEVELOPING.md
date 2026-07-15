@@ -4,19 +4,17 @@ How to continue building this project with an AI assistant, using the same
 harness that produced Phases 1 and 2. Read this once before your first session,
 alongside `build-kit/docs/development-model.md`, which is the operating model:
 now that the initial build is complete, work is spec-anchored and splits into
-bounded **initiatives** (this harness) and **standing processes** (the ingest
-loop, `docs/maintenance.md`, and governance). This guide is how to run an
-initiative.
+bounded **roadmap deliverables** and **standing processes** (the ingest loop,
+`docs/maintenance.md`, and governance). This guide is how to run accepted work.
 
 ## The idea
 
-An initiative is a bounded piece of work with a goal and an end (historically
-these were the numbered build sessions; the harness is unchanged). Each has a
-block in `build-kit/IMPLEMENTATION-GUIDE.md` (goal, time, ordered steps,
-checkpoint) and an **autonomy mode** (how long a leash the assistant gets). It
-starts with `/osp-session N`, which reads the block and the current state,
-restates the plan, and waits for your go. It ends with `/osp-close`, which runs
-verification gates and updates the honest status tracker. The law the assistant
+Future work is a stable deliverable ID in `roadmap/roadmap.yaml`. The
+organization can propose work, but the named repository's maintainers accept,
+defer, or reject it. An accepted repository issue owns implementation and
+completion; the YAML owns the cross-repository portfolio. Work starts with
+`/osp-session <roadmap-id>` and ends with `/osp-close`. Historical numeric
+sessions remain readable but no new numbered sessions are created. The law the assistant
 works under is the workspace `CLAUDE.md`, which is a thin file that imports
 the single tracked law here with `@build-kit/CLAUDE.template.md` (so it never
 drifts); edit the law in `CLAUDE.template.md`.
@@ -34,12 +32,13 @@ needs its checkpoint proof. A truthful yellow beats a false green.
 git clone https://github.com/open-science-pillars/build-kit
 ./build-kit/bootstrap.sh ~/osp-workspace
 cd ~/osp-workspace && claude
-> /osp-session <N>
+> /osp-roadmap audit
+> /osp-session <roadmap-id>
 ```
 
 `bootstrap.sh` clones the org repos flat (including `evals`), links the
-`osp-session` and `osp-close` skills as project skills (so they load when you
-run Claude Code from the workspace), and writes a workspace `CLAUDE.md` that
+`osp-roadmap`, `osp-session`, and `osp-close` skills for both Claude Code and
+Codex, and writes a workspace `CLAUDE.md` that
 imports the law with `@build-kit/CLAUDE.template.md`. It is idempotent; re-run
 it to update.
 
@@ -50,30 +49,21 @@ before your first session set up the scientific environment described in the
 for the tutorials, and an Earthdata Login in `~/.netrc` for NASA data). Without
 it, sessions boot but stall at the first golden notebook.
 
-## Authoring a new session block
+## Proposing a roadmap deliverable
 
-When you take on new work (a new domain, a new capability), write its block
-into `IMPLEMENTATION-GUIDE.md` in the established format before you run it. The
-template:
+Add proposed work to `roadmap/roadmap.yaml` with a stable lowercase ID. Include
+the owning repository, proposal and execution state, priority, dependencies,
+gate, acceptance criteria, contributor readiness, and issue seed policy. Run:
 
-```markdown
-## Session N: <Title> (<estimated hours>, <autonomy mode>)
-
-<One-paragraph goal: what exists at the end that did not exist at the start.>
-
-1. <Ordered step, each independently checkpointable.>
-2. <...>
-
-**Checkpoint:** <the observable evidence that this session is truly done:
-green goldens, verified concepts, a recorded test, a pushed artifact.>
+```bash
+uv run build-kit/scripts/roadmap.py validate
+uv run build-kit/scripts/roadmap.py render
+uv run build-kit/scripts/roadmap.py audit --offline
 ```
 
-Put the autonomy mode in the header, as the later blocks do (for example
-Session 17: "Applied Pack + Canonical Home (2.5 hr; tight supervision)").
-Session 15 (hydrology scaffold) is a good worked example for the body shape:
-it names a concrete scaffold, a live data audit, two concepts, and a green
-golden as its checkpoint. Keep steps small enough that `/osp-close` can walk
-them one by one.
+Seed a proposal issue only after its dry-run is human-reviewed. The repository
+team records its decision with exactly one roadmap decision label. Work cannot
+be `ready`, `active`, or `done` until accepted, and `done` requires evidence.
 
 ## The autonomy dial
 
@@ -146,7 +136,7 @@ and agent against this rule and get a per-file migration plan; the
 knowledge-linter flags inlined concept content and inert concepts so drift is
 caught mechanically.
 
-## Opening "Session 20" (the next domain)
+## Opening the next domain
 
 1. Confirm the phase gate against `phase2-preregistration.md`: the go
    conditions are met AND the ablation is not null or reversed (stop
@@ -155,12 +145,11 @@ caught mechanically.
 2. Write the spec detail for the new domain into `SPECIFICATION.md` (structure,
    skills, knowledge requirements, acceptance criteria), following the
    hydrology section (§10) as the model, at the scheduled spec-revision window.
-3. Author the Session 20+ blocks in `IMPLEMENTATION-GUIDE.md`, each with an
-   autonomy mode in its header.
-4. Create the new repo and register it in `build-kit/bootstrap.sh`'s `REPOS`
-   array (so later re-bootstraps clone it), then scaffold the plugin from
-   `plugin-template`, its bundle from `knowledge-template`, and run
-   `/osp-session 20`.
+3. Add roadmap proposals with acceptance criteria and contributor readiness;
+   do not mark them accepted on behalf of their future repository team.
+4. After the organization and repository owners approve creation, register the
+   repository in the roadmap and `bootstrap.sh`, scaffold from the templates,
+   and run `/osp-session <roadmap-id>` only after repository acceptance.
 
 ## Verifying the docs stay healthy
 

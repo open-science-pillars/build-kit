@@ -1,26 +1,28 @@
 ---
 name: osp-session
-description: Start an Open Science Pillars build session N. Loads the session plan from IMPLEMENTATION-GUIDE.md and current state from PROGRESS.md, and restates goals, steps, and checkpoint before any work.
+description: Start accepted Open Science Pillars work by stable roadmap ID, with dependency, gate, ownership, and acceptance checks.
 disable-model-invocation: true
 ---
 
 # OSP Session Bootstrap
 
-You are starting build session $ARGUMENTS for Open Science Pillars.
+You are starting Open Science Pillars work `$ARGUMENTS`.
 
-1. Read build-kit/IMPLEMENTATION-GUIDE.md and extract the
-   full block for Session $ARGUMENTS (goal, time, steps, checkpoint).
-2. Read build-kit/PROGRESS.md. Report: items already green
-   that this session depends on; anything red or yellow that blocks it.
-   If a dependency is not green, STOP and say so.
-3. Restate, in one screen: today's goal, the ordered steps, the
-   checkpoint criteria, and this session's autonomy mode (read it from the
-   session block header if stated there; otherwise, for historical sessions,
-   from the BUILD-HARNESS autonomy table). Wait for confirmation before
-   step one.
-4. During the session: cite spec sections when authoring
+1. If `$ARGUMENTS` is a historical numeric session, use its archived block in
+   `build-kit/IMPLEMENTATION-GUIDE.md` and `build-kit/PROGRESS.md`. State that
+   this is compatibility mode and do not create new numbered sessions.
+2. Otherwise run `uv run build-kit/scripts/roadmap.py brief $ARGUMENTS`. If the
+   deliverable is not accepted and ready, or has an incomplete dependency or
+   gate, STOP.
+3. Read the owning repository's `.osp/governance.yaml`, the linked issue when
+   present, and the relevant specification. The repository issue is the
+   execution record after acceptance; YAML is the portfolio record.
+4. Restate in one screen: outcome, owning repository, acceptance criteria,
+   dependencies, gate, contributor prerequisites, and verification plan. Wait
+   for confirmation before changing files.
+5. During the work, cite spec sections when authoring
    ("per SPEC §3.4"); when you and the spec disagree, flag it,
    do not improvise silently.
-5. If a dataset peculiarity surfaces during testing, immediately draft
+6. If a dataset peculiarity surfaces during testing, immediately draft
    the knowledge concept (correct type, frontmatter, links) and queue
    it for approval. This is the ingest loop; it is never deferred.
