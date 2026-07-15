@@ -34,7 +34,7 @@ Legend: 🟢 complete · 🟡 in progress · ⚪ not started · 🔴 blocked · 
 | marketplace add works; both plugins install | 🟢 Cd 2026-07-04: add succeeds, core and ocean-science install; needed owner + source-object fixes vs SPEC §2.2 (PARKING #6); Cw/Sc install of the real marketplace waits for Session 5 |
 | knowledge/ + verification/ present; zero commands/ | 🟢 core, ocean-science, plugin-template; `find . -type d -name commands` = 0; template golden notebook green (exit 0) |
 | 5 issue templates incl. new_knowledge_concept | 🟢 .github/.github/ISSUE_TEMPLATE/{bug_report,feature_request,new_skill,new_domain_plugin,new_knowledge_concept}.yml |
-| DCO app installed org-wide (step 8) | 🟡 needs Paul in the web UI: github.com/apps/dco → install for open-science-pillars, all repositories; blocking ruleset deferred to Session 14 |
+| DCO app installed org-wide (step 8) | 🟢 verified passing on all 11 federated-roadmap PRs, 2026-07-15; protected-branch rules remain unverified |
 
 ## Core Plugin (Sessions 2-5)
 
