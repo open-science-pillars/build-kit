@@ -25,7 +25,7 @@ The organization has a team-safe roadmap harness and public documentation that m
 | `roadmap-harness-v1`: Build the federated roadmap harness | `build-kit` | accepted | active | owner-only | not seeded |
 | `federated-governance-baseline`: Declare repository-level roadmap authority | `.github` | accepted | active | owner-only | not seeded |
 | `reconcile-project-record`: Reconcile specifications, progress, limitations, and counts | `marketplace` | accepted | active | needs-context | not seeded |
-| `codex-surface-policy`: Define Codex as a supported distribution and behavior surface | `marketplace` | draft | proposed | needs-context | not seeded |
+| `codex-surface-policy`: Define Codex as a supported distribution and behavior surface | `marketplace` | seeded | proposed | needs-context | [#2](https://github.com/open-science-pillars/marketplace/issues/2) |
 
 #### Acceptance details
 
@@ -66,11 +66,11 @@ Core, ocean-science, and hydrology install through a native Codex marketplace wi
 
 | Deliverable | Repository | Proposal | Status | Contributor | Issue |
 |---|---|---|---|---|---|
-| `codex-core-manifest`: Package core as a Codex plugin | `core` | draft | proposed | ready | not seeded |
-| `codex-ocean-manifest`: Package ocean-science as a Codex plugin | `ocean-science` | draft | proposed | ready | not seeded |
-| `codex-hydrology-manifest`: Package hydrology as a Codex plugin | `hydrology` | draft | proposed | ready | not seeded |
-| `codex-plugin-template`: Add dual Claude and Codex packaging to plugin-template | `plugin-template` | draft | proposed | ready | not seeded |
-| `codex-marketplace-catalog`: Publish the native Codex marketplace catalog | `marketplace` | draft | proposed | ready | not seeded |
+| `codex-core-manifest`: Package core as a Codex plugin | `core` | seeded | proposed | ready | [#2](https://github.com/open-science-pillars/core/issues/2) |
+| `codex-ocean-manifest`: Package ocean-science as a Codex plugin | `ocean-science` | seeded | proposed | ready | [#2](https://github.com/open-science-pillars/ocean-science/issues/2) |
+| `codex-hydrology-manifest`: Package hydrology as a Codex plugin | `hydrology` | seeded | proposed | ready | [#2](https://github.com/open-science-pillars/hydrology/issues/2) |
+| `codex-plugin-template`: Add dual Claude and Codex packaging to plugin-template | `plugin-template` | seeded | proposed | ready | [#2](https://github.com/open-science-pillars/plugin-template/issues/2) |
+| `codex-marketplace-catalog`: Publish the native Codex marketplace catalog | `marketplace` | seeded | proposed | ready | [#3](https://github.com/open-science-pillars/marketplace/issues/3) |
 
 #### Acceptance details
 
@@ -113,9 +113,9 @@ The pre-registered knowledge-effectiveness gate has a reproducible published res
 
 | Deliverable | Repository | Proposal | Status | Contributor | Issue |
 |---|---|---|---|---|---|
-| `ablation-protocol-amendment`: Publish the post-migration ablation amendment | `marketplace` | draft | proposed | owner-only | not seeded |
-| `ablation-runner-calibration`: Calibrate non-obvious probes and release-mixing grading | `evals` | draft | proposed | needs-context | not seeded |
-| `powered-ablation-run`: Run and publish the powered ablation | `evals` | draft | proposed | owner-only | not seeded |
+| `ablation-protocol-amendment`: Publish the post-migration ablation amendment | `marketplace` | seeded | proposed | owner-only | [#4](https://github.com/open-science-pillars/marketplace/issues/4) |
+| `ablation-runner-calibration`: Calibrate non-obvious probes and release-mixing grading | `evals` | seeded | proposed | needs-context | [#2](https://github.com/open-science-pillars/evals/issues/2) |
+| `powered-ablation-run`: Run and publish the powered ablation | `evals` | seeded | proposed | owner-only | [#3](https://github.com/open-science-pillars/evals/issues/3) |
 
 #### Acceptance details
 
@@ -147,7 +147,7 @@ OSP measures whether the right skill activates separately from whether the answe
 
 | Deliverable | Repository | Proposal | Status | Contributor | Issue |
 |---|---|---|---|---|---|
-| `activation-eval-runner`: Build and pilot the activation-eval runner | `evals` | draft | proposed | ready | not seeded |
+| `activation-eval-runner`: Build and pilot the activation-eval runner | `evals` | seeded | proposed | ready | [#4](https://github.com/open-science-pillars/evals/issues/4) |
 
 #### Acceptance details
 
@@ -168,10 +168,10 @@ OSP has truthful surface evidence, external validation, governed releases, and c
 
 | Deliverable | Repository | Proposal | Status | Contributor | Issue |
 |---|---|---|---|---|---|
-| `conversational-surface-validation`: Complete Cowork and Claude Science verification | `marketplace` | draft | proposed | needs-context | not seeded |
-| `tutorial-nonauthor-validation`: Complete non-author Tutorial 2 validation | `tutorials` | draft | proposed | ready | not seeded |
-| `provider-steward-handoff`: Complete or accurately reframe provider stewardship | `nasa-daac-knowledge` | draft | proposed | needs-context | not seeded |
-| `governed-release`: Cut the first governed, citable OSP release | `build-kit` | draft | proposed | owner-only | not seeded |
+| `conversational-surface-validation`: Complete Cowork and Claude Science verification | `marketplace` | seeded | proposed | needs-context | [#5](https://github.com/open-science-pillars/marketplace/issues/5) |
+| `tutorial-nonauthor-validation`: Complete non-author Tutorial 2 validation | `tutorials` | seeded | proposed | ready | [#2](https://github.com/open-science-pillars/tutorials/issues/2) |
+| `provider-steward-handoff`: Complete or accurately reframe provider stewardship | `nasa-daac-knowledge` | seeded | proposed | needs-context | [#2](https://github.com/open-science-pillars/nasa-daac-knowledge/issues/2) |
+| `governed-release`: Cut the first governed, citable OSP release | `build-kit` | seeded | proposed | owner-only | [#2](https://github.com/open-science-pillars/build-kit/issues/2) |
 
 #### Acceptance details
 

@@ -1,448 +1,604 @@
 schema_version: 1
 organization: open-science-pillars
 last_reviewed: 2026-07-15
-
 repositories:
-  - marketplace
-  - core
-  - ocean-science
-  - hydrology
-  - tutorials
-  - plugin-template
-  - knowledge-template
-  - nasa-daac-knowledge
-  - evals
-  - build-kit
-  - .github
-
+- marketplace
+- core
+- ocean-science
+- hydrology
+- tutorials
+- plugin-template
+- knowledge-template
+- nasa-daac-knowledge
+- evals
+- build-kit
+- .github
 labels:
   roadmap:
-    color: "1D76DB"
-    description: "Tracked in the Open Science Pillars organization roadmap"
+    color: 1D76DB
+    description: Tracked in the Open Science Pillars organization roadmap
   roadmap:proposal:
-    color: "D4C5F9"
-    description: "Organization proposal awaiting repository maintainer decision"
+    color: D4C5F9
+    description: Organization proposal awaiting repository maintainer decision
   roadmap:accepted:
-    color: "0E8A16"
-    description: "Accepted by repository maintainers"
+    color: 0E8A16
+    description: Accepted by repository maintainers
   roadmap:deferred:
-    color: "FBCA04"
-    description: "Deferred by repository maintainers"
+    color: FBCA04
+    description: Deferred by repository maintainers
   roadmap:rejected:
-    color: "B60205"
-    description: "Rejected by repository maintainers"
+    color: B60205
+    description: Rejected by repository maintainers
   status:blocked:
-    color: "B60205"
-    description: "Blocked on a documented dependency or gate"
+    color: B60205
+    description: Blocked on a documented dependency or gate
   priority:P0:
-    color: "B60205"
-    description: "Immediate priority"
+    color: B60205
+    description: Immediate priority
   priority:P1:
-    color: "D93F0B"
-    description: "Near-term priority"
+    color: D93F0B
+    description: Near-term priority
   priority:P2:
-    color: "FBCA04"
-    description: "Later priority"
-
+    color: FBCA04
+    description: Later priority
 decisions:
-  - id: ai4s-2026
-    title: AI-for-Science submission
-    status: declined
-    decided: 2026-07-15
-    rationale: "The project owner decided not to submit."
-    seed_issue: false
-
+- id: ai4s-2026
+  title: AI-for-Science submission
+  status: declined
+  decided: 2026-07-15
+  rationale: The project owner decided not to submit.
+  seed_issue: false
 initiatives:
-  - id: truth-reconciliation
-    title: Federated roadmap and truth reconciliation
-    outcome: "The organization has a team-safe roadmap harness and public documentation that matches repository reality."
+- id: truth-reconciliation
+  title: Federated roadmap and truth reconciliation
+  outcome: The organization has a team-safe roadmap harness and public documentation that matches repository
+    reality.
+  status: active
+  priority: P0
+  depends_on: []
+  gate: null
+  deliverables:
+  - id: roadmap-harness-v1
+    title: Build the federated roadmap harness
+    repo: build-kit
+    proposal_state: accepted
     status: active
     priority: P0
     depends_on: []
     gate: null
-    deliverables:
-      - id: roadmap-harness-v1
-        title: Build the federated roadmap harness
-        repo: build-kit
-        proposal_state: accepted
-        status: active
-        priority: P0
-        depends_on: []
-        gate: null
-        acceptance:
-          - "Roadmap YAML validates and renders deterministically."
-          - "Claude and Codex can audit and brief roadmap work."
-          - "All GitHub writes are dry-run unless explicitly confirmed."
-        evidence:
-          - "docs/roadmap-harness-plan.md"
-          - "docs/roadmap-implementation-guide.md"
-        contributor:
-          readiness: owner-only
-          champion: PaulMRamirez
-          prerequisites: [Python, GitHub CLI, organization governance]
-        labels: [roadmap, priority:P0]
-        issue:
-          seed: false
-          number: null
-          url: null
-      - id: federated-governance-baseline
-        title: Declare repository-level roadmap authority
-        repo: .github
-        proposal_state: accepted
-        status: active
-        priority: P0
-        depends_on: [roadmap-harness-v1]
-        gate: null
-        acceptance:
-          - "Every repository declares maintainers and proposal policy."
-          - "CODEOWNERS covers every repository."
-          - "Interim solo review and future team handoff are documented."
-        evidence: []
-        contributor:
-          readiness: owner-only
-          champion: PaulMRamirez
-          prerequisites: [GitHub governance]
-        labels: [roadmap, documentation, priority:P0]
-        issue:
-          seed: false
-          number: null
-          url: null
-      - id: reconcile-project-record
-        title: Reconcile specifications, progress, limitations, and counts
-        repo: marketplace
-        proposal_state: accepted
-        status: active
-        priority: P0
-        depends_on: [roadmap-harness-v1]
-        gate: null
-        acceptance:
-          - "Completed work is not described as deferred."
-          - "AI-for-Science is recorded as declined."
-          - "Counts, versions, and current limitations match repositories."
-        evidence: []
-        contributor:
-          readiness: needs-context
-          champion: PaulMRamirez
-          prerequisites: [OSP architecture, documentation review]
-        labels: [roadmap, documentation, priority:P0]
-        issue:
-          seed: false
-          number: null
-          url: null
-      - id: codex-surface-policy
-        title: Define Codex as a supported distribution and behavior surface
-        repo: marketplace
-        proposal_state: draft
-        status: proposed
-        priority: P1
-        depends_on: [reconcile-project-record]
-        gate: null
-        acceptance:
-          - "Architecture and specification distinguish Claude surfaces from Codex distribution."
-          - "Testing and support claims are explicit."
-        evidence: []
-        contributor:
-          readiness: needs-context
-          champion: needed
-          prerequisites: [OSP architecture, Codex plugins]
-        labels: [roadmap, documentation, priority:P1]
-        issue:
-          seed: true
-          number: null
-          url: null
-
-  - id: codex-distribution
-    title: Native Codex distribution
-    outcome: "Core, ocean-science, and hydrology install through a native Codex marketplace without duplicating source trees."
+    acceptance:
+    - Roadmap YAML validates and renders deterministically.
+    - Claude and Codex can audit and brief roadmap work.
+    - All GitHub writes are dry-run unless explicitly confirmed.
+    evidence:
+    - docs/roadmap-harness-plan.md
+    - docs/roadmap-implementation-guide.md
+    contributor:
+      readiness: owner-only
+      champion: PaulMRamirez
+      prerequisites:
+      - Python
+      - GitHub CLI
+      - organization governance
+    labels:
+    - roadmap
+    - priority:P0
+    issue:
+      seed: false
+      number: null
+      url: null
+  - id: federated-governance-baseline
+    title: Declare repository-level roadmap authority
+    repo: .github
+    proposal_state: accepted
+    status: active
+    priority: P0
+    depends_on:
+    - roadmap-harness-v1
+    gate: null
+    acceptance:
+    - Every repository declares maintainers and proposal policy.
+    - CODEOWNERS covers every repository.
+    - Interim solo review and future team handoff are documented.
+    evidence: []
+    contributor:
+      readiness: owner-only
+      champion: PaulMRamirez
+      prerequisites:
+      - GitHub governance
+    labels:
+    - roadmap
+    - documentation
+    - priority:P0
+    issue:
+      seed: false
+      number: null
+      url: null
+  - id: reconcile-project-record
+    title: Reconcile specifications, progress, limitations, and counts
+    repo: marketplace
+    proposal_state: accepted
+    status: active
+    priority: P0
+    depends_on:
+    - roadmap-harness-v1
+    gate: null
+    acceptance:
+    - Completed work is not described as deferred.
+    - AI-for-Science is recorded as declined.
+    - Counts, versions, and current limitations match repositories.
+    evidence: []
+    contributor:
+      readiness: needs-context
+      champion: PaulMRamirez
+      prerequisites:
+      - OSP architecture
+      - documentation review
+    labels:
+    - roadmap
+    - documentation
+    - priority:P0
+    issue:
+      seed: false
+      number: null
+      url: null
+  - id: codex-surface-policy
+    title: Define Codex as a supported distribution and behavior surface
+    repo: marketplace
+    proposal_state: seeded
     status: proposed
     priority: P1
-    depends_on: [truth-reconciliation]
+    depends_on:
+    - reconcile-project-record
     gate: null
-    deliverables:
-      - id: codex-core-manifest
-        title: Package core as a Codex plugin
-        repo: core
-        proposal_state: draft
-        status: proposed
-        priority: P1
-        depends_on: [codex-surface-policy]
-        gate: null
-        acceptance:
-          - "A valid .codex-plugin/plugin.json is present."
-          - "A clean Codex install exposes all core skills."
-        evidence: []
-        contributor:
-          readiness: ready
-          champion: needed
-          prerequisites: [JSON, Codex plugin packaging]
-        labels: [roadmap, enhancement, help wanted, priority:P1]
-        issue: {seed: true, number: null, url: null}
-      - id: codex-ocean-manifest
-        title: Package ocean-science as a Codex plugin
-        repo: ocean-science
-        proposal_state: draft
-        status: proposed
-        priority: P1
-        depends_on: [codex-surface-policy]
-        gate: null
-        acceptance:
-          - "A valid .codex-plugin/plugin.json is present."
-          - "A clean Codex install exposes all ocean-science skills."
-        evidence: []
-        contributor:
-          readiness: ready
-          champion: needed
-          prerequisites: [JSON, Codex plugin packaging]
-        labels: [roadmap, enhancement, help wanted, priority:P1]
-        issue: {seed: true, number: null, url: null}
-      - id: codex-hydrology-manifest
-        title: Package hydrology as a Codex plugin
-        repo: hydrology
-        proposal_state: draft
-        status: proposed
-        priority: P1
-        depends_on: [codex-surface-policy]
-        gate: null
-        acceptance:
-          - "A valid .codex-plugin/plugin.json is present."
-          - "A clean Codex install exposes all hydrology skills."
-        evidence: []
-        contributor:
-          readiness: ready
-          champion: needed
-          prerequisites: [JSON, Codex plugin packaging]
-        labels: [roadmap, enhancement, help wanted, priority:P1]
-        issue: {seed: true, number: null, url: null}
-      - id: codex-plugin-template
-        title: Add dual Claude and Codex packaging to plugin-template
-        repo: plugin-template
-        proposal_state: draft
-        status: proposed
-        priority: P1
-        depends_on: [codex-core-manifest]
-        gate: null
-        acceptance:
-          - "A newly scaffolded plugin validates on Claude and Codex."
-        evidence: []
-        contributor:
-          readiness: ready
-          champion: needed
-          prerequisites: [Plugin scaffolding]
-        labels: [roadmap, enhancement, help wanted, priority:P1]
-        issue: {seed: true, number: null, url: null}
-      - id: codex-marketplace-catalog
-        title: Publish the native Codex marketplace catalog
-        repo: marketplace
-        proposal_state: draft
-        status: proposed
-        priority: P1
-        depends_on: [codex-core-manifest, codex-ocean-manifest, codex-hydrology-manifest]
-        gate: null
-        acceptance:
-          - "The Codex marketplace installs every accepted plugin from its repository root."
-          - "Clean-install and update evidence is recorded."
-        evidence: []
-        contributor:
-          readiness: ready
-          champion: needed
-          prerequisites: [Codex marketplace schema]
-        labels: [roadmap, enhancement, help wanted, priority:P1]
-        issue: {seed: true, number: null, url: null}
-
-  - id: powered-ablation
-    title: Refined powered knowledge-bundle ablation
-    outcome: "The pre-registered knowledge-effectiveness gate has a reproducible published result and pass-or-pivot decision."
+    acceptance:
+    - Architecture and specification distinguish Claude surfaces from Codex distribution.
+    - Testing and support claims are explicit.
+    evidence: []
+    contributor:
+      readiness: needs-context
+      champion: needed
+      prerequisites:
+      - OSP architecture
+      - Codex plugins
+    labels:
+    - roadmap
+    - documentation
+    - priority:P1
+    issue:
+      seed: true
+      number: 2
+      url: https://github.com/open-science-pillars/marketplace/issues/2
+- id: codex-distribution
+  title: Native Codex distribution
+  outcome: Core, ocean-science, and hydrology install through a native Codex marketplace without duplicating
+    source trees.
+  status: proposed
+  priority: P1
+  depends_on:
+  - truth-reconciliation
+  gate: null
+  deliverables:
+  - id: codex-core-manifest
+    title: Package core as a Codex plugin
+    repo: core
+    proposal_state: seeded
+    status: proposed
+    priority: P1
+    depends_on:
+    - codex-surface-policy
+    gate: null
+    acceptance:
+    - A valid .codex-plugin/plugin.json is present.
+    - A clean Codex install exposes all core skills.
+    evidence: []
+    contributor:
+      readiness: ready
+      champion: needed
+      prerequisites:
+      - JSON
+      - Codex plugin packaging
+    labels:
+    - roadmap
+    - enhancement
+    - help wanted
+    - priority:P1
+    issue:
+      seed: true
+      number: 2
+      url: https://github.com/open-science-pillars/core/issues/2
+  - id: codex-ocean-manifest
+    title: Package ocean-science as a Codex plugin
+    repo: ocean-science
+    proposal_state: seeded
+    status: proposed
+    priority: P1
+    depends_on:
+    - codex-surface-policy
+    gate: null
+    acceptance:
+    - A valid .codex-plugin/plugin.json is present.
+    - A clean Codex install exposes all ocean-science skills.
+    evidence: []
+    contributor:
+      readiness: ready
+      champion: needed
+      prerequisites:
+      - JSON
+      - Codex plugin packaging
+    labels:
+    - roadmap
+    - enhancement
+    - help wanted
+    - priority:P1
+    issue:
+      seed: true
+      number: 2
+      url: https://github.com/open-science-pillars/ocean-science/issues/2
+  - id: codex-hydrology-manifest
+    title: Package hydrology as a Codex plugin
+    repo: hydrology
+    proposal_state: seeded
+    status: proposed
+    priority: P1
+    depends_on:
+    - codex-surface-policy
+    gate: null
+    acceptance:
+    - A valid .codex-plugin/plugin.json is present.
+    - A clean Codex install exposes all hydrology skills.
+    evidence: []
+    contributor:
+      readiness: ready
+      champion: needed
+      prerequisites:
+      - JSON
+      - Codex plugin packaging
+    labels:
+    - roadmap
+    - enhancement
+    - help wanted
+    - priority:P1
+    issue:
+      seed: true
+      number: 2
+      url: https://github.com/open-science-pillars/hydrology/issues/2
+  - id: codex-plugin-template
+    title: Add dual Claude and Codex packaging to plugin-template
+    repo: plugin-template
+    proposal_state: seeded
+    status: proposed
+    priority: P1
+    depends_on:
+    - codex-core-manifest
+    gate: null
+    acceptance:
+    - A newly scaffolded plugin validates on Claude and Codex.
+    evidence: []
+    contributor:
+      readiness: ready
+      champion: needed
+      prerequisites:
+      - Plugin scaffolding
+    labels:
+    - roadmap
+    - enhancement
+    - help wanted
+    - priority:P1
+    issue:
+      seed: true
+      number: 2
+      url: https://github.com/open-science-pillars/plugin-template/issues/2
+  - id: codex-marketplace-catalog
+    title: Publish the native Codex marketplace catalog
+    repo: marketplace
+    proposal_state: seeded
+    status: proposed
+    priority: P1
+    depends_on:
+    - codex-core-manifest
+    - codex-ocean-manifest
+    - codex-hydrology-manifest
+    gate: null
+    acceptance:
+    - The Codex marketplace installs every accepted plugin from its repository root.
+    - Clean-install and update evidence is recorded.
+    evidence: []
+    contributor:
+      readiness: ready
+      champion: needed
+      prerequisites:
+      - Codex marketplace schema
+    labels:
+    - roadmap
+    - enhancement
+    - help wanted
+    - priority:P1
+    issue:
+      seed: true
+      number: 3
+      url: https://github.com/open-science-pillars/marketplace/issues/3
+- id: powered-ablation
+  title: Refined powered knowledge-bundle ablation
+  outcome: The pre-registered knowledge-effectiveness gate has a reproducible published result and pass-or-pivot
+    decision.
+  status: proposed
+  priority: P0
+  depends_on:
+  - truth-reconciliation
+  gate: null
+  deliverables:
+  - id: ablation-protocol-amendment
+    title: Publish the post-migration ablation amendment
+    repo: marketplace
+    proposal_state: seeded
     status: proposed
     priority: P0
-    depends_on: [truth-reconciliation]
+    depends_on:
+    - reconcile-project-record
     gate: null
-    deliverables:
-      - id: ablation-protocol-amendment
-        title: Publish the post-migration ablation amendment
-        repo: marketplace
-        proposal_state: draft
-        status: proposed
-        priority: P0
-        depends_on: [reconcile-project-record]
-        gate: null
-        acceptance:
-          - "The refined cases, model, grading, sample size, and decision rule are recorded before the powered run."
-        evidence: []
-        contributor:
-          readiness: owner-only
-          champion: PaulMRamirez
-          prerequisites: [Experimental design, OSP pre-registration]
-        labels: [roadmap, documentation, priority:P0]
-        issue: {seed: true, number: null, url: null}
-      - id: ablation-runner-calibration
-        title: Calibrate non-obvious probes and release-mixing grading
-        repo: evals
-        proposal_state: draft
-        status: proposed
-        priority: P0
-        depends_on: [ablation-protocol-amendment]
-        gate: null
-        acceptance:
-          - "Every powered probe discriminates concept application rather than keyword mention."
-          - "Release-mixing grading is resolved before the run."
-        evidence: []
-        contributor:
-          readiness: needs-context
-          champion: needed
-          prerequisites: [Evaluation design, scientific rubrics]
-        labels: [roadmap, enhancement, priority:P0]
-        issue: {seed: true, number: null, url: null}
-      - id: powered-ablation-run
-        title: Run and publish the powered ablation
-        repo: evals
-        proposal_state: draft
-        status: proposed
-        priority: P0
-        depends_on: [ablation-runner-calibration]
-        gate: null
-        acceptance:
-          - "Raw transcripts, commit SHAs, model version, intervals, and infrastructure errors are retained."
-          - "Results publish regardless of direction."
-          - "A pass-or-pivot decision is recorded."
-        evidence: []
-        contributor:
-          readiness: owner-only
-          champion: PaulMRamirez
-          prerequisites: [Credentialed compute, evaluation operations]
-        labels: [roadmap, priority:P0]
-        issue: {seed: true, number: null, url: null}
-
-  - id: activation-evals
-    title: Skill activation evaluations
-    outcome: "OSP measures whether the right skill activates separately from whether the answer is scientifically correct."
+    acceptance:
+    - The refined cases, model, grading, sample size, and decision rule are recorded before the powered
+      run.
+    evidence: []
+    contributor:
+      readiness: owner-only
+      champion: PaulMRamirez
+      prerequisites:
+      - Experimental design
+      - OSP pre-registration
+    labels:
+    - roadmap
+    - documentation
+    - priority:P0
+    issue:
+      seed: true
+      number: 4
+      url: https://github.com/open-science-pillars/marketplace/issues/4
+  - id: ablation-runner-calibration
+    title: Calibrate non-obvious probes and release-mixing grading
+    repo: evals
+    proposal_state: seeded
+    status: proposed
+    priority: P0
+    depends_on:
+    - ablation-protocol-amendment
+    gate: null
+    acceptance:
+    - Every powered probe discriminates concept application rather than keyword mention.
+    - Release-mixing grading is resolved before the run.
+    evidence: []
+    contributor:
+      readiness: needs-context
+      champion: needed
+      prerequisites:
+      - Evaluation design
+      - scientific rubrics
+    labels:
+    - roadmap
+    - enhancement
+    - priority:P0
+    issue:
+      seed: true
+      number: 2
+      url: https://github.com/open-science-pillars/evals/issues/2
+  - id: powered-ablation-run
+    title: Run and publish the powered ablation
+    repo: evals
+    proposal_state: seeded
+    status: proposed
+    priority: P0
+    depends_on:
+    - ablation-runner-calibration
+    gate: null
+    acceptance:
+    - Raw transcripts, commit SHAs, model version, intervals, and infrastructure errors are retained.
+    - Results publish regardless of direction.
+    - A pass-or-pivot decision is recorded.
+    evidence: []
+    contributor:
+      readiness: owner-only
+      champion: PaulMRamirez
+      prerequisites:
+      - Credentialed compute
+      - evaluation operations
+    labels:
+    - roadmap
+    - priority:P0
+    issue:
+      seed: true
+      number: 3
+      url: https://github.com/open-science-pillars/evals/issues/3
+- id: activation-evals
+  title: Skill activation evaluations
+  outcome: OSP measures whether the right skill activates separately from whether the answer is scientifically
+    correct.
+  status: proposed
+  priority: P1
+  depends_on:
+  - codex-distribution
+  gate: null
+  deliverables:
+  - id: activation-eval-runner
+    title: Build and pilot the activation-eval runner
+    repo: evals
+    proposal_state: seeded
     status: proposed
     priority: P1
-    depends_on: [codex-distribution]
+    depends_on:
+    - codex-marketplace-catalog
     gate: null
-    deliverables:
-      - id: activation-eval-runner
-        title: Build and pilot the activation-eval runner
-        repo: evals
-        proposal_state: draft
-        status: proposed
-        priority: P1
-        depends_on: [codex-marketplace-catalog]
-        gate: null
-        acceptance:
-          - "Positive, negative, and ambiguous prompt cases are supported."
-          - "The runner observes skill use rather than answer keywords alone."
-          - "Claude Code and Codex pilot results are recorded."
-        evidence: []
-        contributor:
-          readiness: ready
-          champion: needed
-          prerequisites: [Python, agent evaluation]
-        labels: [roadmap, enhancement, help wanted, priority:P1]
-        issue: {seed: true, number: null, url: null}
-
-  - id: release-validation
-    title: Release and external validation
-    outcome: "OSP has truthful surface evidence, external validation, governed releases, and citable tags."
+    acceptance:
+    - Positive, negative, and ambiguous prompt cases are supported.
+    - The runner observes skill use rather than answer keywords alone.
+    - Claude Code and Codex pilot results are recorded.
+    evidence: []
+    contributor:
+      readiness: ready
+      champion: needed
+      prerequisites:
+      - Python
+      - agent evaluation
+    labels:
+    - roadmap
+    - enhancement
+    - help wanted
+    - priority:P1
+    issue:
+      seed: true
+      number: 4
+      url: https://github.com/open-science-pillars/evals/issues/4
+- id: release-validation
+  title: Release and external validation
+  outcome: OSP has truthful surface evidence, external validation, governed releases, and citable tags.
+  status: proposed
+  priority: P1
+  depends_on:
+  - powered-ablation
+  - codex-distribution
+  gate: null
+  deliverables:
+  - id: conversational-surface-validation
+    title: Complete Cowork and Claude Science verification
+    repo: marketplace
+    proposal_state: seeded
     status: proposed
     priority: P1
-    depends_on: [powered-ablation, codex-distribution]
+    depends_on:
+    - reconcile-project-record
     gate: null
-    deliverables:
-      - id: conversational-surface-validation
-        title: Complete Cowork and Claude Science verification
-        repo: marketplace
-        proposal_state: draft
-        status: proposed
-        priority: P1
-        depends_on: [reconcile-project-record]
-        gate: null
-        acceptance:
-          - "Core, ocean, and hydrology matrices record tested behavior without overclaiming computation."
-        evidence: []
-        contributor:
-          readiness: needs-context
-          champion: needed
-          prerequisites: [Cowork access, Claude Science access]
-        labels: [roadmap, documentation, priority:P1]
-        issue: {seed: true, number: null, url: null}
-      - id: tutorial-nonauthor-validation
-        title: Complete non-author Tutorial 2 validation
-        repo: tutorials
-        proposal_state: draft
-        status: proposed
-        priority: P1
-        depends_on: [reconcile-project-record]
-        gate: null
-        acceptance:
-          - "One non-author completes Tutorial 2 unaided and friction notes are recorded verbatim."
-        evidence: []
-        contributor:
-          readiness: ready
-          champion: needed
-          prerequisites: [Earthdata Login, ocean Python environment]
-        labels: [roadmap, help wanted, priority:P1]
-        issue: {seed: true, number: null, url: null}
-      - id: provider-steward-handoff
-        title: Complete or accurately reframe provider stewardship
-        repo: nasa-daac-knowledge
-        proposal_state: draft
-        status: proposed
-        priority: P1
-        depends_on: [reconcile-project-record]
-        gate: null
-        acceptance:
-          - "A provider steward accepts the documented handoff, or public claims state interim single-steward reality."
-        evidence: []
-        contributor:
-          readiness: needs-context
-          champion: needed
-          prerequisites: [PO.DAAC relationship, knowledge stewardship]
-        labels: [roadmap, documentation, priority:P1]
-        issue: {seed: true, number: null, url: null}
-      - id: governed-release
-        title: Cut the first governed, citable OSP release
-        repo: build-kit
-        proposal_state: draft
-        status: proposed
-        priority: P1
-        depends_on: [powered-ablation-run, conversational-surface-validation]
-        gate: null
-        acceptance:
-          - "Release gates pass in every affected repository."
-          - "Version tags and citation metadata agree."
-          - "Archive claims are backed by actual archives."
-        evidence: []
-        contributor:
-          readiness: owner-only
-          champion: PaulMRamirez
-          prerequisites: [Release administration, Zenodo]
-        labels: [roadmap, priority:P1]
-        issue: {seed: true, number: null, url: null}
-
-  - id: phase3-remote-sensing
-    title: Conditional remote-sensing and flood workflow
-    outcome: "A transparent baseline and optional model-backed flood workflow test the Phase-3 architecture."
+    acceptance:
+    - Core, ocean, and hydrology matrices record tested behavior without overclaiming computation.
+    evidence: []
+    contributor:
+      readiness: needs-context
+      champion: needed
+      prerequisites:
+      - Cowork access
+      - Claude Science access
+    labels:
+    - roadmap
+    - documentation
+    - priority:P1
+    issue:
+      seed: true
+      number: 5
+      url: https://github.com/open-science-pillars/marketplace/issues/5
+  - id: tutorial-nonauthor-validation
+    title: Complete non-author Tutorial 2 validation
+    repo: tutorials
+    proposal_state: seeded
+    status: proposed
+    priority: P1
+    depends_on:
+    - reconcile-project-record
+    gate: null
+    acceptance:
+    - One non-author completes Tutorial 2 unaided and friction notes are recorded verbatim.
+    evidence: []
+    contributor:
+      readiness: ready
+      champion: needed
+      prerequisites:
+      - Earthdata Login
+      - ocean Python environment
+    labels:
+    - roadmap
+    - help wanted
+    - priority:P1
+    issue:
+      seed: true
+      number: 2
+      url: https://github.com/open-science-pillars/tutorials/issues/2
+  - id: provider-steward-handoff
+    title: Complete or accurately reframe provider stewardship
+    repo: nasa-daac-knowledge
+    proposal_state: seeded
+    status: proposed
+    priority: P1
+    depends_on:
+    - reconcile-project-record
+    gate: null
+    acceptance:
+    - A provider steward accepts the documented handoff, or public claims state interim single-steward
+      reality.
+    evidence: []
+    contributor:
+      readiness: needs-context
+      champion: needed
+      prerequisites:
+      - PO.DAAC relationship
+      - knowledge stewardship
+    labels:
+    - roadmap
+    - documentation
+    - priority:P1
+    issue:
+      seed: true
+      number: 2
+      url: https://github.com/open-science-pillars/nasa-daac-knowledge/issues/2
+  - id: governed-release
+    title: Cut the first governed, citable OSP release
+    repo: build-kit
+    proposal_state: seeded
+    status: proposed
+    priority: P1
+    depends_on:
+    - powered-ablation-run
+    - conversational-surface-validation
+    gate: null
+    acceptance:
+    - Release gates pass in every affected repository.
+    - Version tags and citation metadata agree.
+    - Archive claims are backed by actual archives.
+    evidence: []
+    contributor:
+      readiness: owner-only
+      champion: PaulMRamirez
+      prerequisites:
+      - Release administration
+      - Zenodo
+    labels:
+    - roadmap
+    - priority:P1
+    issue:
+      seed: true
+      number: 2
+      url: https://github.com/open-science-pillars/build-kit/issues/2
+- id: phase3-remote-sensing
+  title: Conditional remote-sensing and flood workflow
+  outcome: A transparent baseline and optional model-backed flood workflow test the Phase-3 architecture.
+  status: blocked
+  priority: P2
+  depends_on:
+  - powered-ablation
+  gate: The powered ablation must clear the pre-registered Phase-3 go condition.
+  deliverables:
+  - id: phase3-flood-slice
+    title: Build the baseline-first remote-sensing flood slice
+    repo: marketplace
+    proposal_state: draft
     status: blocked
     priority: P2
-    depends_on: [powered-ablation]
-    gate: "The powered ablation must clear the pre-registered Phase-3 go condition."
-    deliverables:
-      - id: phase3-flood-slice
-        title: Build the baseline-first remote-sensing flood slice
-        repo: marketplace
-        proposal_state: draft
-        status: blocked
-        priority: P2
-        depends_on: [powered-ablation-run]
-        gate: "Do not seed or start until the powered-ablation decision authorizes Phase 3."
-        acceptance:
-          - "A transparent non-model baseline precedes the optional hosted-model method."
-          - "Validation, uncertainty, goldens, and evals cover both methods."
-        evidence: []
-        contributor:
-          readiness: needs-context
-          champion: needed
-          prerequisites: [Remote sensing, flood mapping, Phase-3 authorization]
-        labels: [roadmap, status:blocked, priority:P2]
-        issue: {seed: false, number: null, url: null}
-
+    depends_on:
+    - powered-ablation-run
+    gate: Do not seed or start until the powered-ablation decision authorizes Phase 3.
+    acceptance:
+    - A transparent non-model baseline precedes the optional hosted-model method.
+    - Validation, uncertainty, goldens, and evals cover both methods.
+    evidence: []
+    contributor:
+      readiness: needs-context
+      champion: needed
+      prerequisites:
+      - Remote sensing
+      - flood mapping
+      - Phase-3 authorization
+    labels:
+    - roadmap
+    - status:blocked
+    - priority:P2
+    issue:
+      seed: false
+      number: null
+      url: null
