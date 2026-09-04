@@ -40,7 +40,7 @@ available was the linear session frame. Name that shape and use it deliberately.
 | Knowledge management (ingest loop) | Standing (event-driven) | `knowledge-authoring-guide.md`, `knowledge-template`, the seeder + linter agents, `steward-playbook.md`, `sync_check.py` |
 | Governance / steward review | Standing (PR-driven) | `.github/GOVERNANCE.md`, `steward-playbook.md`, CODEOWNERS |
 | Maintenance (staleness, re-verification, drift) | Standing (cadence) | `build-kit/docs/maintenance.md` (this pass adds it), the linter's staleness checks, `sync_check.py` |
-| Skill development | Initiative (new) + standing (refactor) | `skill-authoring-guide.md`, `plugin-template`, `design-knowledge-coupling.md`, the coupling review/migrate workflows, linter checks 14-16 |
+| Skill development | Initiative (new) + standing (refactor) | `skill-authoring-guide.md`, `plugin-template`, `design-knowledge-coupling.md`, the coupling review/migrate workflows, linter checks 10 to 13 |
 | Evaluation | Initiative (the ablation) + standing (runner/CI) | `eval-authoring-guide.md`, the `evals` runner, per-plugin `evals/`, `phase2-preregistration.md`, rule 9 |
 | New domain / new plugin | Initiative (gated + spec-driven) | `plugin-template`, `knowledge-template`, `marketplace.json`, SPEC §1.1/§10, DEVELOPING "Opening the next domain" |
 

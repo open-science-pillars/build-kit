@@ -22,13 +22,13 @@ session close.
 
 1. **Linter, every bundle.** Run the `knowledge-linter` agent on each
    `knowledge/` bundle. Act on its flags:
-   - check 7 (dataset `timestamp` older than 365 days): a stale candidate, queue
-     re-verification.
-   - checks 9/10 (`upstream: pending` older than 60 days; `disputed` without a
-     linked issue): resolve or escalate.
-   - checks 14-16 (coupling drift: inlined concept content, unjustified
-     hardcode, inert concept): a skill has drifted from the coupling model; fix
-     the skill, do not edit around it.
+   - check 4 (staleness sense, on top of the checker's W5): a stale
+     candidate, queue re-verification.
+   - checks 6 and 2 (`upstream: pending` older than 60 days; `disputed` without
+     an open linked issue): resolve or escalate.
+   - checks 10 to 13 (coupling drift: inlined concept content, unjustified
+     hardcode, inert concept, consult drift): a skill has drifted from the
+     coupling model; fix the skill, do not edit around it.
 2. **Byte-identity, every snapshot.** Run
    `nasa-daac-knowledge/tools/sync_check.py <plugin>/knowledge` for each plugin
    that carries a pinned podaac snapshot. Any mismatch is a release-blocking
