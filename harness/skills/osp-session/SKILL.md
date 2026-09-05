@@ -20,9 +20,9 @@ You are starting Open Science Pillars work `$ARGUMENTS`.
 4. Restate in one screen: outcome, owning repository, acceptance criteria,
    dependencies, gate, contributor prerequisites, and verification plan. Wait
    for confirmation before changing files.
-5. During the work, cite spec sections when authoring
-   ("per SPEC §3.4"); when you and the spec disagree, flag it,
-   do not improvise silently.
+5. During the work, cite the specification's rules by name when
+   authoring ("per the specification's report confirmation gate");
+   when you and the spec disagree, flag it, do not improvise silently.
 6. If a dataset peculiarity surfaces during testing, immediately draft
    the knowledge concept (correct type, frontmatter, links) and queue
    it for approval. This is the ingest loop; it is never deferred.

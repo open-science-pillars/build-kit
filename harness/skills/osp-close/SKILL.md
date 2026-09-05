@@ -19,7 +19,7 @@ Run the gates, then the bookkeeping. Never reorder.
    flags high-severity gotchas lacking eval cases).
 4. Golden notebooks: for every workflow skill touched, execute its
    verification/ marimo notebook headless (where one exists per the
-   SPEC §6 scope rule); report green or the diff.
+   specification's golden-notebook scope rule); report green or the diff.
 5. Surface matrix: list every supported surface that still needs verification;
    do not claim an untested Claude or Codex surface.
 6. Placeholder sweep: `grep -rln "^Placeholder" <repos>` returns zero,

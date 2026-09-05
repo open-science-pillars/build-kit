@@ -144,7 +144,7 @@ caught mechanically.
    clear, diagnosing the ablation is the work, not a new domain.
 2. Write the spec detail for the new domain into `SPECIFICATION.md` (structure,
    skills, knowledge requirements, acceptance criteria), following the
-   hydrology section (§10) as the model, at the scheduled spec-revision window.
+   hydrology section as the model, at the scheduled spec-revision window.
 3. Add roadmap proposals with acceptance criteria and contributor readiness;
    do not mark them accepted on behalf of their future repository team.
 4. After the organization and repository owners approve creation, register the
