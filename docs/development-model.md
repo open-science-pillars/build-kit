@@ -42,7 +42,7 @@ available was the linear session frame. Name that shape and use it deliberately.
 | Maintenance (staleness, re-verification, drift) | Standing (cadence) | `build-kit/docs/maintenance.md` (this pass adds it), the linter's staleness checks, `sync_check.py` |
 | Skill development | Initiative (new) + standing (refactor) | `skill-authoring-guide.md`, `plugin-template`, `design-knowledge-coupling.md`, the coupling review/migrate workflows, linter checks 10 to 13 |
 | Evaluation | Initiative (the ablation) + standing (runner/CI) | `eval-authoring-guide.md`, the `evals` runner, per-plugin `evals/`, `phase2-preregistration.md`, rule 9 |
-| New domain / new plugin | Initiative (gated + spec-driven) | `plugin-template`, `knowledge-template`, `marketplace.json`, SPEC §1.1/§10, DEVELOPING "Opening the next domain" |
+| New domain / new plugin | Initiative (gated + spec-driven) | `plugin-template`, `knowledge-template`, `marketplace.json`, the specification's repository-layout and hydrology sections, DEVELOPING "Opening the next domain" |
 
 Two of these were weak because the project never left the build frame:
 maintenance had no standing home (re-verification only fired when the linter
@@ -61,7 +61,7 @@ from repository teams.
 2. **Gate it.** If the initiative crosses a phase boundary (a new domain, a new
    phase), confirm the gate in `phase2-preregistration.md` first. A gate that
    is not clear stops the initiative; that is the point of pre-registration.
-3. **Do the work,** citing the spec by section, capturing knowledge as you go
+3. **Do the work,** citing the specification's rules by name, capturing knowledge as you go
    (the ingest loop never defers), and honoring the workspace law
    (`CLAUDE.template.md`).
 4. **Close it.** Run `/osp-close`: verification evidence goes to the repository

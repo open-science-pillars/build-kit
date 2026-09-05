@@ -50,9 +50,9 @@ session close.
    still as described: ShortNames still resolve in CMR, the version is current,
    the access path still works. Update `version`, `verified`, and `verified_by`
    with the new date; if the product baseline changed, set `status: stale`
-   first, then re-verify (steward-playbook lifecycle §5.6). A dataset whose
-   baseline changed may invalidate recipes and gotchas that depend on it: sweep
-   them too.
+   first, then re-verify (the specification's lifecycle and status rule, which
+   the steward playbook applies). A dataset whose baseline changed may
+   invalidate recipes and gotchas that depend on it: sweep them too.
 2. **Dependency and tool drift.** Confirm the tools the skills assume still
    behave (the kind of drift already recorded: `/doctor` losing the
    description-budget check, `ecco_access` mishandling statics). New drift goes
