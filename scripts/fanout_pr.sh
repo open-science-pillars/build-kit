@@ -32,7 +32,8 @@
 #
 # Needs gh authenticated for the organization and a git identity whose
 # name and email match the DCO sign-off. Never force-pushes, never
-# rewrites history, never touches a clone that is not on main.
+# rewrites history, never touches a clone that is not on main, and
+# merges only after the gates have reported.
 set -uo pipefail
 
 here="$(cd "$(dirname "$0")" && pwd)"
@@ -111,13 +112,24 @@ one() {  # one REPO: the whole cycle for one clone, status to $work/REPO.status
     step=find
     url="$(gh pr view "$branch" --json url --jq .url)" || { echo "FAILED $step" >"$status"; return; }
   fi
-  # The gates: watch until every check reports; a repository with no
-  # checks at all is not a failure, it has nothing to wait for.
+  # The gates: watch until every check reports. Checks register a few
+  # seconds after the push, so "no checks reported" right after opening
+  # the pull request is not an answer: a repository that carries
+  # workflows is asked again, up to three minutes, before it is treated
+  # as having nothing to wait for; one without workflows is asked twice.
   step=checks
-  local out
-  out="$(gh pr checks "$url" --watch --fail-fast 2>&1)"; local rc=$?
-  echo "$out"
-  if [ $rc -ne 0 ] && ! grep -q "no checks reported" <<<"$out"; then echo "FAILED $step $url" >"$status"; return; fi
+  local out rc tries=0 limit=18
+  ls .github/workflows/*.yml >/dev/null 2>&1 || limit=2
+  while :; do
+    out="$(gh pr checks "$url" --watch --fail-fast 2>&1)"; rc=$?
+    if [ $rc -eq 0 ]; then echo "$out"; break; fi
+    if grep -q "no checks reported" <<<"$out"; then
+      tries=$((tries + 1))
+      if [ $tries -ge $limit ]; then echo "$out"; break; fi
+      sleep 10; continue
+    fi
+    echo "$out"; echo "FAILED $step $url" >"$status"; return
+  done
   step=merge
   local n=0
   until gh pr merge "$url" --merge --delete-branch; do
