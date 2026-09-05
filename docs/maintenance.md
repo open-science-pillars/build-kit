@@ -29,14 +29,20 @@ session close.
    - checks 10 to 13 (coupling drift: inlined concept content, unjustified
      hardcode, inert concept, consult drift): a skill has drifted from the
      coupling model; fix the skill, do not edit around it.
-2. **Byte-identity, every snapshot; no owed signatures.** Run
-   `nasa-daac-knowledge/tools/sync_check.py <plugin>/knowledge` for each plugin
-   that carries a pinned podaac snapshot, and
-   `nasa-daac-knowledge/tools/signature_check.py <bundle>` for every bundle
-   (canonical and plugin-local). Any mismatch is a release-blocking bug:
-   reconcile canonical and snapshot before anything ships. An owed
-   signature (a stable concept edited since its signing commit) is the
-   steward's to clear by re-signing; a release or refresh waits on it.
+2. **Declared dependencies resolve; no owed signatures.** Run
+   `claude plugin list --json` on a machine with the plugins installed
+   (the steward's own counts): every plugin from the catalog is listed at
+   its current release with no `errors` field, and the provider bundle
+   plugin is present as the domain plugins' dependency. An `errors` entry
+   (a missing dependency, a range with no matching tag, a range conflict)
+   is a release-blocking bug in whichever manifest or tag caused it. Run
+   `nasa-daac-knowledge/tools/signature_check.py <bundle>` for every
+   bundle (canonical and plugin-local). An owed signature (a stable
+   concept edited since its signing commit) is the steward's to clear by
+   re-signing; a release tag waits on it. While a plugin still carries a
+   pinned copy of provider concepts (`knowledge/snapshot.yaml`), run
+   `nasa-daac-knowledge/tools/sync_check.py <plugin>/knowledge` for it
+   too, and reconcile any mismatch before anything ships.
 3. **Coupling review (as needed).** When skills have changed, run
    `build-kit/workflows/knowledge-coupling-review.js`; "zero files needing
    migration" is the standing invariant.
@@ -61,7 +67,8 @@ session close.
 
 - A dataset's product baseline or version changes → re-verify that dataset's
   concepts now (do not wait for the quarter).
-- A `sync_check.py` mismatch → reconcile now (release-blocking).
+- A dependency error in `claude plugin list --json`, or a `sync_check.py`
+  mismatch on a copy a plugin still carries → fix now (release-blocking).
 - A tool the skills depend on changes behavior → record and fix now.
 - A concept's evidence link stops resolving → fix the link or mark the concept
   `disputed` with an issue.
@@ -70,4 +77,5 @@ session close.
 
 Maintenance does not rewrite the spec, add features, or stand up domains. Those
 are initiatives. Maintenance keeps what exists true: current versions, resolving
-evidence, byte-identical snapshots, green notebooks, and no coupling drift.
+evidence, dependencies that resolve to tagged releases, green notebooks, and no
+coupling drift.

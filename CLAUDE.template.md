@@ -31,7 +31,8 @@ discrepancy instead of silently choosing.
 core, ocean-science, hydrology: plugins (skills/, agents/, knowledge/,
 verification/, evals/). marketplace: catalog + docs. tutorials: Quarto
 book. plugin-template, knowledge-template: scaffolds.
-nasa-daac-knowledge: canonical knowledge bundles (plugins pin snapshots).
+nasa-daac-knowledge: canonical knowledge bundles, shipped as a plugin the
+domain plugins declare as a dependency.
 build-kit: this harness. .github: org files.
 
 ## Global rules (non-negotiable)
@@ -43,7 +44,8 @@ build-kit: this harness. .github: org files.
 3. Workflow skills keep both invocation paths open; side effects are
    guarded by in-skill confirmation gates, never disable-model-invocation.
 4. Plugins are self-contained: no ../ paths across repos, ever. Cross-repo
-   references use full URLs; embedded knowledge is a pinned snapshot.
+   references use full URLs; another plugin's knowledge is reached by
+   declaring it in plugin.json dependencies, never by copying it.
 5. Every knowledge concept: type in frontmatter; datasets also carry
    title, description, tags, timestamp, resource, and an ## Uncertainty
    section. Gotchas link to their dataset. Update the bundle log.md.
