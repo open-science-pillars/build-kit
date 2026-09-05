@@ -117,9 +117,23 @@ one() {  # one REPO: the whole cycle for one clone, status to $work/REPO.status
   # the pull request is not an answer: a repository that carries
   # workflows is asked again, up to three minutes, before it is treated
   # as having nothing to wait for; one without workflows is asked twice.
+  # And a follow-up push (the --finish path after a review) is judged by
+  # its own commit's runs, never the previous commit's: the watch starts
+  # only once a check run exists for the local HEAD, because the pull
+  # request's rollup keeps showing the earlier commit until then.
   step=checks
-  local out rc tries=0 limit=18
-  ls .github/workflows/*.yml >/dev/null 2>&1 || limit=2
+  local out rc tries=0 limit=18 sha
+  sha="$(git rev-parse HEAD)"
+  if ls .github/workflows/*.yml >/dev/null 2>&1; then
+    while [ "$(gh api "repos/{owner}/{repo}/commits/$sha/check-runs" --jq .total_count 2>/dev/null || echo 0)" = "0" ]; do
+      tries=$((tries + 1))
+      if [ $tries -ge $limit ]; then echo "no check run registered for $sha"; break; fi
+      sleep 10
+    done
+    tries=0
+  else
+    limit=2
+  fi
   while :; do
     out="$(gh pr checks "$url" --watch --fail-fast 2>&1)"; rc=$?
     if [ $rc -eq 0 ]; then echo "$out"; break; fi
