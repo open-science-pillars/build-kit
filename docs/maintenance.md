@@ -39,10 +39,7 @@ session close.
    `nasa-daac-knowledge/tools/signature_check.py <bundle>` for every
    bundle (canonical and plugin-local). An owed signature (a stable
    concept edited since its signing commit) is the steward's to clear by
-   re-signing; a release tag waits on it. While a plugin still carries a
-   pinned copy of provider concepts (`knowledge/snapshot.yaml`), run
-   `nasa-daac-knowledge/tools/sync_check.py <plugin>/knowledge` for it
-   too, and reconcile any mismatch before anything ships.
+   re-signing; a release tag waits on it.
 3. **Coupling review (as needed).** When skills have changed, run
    `build-kit/workflows/knowledge-coupling-review.js`; "zero files needing
    migration" is the standing invariant.
@@ -67,8 +64,8 @@ session close.
 
 - A dataset's product baseline or version changes → re-verify that dataset's
   concepts now (do not wait for the quarter).
-- A dependency error in `claude plugin list --json`, or a `sync_check.py`
-  mismatch on a copy a plugin still carries → fix now (release-blocking).
+- A dependency error in `claude plugin list --json` → fix now
+  (release-blocking).
 - A tool the skills depend on changes behavior → record and fix now.
 - A concept's evidence link stops resolving → fix the link or mark the concept
   `disputed` with an issue.
