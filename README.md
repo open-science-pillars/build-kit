@@ -19,6 +19,10 @@ for **maintainers and future core developers** who want to extend the project
   federated design and copy-ready Claude Code implementation sessions.
 - **[bootstrap.sh](bootstrap.sh)**: clones the org repos flat and wires the
   session harness so `/osp-session` and `/osp-close` work.
+- **[scripts/fanout_pr.sh](scripts/fanout_pr.sh)**: the same change as a
+  pull request in every clone that carries it, in parallel: branch, DCO-signed
+  commit, push, pull request, watch the gates, merge, sync main; `--no-merge`
+  holds at the open pull request for a review and `--finish` completes it.
 - **[CLAUDE.template.md](CLAUDE.template.md)**: the canonical workspace "law" (the workspace `CLAUDE.md` imports it, never copies it)
   (the non-negotiable global rules) to seed a new build workspace.
 - **[harness/skills/](harness/skills/)**: the runnable `osp-roadmap`,
