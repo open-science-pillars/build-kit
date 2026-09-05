@@ -29,10 +29,14 @@ session close.
    - checks 10 to 13 (coupling drift: inlined concept content, unjustified
      hardcode, inert concept, consult drift): a skill has drifted from the
      coupling model; fix the skill, do not edit around it.
-2. **Byte-identity, every snapshot.** Run
+2. **Byte-identity, every snapshot; no owed signatures.** Run
    `nasa-daac-knowledge/tools/sync_check.py <plugin>/knowledge` for each plugin
-   that carries a pinned podaac snapshot. Any mismatch is a release-blocking
-   bug: reconcile canonical and snapshot before anything ships.
+   that carries a pinned podaac snapshot, and
+   `nasa-daac-knowledge/tools/signature_check.py <bundle>` for every bundle
+   (canonical and plugin-local). Any mismatch is a release-blocking bug:
+   reconcile canonical and snapshot before anything ships. An owed
+   signature (a stable concept edited since its signing commit) is the
+   steward's to clear by re-signing; a release or refresh waits on it.
 3. **Coupling review (as needed).** When skills have changed, run
    `build-kit/workflows/knowledge-coupling-review.js`; "zero files needing
    migration" is the standing invariant.
