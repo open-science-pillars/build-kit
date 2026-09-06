@@ -446,3 +446,205 @@ initiatives:
         labels: [roadmap, status:blocked, priority:P2]
         issue: {seed: false, number: null, url: null}
 
+
+
+  - id: hydrology-investigations
+    title: Hydrology for investigations
+    outcome: "The hydrology plugin answers basin and event questions end to end with receipts, closes a basin water balance as an attested computation, and survives the USGS WaterServices decommission, released and installed."
+    status: ready
+    priority: P0
+    depends_on: []
+    gate: "The Phase-2 reading is recorded as a dated addition to docs/phase2-preregistration.md before any provider-product concept is written."
+    deliverables:
+      - id: hydro-usgs-waterdata-migration
+        title: Migrate the USGS connector to the Water Data APIs and release it
+        repo: core
+        proposal_state: draft
+        status: proposed
+        priority: P0
+        depends_on: []
+        gate: null
+        acceptance:
+          - "The six hydrology eval cases pass on the new connector at the stated N."
+          - "A recorded live probe on the new endpoints fixes the field map, paging, and depth facts."
+          - "Value-level parity against legacy captures is recorded; the legacy endpoint remains only as a dated deprecation fact."
+          - "Core and hydrology are tagged and the hydrology pin points at the tagged core commit."
+        evidence: []
+        contributor:
+          readiness: needs-context
+          champion: owner
+          prerequisites: [USGS Water Data APIs, observations server contract, dataretrieval waterdata module]
+        labels: [roadmap, priority:P0]
+        issue: {seed: false, number: null, url: null}
+      - id: hydro-basin-unit
+        title: Add basin delineation as the unit of analysis
+        repo: hydrology
+        proposal_state: draft
+        status: proposed
+        priority: P0
+        depends_on: []
+        gate: null
+        acceptance:
+          - "Gauge, point, and hydrologic-unit inputs return a frozen polygon with provenance."
+          - "The unsnapped-point trap has an eval case registered in the runner's hydrology manifest and run at the stated N."
+          - "Three fixture basins are compared against the monitoring-locations drainage area with a stated tolerance."
+        evidence: []
+        contributor:
+          readiness: ready
+          champion: owner
+          prerequisites: [NLDI, Watershed Boundary Dataset, equal-area projections]
+        labels: [roadmap, priority:P0]
+        issue: {seed: false, number: null, url: null}
+      - id: hydro-p-et-connectors
+        title: Add IMERG precipitation and MOD16 and OpenET evapotranspiration with their trap sets
+        repo: hydrology
+        proposal_state: draft
+        status: proposed
+        priority: P0
+        depends_on: [hydro-basin-unit]
+        gate: "The Phase-2 dated addition is merged before the IMERG and MOD16 concepts are written."
+        acceptance:
+          - "Run-mixing, cold-season, MOD16 fill, and OpenET area-cap gotchas each carry an eval case registered in the runner's hydrology manifest and run at the stated N."
+          - "One live pull per product is recorded; the IMERG Final gap is a dated fact with stale_after."
+          - "Provider-product facts carry upstream pending naming their canonical provider directory."
+        evidence: []
+        contributor:
+          readiness: needs-context
+          champion: owner
+          prerequisites: [GES DISC and LP DAAC access through earthaccess, OpenET API, IMERG run semantics]
+        labels: [roadmap, priority:P0]
+        issue: {seed: false, number: null, url: null}
+      - id: hydro-w1-basin-balance
+        title: Close a basin water balance as an attested computation
+        repo: hydrology
+        proposal_state: draft
+        status: proposed
+        priority: P0
+        depends_on: [hydro-usgs-waterdata-migration, hydro-basin-unit, hydro-p-et-connectors]
+        gate: null
+        acceptance:
+          - "The verification notebook runs green on the Ohio, Lees Ferry, and the Roaring Fork refusal."
+          - "The storage term refuses below the footprint floor the computation states; no gain factor is applied above it."
+          - "Receipts name product versions, runs, captures, and data-tree stamps; the attester recomputes from the receipt."
+          - "Hydrology is released with the recipe, skill, and a quickstart walkthrough on Lees Ferry."
+        evidence: []
+        contributor:
+          readiness: owner-only
+          champion: owner
+          prerequisites: [Attested computation pattern, GRACE mascon handling, frozen fixture trees]
+        labels: [roadmap, priority:P0]
+        issue: {seed: false, number: null, url: null}
+      - id: hydro-w2-w5-workflows
+        title: Event reconstruction, flood frequency, drought anatomy, and the reservoir ledger
+        repo: hydrology
+        proposal_state: draft
+        status: proposed
+        priority: P1
+        depends_on: [hydro-w1-basin-balance]
+        gate: null
+        acceptance:
+          - "Each workflow runs from a basin identifier with receipts and a green verification notebook, except as stated for flood frequency."
+          - "Every high-severity gotcha added carries an eval case; DSWx concepts enter the podaac bundle."
+          - "Flood frequency exports a WATSTORE file for PeakFQ, parses its output, and refuses a return period without an interval; the export and screening steps have a green notebook, the parse is verified against a PeakFQ output the analyst produces."
+        evidence: []
+        contributor:
+          readiness: needs-context
+          champion: needed
+          prerequisites: [OPERA DSWx, PeakFQ, SNODAS, National Water Model retrospective]
+        labels: [roadmap, priority:P1]
+        issue: {seed: false, number: null, url: null}
+      - id: hydro-scout-and-confrontation
+        title: Teach the scout to plan by workflow and confront SWOT water surface elevation with gauge stage
+        repo: hydrology
+        proposal_state: draft
+        status: proposed
+        priority: P1
+        depends_on: [hydro-w2-w5-workflows]
+        gate: null
+        acceptance:
+          - "The scout returns a plan by basin and workflow that cites the concepts binding it and downloads nothing."
+          - "A confrontation recipe scores SWOT reach water surface elevation against gauge stage at a steward-accepted pair with intervals and receipts; reach discharge against gauge discharge is reported as a consistency check."
+          - "The Hydrocron collection gotcha and the version transition facts enter the hydrology bundle; the core Hydrocron tools take a collection_name parameter and core is released with it."
+        evidence: []
+        contributor:
+          readiness: needs-context
+          champion: owner
+          prerequisites: [Hydrocron, SWOT hydrology products, confrontation recipe form]
+        labels: [roadmap, priority:P1]
+        issue: {seed: false, number: null, url: null}
+      - id: hydro-investigation-tutorial
+        title: Write the hydrology investigation tutorial and run it with a non-author reader
+        repo: tutorials
+        proposal_state: draft
+        status: proposed
+        priority: P1
+        depends_on: [hydro-w1-basin-balance, hydro-w2-w5-workflows]
+        gate: null
+        acceptance:
+          - "Water year 2023 is told two ways on a clean catalog install: the balance on Lees Ferry, the event on Tulare."
+          - "One non-author hydrologist completes it unaided with friction notes captured."
+        evidence: []
+        contributor:
+          readiness: ready
+          champion: needed
+          prerequisites: [Hydrology plugin installed from the catalog, Earthdata Login]
+        labels: [roadmap, priority:P1]
+        issue: {seed: false, number: null, url: null}
+      - id: hydro-stewards-and-releases
+        title: Steward scaffolds, CODEOWNERS scopes, and the general-availability flip
+        repo: nasa-daac-knowledge
+        proposal_state: draft
+        status: proposed
+        priority: P1
+        depends_on: [hydro-w2-w5-workflows, hydro-investigation-tutorial]
+        gate: "Provider directories are created only under their own dated addition to the pre-registration."
+        acceptance:
+          - "A CODEOWNERS path scope selects one steward's source-prefixed concept files."
+          - "The plugin flips to general availability on stated criteria: tagged release, goldens green, first-wave concepts signed, one non-author tutorial completion."
+          - "Outreach notes to USGS, WWAO, and PO.DAAC are drafted with evidence attached and sent by the owner."
+        evidence: []
+        contributor:
+          readiness: owner-only
+          champion: owner
+          prerequisites: [Steward playbook, credit derivation, release checklist]
+        labels: [roadmap, priority:P1]
+        issue: {seed: false, number: null, url: null}
+      - id: hydro-coastal-water
+        title: Coastal composites where hydrology meets ocean science
+        repo: ocean-science
+        proposal_state: draft
+        status: proposed
+        priority: P2
+        depends_on: [hydro-w1-basin-balance]
+        gate: null
+        acceptance:
+          - "Land water storage sits beside the sea level budget as a consistency check with no fourth term."
+          - "Compound flood reconstruction reconciles gauge and tide datums before any comparison."
+          - "No third bundle or plugin; boundary concepts live in their canonical homes and cross-cite."
+        evidence: []
+        contributor:
+          readiness: needs-context
+          champion: needed
+          prerequisites: [CO-OPS connector, sea level budget convention, SWOT coastal products]
+        labels: [roadmap, priority:P2]
+        issue: {seed: false, number: null, url: null}
+      - id: hydro-deferred-connectors
+        title: Model context, the PeakFQ fixture, ECOSTRESS, and the SWOT hydrology move
+        repo: hydrology
+        proposal_state: deferred
+        status: blocked
+        priority: P2
+        depends_on: [hydro-w2-w5-workflows, hydro-stewards-and-releases]
+        gate: null
+        acceptance:
+          - "The National Water Model retrospective is read as pre-2023 model context, labeled as model output in every receipt."
+          - "A PeakFQ round-trip fixture (input file, PeakFQ output, parsed receipt) lands and the flood-frequency parser is verified against it."
+          - "ECOSTRESS evapotranspiration is a companion loader with its own concept."
+          - "The SWOT hydrology facts move to the podaac bundle with both sides re-signed, if the stewards decided that posture."
+        evidence: []
+        contributor:
+          readiness: needs-context
+          champion: needed
+          prerequisites: [National Water Model on AWS, PeakFQ, ECOSTRESS, the podaac bundle's steward posture]
+        labels: [roadmap, roadmap:deferred, status:blocked, priority:P2]
+        issue: {seed: false, number: null, url: null}
