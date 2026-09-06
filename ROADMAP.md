@@ -219,3 +219,100 @@ A transparent baseline and optional model-backed flood workflow test the Phase-3
 - [ ] Validation, uncertainty, goldens, and evals cover both methods.
 - Depends on: `powered-ablation-run`
 - Gate: Do not seed or start until the powered-ablation decision authorizes Phase 3.
+
+### Hydrology for investigations
+
+**ID:** `hydrology-investigations`  
+**Status:** ready  
+**Priority:** P0
+
+The hydrology plugin answers basin and event questions end to end with receipts, closes a basin water balance as an attested computation, and survives the USGS WaterServices decommission, released and installed.
+
+> **Gate:** The Phase-2 reading is recorded as a dated addition to docs/phase2-preregistration.md before any provider-product concept is written.
+
+| Deliverable | Repository | Proposal | Status | Contributor | Issue |
+|---|---|---|---|---|---|
+| `hydro-usgs-waterdata-migration`: Migrate the USGS connector to the Water Data APIs and release it | `core` | draft | proposed | needs-context | not seeded |
+| `hydro-basin-unit`: Add basin delineation as the unit of analysis | `hydrology` | draft | proposed | ready | not seeded |
+| `hydro-p-et-connectors`: Add IMERG precipitation and MOD16 and OpenET evapotranspiration with their trap sets | `hydrology` | draft | proposed | needs-context | not seeded |
+| `hydro-w1-basin-balance`: Close a basin water balance as an attested computation | `hydrology` | draft | proposed | owner-only | not seeded |
+| `hydro-w2-w5-workflows`: Event reconstruction, flood frequency, drought anatomy, and the reservoir ledger | `hydrology` | draft | proposed | needs-context | not seeded |
+| `hydro-scout-and-confrontation`: Teach the scout to plan by workflow and confront SWOT water surface elevation with gauge stage | `hydrology` | draft | proposed | needs-context | not seeded |
+| `hydro-investigation-tutorial`: Write the hydrology investigation tutorial and run it with a non-author reader | `tutorials` | draft | proposed | ready | not seeded |
+| `hydro-stewards-and-releases`: Steward scaffolds, CODEOWNERS scopes, and the general-availability flip | `nasa-daac-knowledge` | draft | proposed | owner-only | not seeded |
+| `hydro-coastal-water`: Coastal composites where hydrology meets ocean science | `ocean-science` | draft | proposed | needs-context | not seeded |
+| `hydro-deferred-connectors`: Model context, the PeakFQ fixture, ECOSTRESS, and the SWOT hydrology move | `hydrology` | deferred | blocked | needs-context | not seeded |
+
+#### Acceptance details
+
+**`hydro-usgs-waterdata-migration`**
+
+- [ ] The six hydrology eval cases pass on the new connector at the stated N.
+- [ ] A recorded live probe on the new endpoints fixes the field map, paging, and depth facts.
+- [ ] Value-level parity against legacy captures is recorded; the legacy endpoint remains only as a dated deprecation fact.
+- [ ] Core and hydrology are tagged and the hydrology pin points at the tagged core commit.
+
+**`hydro-basin-unit`**
+
+- [ ] Gauge, point, and hydrologic-unit inputs return a frozen polygon with provenance.
+- [ ] The unsnapped-point trap has an eval case registered in the runner's hydrology manifest and run at the stated N.
+- [ ] Three fixture basins are compared against the monitoring-locations drainage area with a stated tolerance.
+
+**`hydro-p-et-connectors`**
+
+- [ ] Run-mixing, cold-season, MOD16 fill, and OpenET area-cap gotchas each carry an eval case registered in the runner's hydrology manifest and run at the stated N.
+- [ ] One live pull per product is recorded; the IMERG Final gap is a dated fact with stale_after.
+- [ ] Provider-product facts carry upstream pending naming their canonical provider directory.
+- Depends on: `hydro-basin-unit`
+- Gate: The Phase-2 dated addition is merged before the IMERG and MOD16 concepts are written.
+
+**`hydro-w1-basin-balance`**
+
+- [ ] The verification notebook runs green on the Ohio, Lees Ferry, and the Roaring Fork refusal.
+- [ ] The storage term refuses below the footprint floor the computation states; no gain factor is applied above it.
+- [ ] Receipts name product versions, runs, captures, and data-tree stamps; the attester recomputes from the receipt.
+- [ ] Hydrology is released with the recipe, skill, and a quickstart walkthrough on Lees Ferry.
+- Depends on: `hydro-usgs-waterdata-migration`, `hydro-basin-unit`, `hydro-p-et-connectors`
+
+**`hydro-w2-w5-workflows`**
+
+- [ ] Each workflow runs from a basin identifier with receipts and a green verification notebook, except as stated for flood frequency.
+- [ ] Every high-severity gotcha added carries an eval case; DSWx concepts enter the podaac bundle.
+- [ ] Flood frequency exports a WATSTORE file for PeakFQ, parses its output, and refuses a return period without an interval; the export and screening steps have a green notebook, the parse is verified against a PeakFQ output the analyst produces.
+- Depends on: `hydro-w1-basin-balance`
+
+**`hydro-scout-and-confrontation`**
+
+- [ ] The scout returns a plan by basin and workflow that cites the concepts binding it and downloads nothing.
+- [ ] A confrontation recipe scores SWOT reach water surface elevation against gauge stage at a steward-accepted pair with intervals and receipts; reach discharge against gauge discharge is reported as a consistency check.
+- [ ] The Hydrocron collection gotcha and the version transition facts enter the hydrology bundle; the core Hydrocron tools take a collection_name parameter and core is released with it.
+- Depends on: `hydro-w2-w5-workflows`
+
+**`hydro-investigation-tutorial`**
+
+- [ ] Water year 2023 is told two ways on a clean catalog install: the balance on Lees Ferry, the event on Tulare.
+- [ ] One non-author hydrologist completes it unaided with friction notes captured.
+- Depends on: `hydro-w1-basin-balance`, `hydro-w2-w5-workflows`
+
+**`hydro-stewards-and-releases`**
+
+- [ ] A CODEOWNERS path scope selects one steward's source-prefixed concept files.
+- [ ] The plugin flips to general availability on stated criteria: tagged release, goldens green, first-wave concepts signed, one non-author tutorial completion.
+- [ ] Outreach notes to USGS, WWAO, and PO.DAAC are drafted with evidence attached and sent by the owner.
+- Depends on: `hydro-w2-w5-workflows`, `hydro-investigation-tutorial`
+- Gate: Provider directories are created only under their own dated addition to the pre-registration.
+
+**`hydro-coastal-water`**
+
+- [ ] Land water storage sits beside the sea level budget as a consistency check with no fourth term.
+- [ ] Compound flood reconstruction reconciles gauge and tide datums before any comparison.
+- [ ] No third bundle or plugin; boundary concepts live in their canonical homes and cross-cite.
+- Depends on: `hydro-w1-basin-balance`
+
+**`hydro-deferred-connectors`**
+
+- [ ] The National Water Model retrospective is read as pre-2023 model context, labeled as model output in every receipt.
+- [ ] A PeakFQ round-trip fixture (input file, PeakFQ output, parsed receipt) lands and the flood-frequency parser is verified against it.
+- [ ] ECOSTRESS evapotranspiration is a companion loader with its own concept.
+- [ ] The SWOT hydrology facts move to the podaac bundle with both sides re-signed, if the stewards decided that posture.
+- Depends on: `hydro-w2-w5-workflows`, `hydro-stewards-and-releases`
