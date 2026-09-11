@@ -9,6 +9,8 @@
 ## Decisions
 
 - **AI-for-Science submission** (`ai4s-2026`): declined. The project owner decided not to submit.
+- **Pillar means sphere (ADR A)** (`pillar-means-sphere`): proposed. Pillars are the five Earth science spheres; disciplines are domain capabilities inside them; provider bundles stay a separate authority axis; classification is canonical under .osp/repository.yaml. Record: marketplace docs/decisions/adr-a-pillar-means-sphere.md; accepted when it merges.
+- **One governed capability, projected to runtimes (ADR B)** (`multi-runtime-packaging`): proposed. KNOW, ACT, PROVE and REACH are authored once; build-kit renders a Claude projection and an Agent Plugins 1.0 projection; Claude Code, Cowork and Codex are qualification targets; no per-client adapters. Record: marketplace docs/decisions/adr-b-multi-runtime-capability-packaging.md; accepted when it merges.
 
 ## Initiatives
 
@@ -63,6 +65,8 @@ The organization has a team-safe roadmap harness and public documentation that m
 **Priority:** P1
 
 Core, ocean-science, and hydrology install through a native Codex marketplace without duplicating source trees.
+
+> **Gate:** Re-scoped by the multi-runtime-packaging decision (ADR B): Codex consumes the Agent Plugins projection that build-kit renders from canonical source rather than a hand-written manifest per repository. The per-repository manifest deliverables close or re-scope when osp-architecture-alignment lands its runtime renderer (r1-runtime-renderer); their clean-install intent survives as Codex qualification.
 
 | Deliverable | Repository | Proposal | Status | Contributor | Issue |
 |---|---|---|---|---|---|
@@ -316,3 +320,141 @@ The hydrology plugin answers basin and event questions end to end with receipts,
 - [ ] ECOSTRESS evapotranspiration is a companion loader with its own concept.
 - [ ] The SWOT hydrology facts move to the podaac bundle with both sides re-signed, if the stewards decided that posture.
 - Depends on: `hydro-w2-w5-workflows`, `hydro-stewards-and-releases`
+
+### Align OSP spheres, governance, and multi-runtime capability packaging
+
+**ID:** `osp-architecture-alignment`  
+**Status:** active  
+**Priority:** P1
+
+Pillar means sphere; canonical .osp metadata drives organization and runtime projections; per-product tooling is consolidated; Claude Code, Cowork and Codex consume the same governed scientific capabilities through a Claude projection and an Agent Plugins 1.0 projection.
+
+> **Gate:** The decision records (ADR A, ADR B) and the dated Phase-2 pre-registration amendment merge immediately. Every other deliverable begins after the first tranche of hydrology-investigations (its P0 deliverables) is recorded done with evidence; that gate is not removed silently.
+
+| Deliverable | Repository | Proposal | Status | Contributor | Issue |
+|---|---|---|---|---|---|
+| `m0-decision-records`: Record the sphere alignment and multi-runtime packaging decisions | `marketplace` | accepted | active | owner-only | not seeded |
+| `m0-prereg-amendment`: Append the dated Phase-2 pre-registration reading of the architecture work | `marketplace` | accepted | active | owner-only | not seeded |
+| `m1-canonical-metadata`: Add the canonical .osp metadata schemas and apply them to every non-archived repository | `build-kit` | draft | proposed | needs-context | not seeded |
+| `m1-concept-spheres`: Require sphere tags on scientific concepts | `nasa-daac-knowledge` | draft | proposed | needs-context | not seeded |
+| `m1-templates`: Teach the templates the canonical metadata and the sphere examples | `plugin-template` | draft | proposed | ready | not seeded |
+| `m2-badges-consolidation`: Rename ecco-budget-badge to badges and generalize the attestation service | `marketplace` | draft | proposed | needs-context | not seeded |
+| `m2-evals-consolidation`: Move the ECCO eval cases into evals and archive ecco-agent-evals with a pointer | `evals` | draft | proposed | needs-context | not seeded |
+| `m3-governance-teams`: Create sphere, provider steward and runtime maintainer teams and rewrite CODEOWNERS to teams | `.github` | draft | proposed | owner-only | not seeded |
+| `m4-documentation-alignment`: Align the profile, marketplace README, specification, glossary, guides and tutorials to spheres and runtime projections | `marketplace` | draft | proposed | needs-context | not seeded |
+| `m5-planned-repositories`: Instantiate the eleven planned repositories under the planned convention | `.github` | draft | proposed | owner-only | not seeded |
+| `r1-runtime-renderer`: Render the Claude and Agent Plugins projections from canonical source and detect drift | `build-kit` | draft | proposed | needs-context | not seeded |
+| `r2-core-reference`: Qualify core as the reference capability on Claude Code, Cowork and Codex from one SKILL.md | `core` | draft | proposed | needs-context | not seeded |
+| `r3-dependency-reference`: Validate dependency realization on ocean-science across runtimes | `ocean-science` | draft | proposed | needs-context | not seeded |
+| `r4-shared-prove`: Feed Cowork and Codex results through the same deterministic attester | `nasa-daac-knowledge` | draft | proposed | needs-context | not seeded |
+| `r5-cross-runtime-evals`: Record capability, release lock, runtime and model on every eval result | `evals` | draft | proposed | ready | not seeded |
+| `r6-compat-probes`: Add non-blocking compatibility probes for Gemini CLI and Goose | `build-kit` | draft | proposed | ready | not seeded |
+| `r7-release-qualification`: Advertise a runtime as supported only when the qualification harness passes | `build-kit` | draft | proposed | owner-only | not seeded |
+
+#### Acceptance details
+
+**`m0-decision-records`**
+
+- [ ] ADR A (pillar means sphere) is merged under docs/decisions.
+- [ ] ADR B (multi-runtime capability packaging) is merged under docs/decisions.
+- [ ] The design document the records cite is merged with consistent numbering and passes the wording gate.
+
+**`m0-prereg-amendment`**
+
+- [ ] A dated entry states that sphere metadata, provider-neutral .osp metadata, runtime packaging scaffolding and planned repositories are organizational work that neither triggers nor pre-empts the Phase-2 domain gate.
+
+**`m1-canonical-metadata`**
+
+- [ ] Schemas for .osp/repository.yaml, .osp/package.yaml and .osp/surfaces.yaml validate; .osp/governance.yaml gains runtime maintainer teams.
+- [ ] Every existing non-archived repository carries repository.yaml; the sphere view renders from data; expected GitHub topics are computed from it and compared in CI.
+- [ ] No Claude manifest is required as a source of sphere truth.
+- Depends on: `m0-decision-records`, `m0-prereg-amendment`
+- Gate: Begins after the first tranche of hydrology-investigations is recorded done.
+
+**`m1-concept-spheres`**
+
+- [ ] Concept frontmatter accepts spheres (required for scientific concepts) and gcmd (optional).
+- [ ] The linter rejects a scientific concept with no sphere; every existing concept is tagged and re-signed where the steward requires it.
+- Depends on: `m0-decision-records`
+- Gate: Begins after the first tranche of hydrology-investigations is recorded done.
+
+**`m1-templates`**
+
+- [ ] plugin-template and knowledge-template carry .osp metadata examples and sphere and status placeholders that fail validation until replaced.
+- Depends on: `m1-canonical-metadata`
+
+**`m2-badges-consolidation`**
+
+- [ ] The ecco-budget-badge repository is renamed badges; a product workflow is an input to the service rather than part of the repository identity.
+- [ ] The existing ECCO badge still resolves and cannot be hand-set; historical links redirect or clearly resolve.
+- [ ] The specification's repository table and the catalog name the new repository.
+- Depends on: `m1-canonical-metadata`
+
+**`m2-evals-consolidation`**
+
+- [ ] The cases live under evals/products/ecco/ preserving concept_basis, expected behavior and deterministic checks.
+- [ ] The moved cases produce identical results to the last published run; the old repository is archived with a pointer and stays visible.
+- Depends on: `m1-canonical-metadata`
+
+**`m3-governance-teams`**
+
+- [ ] A foundation team, five sphere teams, a provider steward hierarchy, a composites team and the Cowork and Codex runtime maintainer teams exist; one person may hold several during the interim solo period.
+- [ ] Every non-archived repository uses team CODEOWNERS; provider paths map to provider steward teams.
+- [ ] The composite cross-sphere review rule and the runtime authority boundaries are documented.
+- Depends on: `m1-canonical-metadata`
+- Gate: Review-enforcing rulesets stay off until a repository has two maintainers, as GOVERNANCE.md records.
+
+**`m4-documentation-alignment`**
+
+- [ ] No pillar-means-plugin or three-pillars wording survives; the profile sphere view renders from canonical metadata.
+- [ ] The specification states where the measurement, applications and planetary rows of its repository table go under a sphere taxonomy.
+- [ ] Runtime documentation distinguishes development environment, qualified runtime, package conformance and compatibility testing; contributor docs explain KNOW, ACT, PROVE and REACH and state that portable behavior must have a skill representation.
+- Depends on: `m1-canonical-metadata`, `m3-governance-teams`
+
+**`m5-planned-repositories`**
+
+- [ ] partner-knowledge, precipitation, land-ice, sea-ice, solid-earth, land-surface, atmospheric-composition, atmospheric-physics, land-ecosystems, ocean-biology and composites exist with honest banners, repository and governance metadata, team CODEOWNERS and generated topics.
+- [ ] None carries a package or runtime manifest, a catalog entry, a release or a CITATION.cff; none appears installable; the roadmap reports no active domain deliverable in any of them.
+- Depends on: `m3-governance-teams`, `m4-documentation-alignment`
+- Gate: Creation is administrative; promotion out of planned is governed work under its own dated pre-registration entry.
+
+**`r1-runtime-renderer`**
+
+- [ ] osp render produces the Claude plugin manifest, the Agent Plugins 1.0 plugin.json and mcp.json where REACH is portable, optional OpenAI extension metadata and the release lock from .osp metadata and the skills tree.
+- [ ] osp plugin-check validates the portable package against the pinned Agent Plugins specification version; CI fails on a hand edit to any generated projection.
+- Depends on: `m1-canonical-metadata`
+
+**`r2-core-reference`**
+
+- [ ] One canonical skill is discovered and invoked on Claude Code, Claude Cowork and, through the Agent Plugins projection, Codex; the shared script and PROVE step run; the same release identity is recorded on each.
+- [ ] Claude Code installs the capability through one normal install after marketplace setup; Cowork presents the capability rather than its internal KNOW and PROVE dependencies.
+- Depends on: `r1-runtime-renderer`
+
+**`r3-dependency-reference`**
+
+- [ ] Cowork and Codex each resolve core and nasa-daac-knowledge for ocean-science with no KNOW duplication.
+- [ ] A missing required dependency fails explicitly with the floor named and the action suggested.
+- Depends on: `r2-core-reference`
+
+**`r4-shared-prove`**
+
+- [ ] Results produced on both runtimes verify under one attester; the receipt format identifies the capability release.
+- Depends on: `r2-core-reference`
+
+**`r5-cross-runtime-evals`**
+
+- [ ] Results carry capability, capability version, release lock, runtime, model, suite, trial count, score, interval and date.
+- [ ] Identical scientific cases run against both runtimes and compare without changing the capability contract.
+- Depends on: `r2-core-reference`
+
+**`r6-compat-probes`**
+
+- [ ] osp compat installs the portable package or the canonical skills and MCP declarations through each harness's native mechanism and records the result separately from Tier-1 qualification.
+- [ ] No harness-specific scientific content is introduced; a failure is visible and does not block a release.
+- Depends on: `r1-runtime-renderer`
+
+**`r7-release-qualification`**
+
+- [ ] osp qualify runs the required matrix per surface and osp publish emits only qualified projections with honest catalog status.
+- [ ] A release whose runtime fails qualification stays valid and does not advertise that runtime.
+- Depends on: `r3-dependency-reference`, `r4-shared-prove`, `r5-cross-runtime-evals`
