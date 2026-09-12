@@ -293,7 +293,12 @@ tree carries a lock at the installed version and digests to it). A
 runtime the tool cannot drive gets a checklist (`--checklist FILE`) with
 the same prompts verbatim and the pass criteria; the filled checklist
 becomes the record (`--from-checklist FILE`), refused while any status
-or evidence is empty. `--status` prints the state per runtime.
+or evidence is empty. `--status` prints the state per runtime. `--only
+TEST[,TEST]` re-runs the named tests and merges them into the existing
+record for the same version, the rest of the record untouched. The
+side-effect gate counts only tool calls the runtime executed; a call the
+runtime denied or that errored is listed as an attempt and is not a
+write.
 
 `surfaces.yaml` may carry a `probes` block naming the reference skill
 and the prompts the conversational tests use (verbatim on every runtime),

@@ -289,6 +289,7 @@ def headless(prompt: str, tools: str, max_turns: int, model: str | None, timeout
         cmd += ["--model", model]
     r = run(cmd, timeout=timeout, cwd=cwd)
     text, tools_used, seen_model, status, turns = [], [], None, None, None
+    by_id: dict[str, dict[str, Any]] = {}
     for line in (r.stdout or "").splitlines():
         try:
             ev = json.loads(line)
@@ -297,19 +298,32 @@ def headless(prompt: str, tools: str, max_turns: int, model: str | None, timeout
         kind = ev.get("type")
         if kind == "system" and ev.get("subtype") == "init":
             seen_model = ev.get("model")
+        elif kind == "system" and ev.get("subtype") == "permission_denied":
+            if ev.get("tool_use_id") in by_id:
+                by_id[ev["tool_use_id"]]["denied"] = True
         elif kind == "assistant":
             for block in ev.get("message", {}).get("content", []) or []:
                 if block.get("type") == "text":
                     text.append(block["text"])
                 elif block.get("type") == "tool_use":
-                    tools_used.append(block.get("name"))
+                    call = {"name": block.get("name"), "denied": False, "error": None}
+                    by_id[block.get("id")] = call
+                    tools_used.append(call)
+        elif kind == "user":
+            for block in ev.get("message", {}).get("content", []) or []:
+                if isinstance(block, dict) and block.get("type") == "tool_result" and block.get("tool_use_id") in by_id:
+                    by_id[block["tool_use_id"]]["error"] = bool(block.get("is_error"))
         elif kind == "result":
             status, turns = ev.get("subtype"), ev.get("num_turns")
             if ev.get("result"):
                 text.append(ev["result"])
     if r.returncode == 124:
         status = "timeout"
-    return {"text": "\n".join(text), "tools": tools_used, "model": seen_model, "status": status,
+    # A tool call that was denied or errored had no effect; only the rest
+    # can have touched anything.
+    effective = [c["name"] for c in tools_used if not c["denied"] and not c["error"]]
+    denied = [c["name"] for c in tools_used if c["denied"] or c["error"]]
+    return {"text": "\n".join(text), "tools": effective, "attempted": denied, "model": seen_model, "status": status,
             "turns": turns, "raw": r.stdout or "", "stderr": r.stderr or ""}
 
 
@@ -330,11 +344,19 @@ def keep(evidence: Path | None, name: str, reply: dict[str, Any]) -> str:
 
 
 def qualify_claude_code(cap: dict[str, Any], marketplace: str, model: str | None, evidence: Path | None,
-                        max_turns: int, timeout: int) -> dict[str, Any]:
+                        max_turns: int, timeout: int, only: set[str] | None = None) -> dict[str, Any]:
+    """Every test, or with `only` just those named (the install step still
+    runs, since the others need the installed tree, and is recorded only
+    when named): a single failed conversational test is re-run into the
+    record rather than the whole matrix."""
     name, version, pkg = cap["name"], cap["version"], cap["package"]
     probes = probes_for(cap)
     tests: dict[str, dict[str, Any]] = {}
     models: set[str] = set()
+    wanted = only or set(TESTS)
+
+    def skip(test: str) -> bool:
+        return test not in wanted
     # Every conversational call is launched from the work directory: a
     # neutral place with no project instructions or memory of its own, so a
     # trial reads only what the installed package gives it, and the one
@@ -343,6 +365,8 @@ def qualify_claude_code(cap: dict[str, Any], marketplace: str, model: str | None
     work.mkdir(parents=True, exist_ok=True)
 
     def record(test: str, status: str, evidence_text: str, **extra: Any) -> None:
+        if skip(test):
+            return
         tests[test] = {"status": status, "evidence": evidence_text, **extra}
         print(f"  {test}: {status.upper()}  {evidence_text[:160]}", flush=True)
 
@@ -372,7 +396,9 @@ def qualify_claude_code(cap: dict[str, Any], marketplace: str, model: str | None
 
     # dependency-resolution: every declared dependency installed, enabled, within its floor
     deps = osp.dependency_entries(pkg)
-    if not deps:
+    if skip("dependency-resolution"):
+        pass
+    elif not deps:
         record("dependency-resolution", "skip", "no declared dependencies (a foundation package)")
     else:
         problems, found = [], []
@@ -393,10 +419,12 @@ def qualify_claude_code(cap: dict[str, Any], marketplace: str, model: str | None
 
     # skill-discovery: the runtime's inventory names every canonical skill
     canonical = skill_names(install_path, pkg) if install_path else []
-    details = run(["claude", "plugin", "details", name], timeout=120).stdout
+    details = run(["claude", "plugin", "details", name], timeout=120).stdout if not skip("skill-discovery") else ""
     discovered = parse_details_skills(details)
     missing = sorted(set(canonical) - set(discovered))
-    if not install_path:
+    if skip("skill-discovery"):
+        pass
+    elif not install_path:
         record("skill-discovery", "fail", "nothing installed to discover")
     elif missing:
         record("skill-discovery", "fail", f"not in the runtime's inventory: {', '.join(missing)}")
@@ -405,7 +433,9 @@ def qualify_claude_code(cap: dict[str, Any], marketplace: str, model: str | None
 
     # skill-invocation: slash form and conversational form, no coaching
     p = probes["skill-invocation"]
-    if not p.get("skill"):
+    if skip("skill-invocation"):
+        pass
+    elif not p.get("skill"):
         record("skill-invocation", "skip", "the package carries no skills")
     else:
         results = []
@@ -425,19 +455,22 @@ def qualify_claude_code(cap: dict[str, Any], marketplace: str, model: str | None
 
     # knowledge-resolution: a concept cited by bundle path with its status
     p = probes["knowledge-resolution"]
-    reply = headless(p["prompt"], DEFAULT_TOOLS, max_turns, model, timeout, cwd=work)
-    if reply["model"]:
-        models.add(reply["model"])
-    path = keep(evidence, "knowledge-resolution", reply)
-    unmatched = expect_all(reply["text"], p["expect"])
-    cited = KNOWLEDGE_PATH.findall(reply["text"])
-    record("knowledge-resolution", "pass" if not unmatched and reply["text"].strip() else "fail",
-           (f"cited {', '.join(sorted(set(cited))[:3])} ({reply['status']}, {reply['turns']} turns) {path}"
-            if not unmatched else f"unmatched {unmatched} ({reply['status']}) {path}"), prompt=p["prompt"])
+    if not skip("knowledge-resolution"):
+        reply = headless(p["prompt"], DEFAULT_TOOLS, max_turns, model, timeout, cwd=work)
+        if reply["model"]:
+            models.add(reply["model"])
+        path = keep(evidence, "knowledge-resolution", reply)
+        unmatched = expect_all(reply["text"], p["expect"])
+        cited = KNOWLEDGE_PATH.findall(reply["text"])
+        record("knowledge-resolution", "pass" if not unmatched and reply["text"].strip() else "fail",
+               (f"cited {', '.join(sorted(set(cited))[:3])} ({reply['status']}, {reply['turns']} turns) {path}"
+                if not unmatched else f"unmatched {unmatched} ({reply['status']}) {path}"), prompt=p["prompt"])
 
     # connector-invocation: every declared server registered by the runtime and reachable
     servers = osp.reach_servers(pkg)
-    if not servers:
+    if skip("connector-invocation"):
+        pass
+    elif not servers:
         record("connector-invocation", "skip", "no REACH declared")
     else:
         health = parse_mcp_list(run(["claude", "mcp", "list"], timeout=300).stdout, name)
@@ -453,7 +486,9 @@ def qualify_claude_code(cap: dict[str, Any], marketplace: str, model: str | None
 
     # golden-computation: the installed package's golden scripts run green
     scripts = golden_scripts(cap, install_path) if install_path else []
-    if not scripts:
+    if skip("golden-computation"):
+        pass
+    elif not scripts:
         record("golden-computation", "skip", "no golden scripts declared")
     else:
         outcomes = []
@@ -470,7 +505,9 @@ def qualify_claude_code(cap: dict[str, Any], marketplace: str, model: str | None
     # shared executor, the attester verifies it, and the attestation names
     # the capability release and the runtime.
     prove = cap["probes"].get("prove") or {}
-    if not (prove.get("command") and prove.get("prompt")):
+    if skip("prove") and skip("receipt"):
+        pass
+    elif not (prove.get("command") and prove.get("prompt")):
         for test in ("prove", "receipt"):
             record(test, "blocked", "no attester declared in surfaces.yaml probes.prove (prompt, receipt, command, "
                                     "attestation); the shared attester with its receipt is the r4-shared-prove deliverable")
@@ -495,7 +532,7 @@ def qualify_claude_code(cap: dict[str, Any], marketplace: str, model: str | None
         receipt_path = Path(fill(prove.get("receipt", "${WORK}/receipt.json")))
         if not receipt_path.is_file():
             record("prove", "fail", f"the runtime did not write the receipt {receipt_path.name} ({reply['status']}, "
-                                    f"{reply['turns']} turns, tools {sorted(set(reply['tools']))}) {path}")
+                                    f"{reply['turns']} turns, tools that ran {sorted(set(reply['tools']))}, denied {sorted(set(reply['attempted']))}) {path}")
             record("receipt", "fail", "no receipt to attest")
         else:
             cmd = [fill(str(c)) for c in prove["command"]]
@@ -521,19 +558,24 @@ def qualify_claude_code(cap: dict[str, Any], marketplace: str, model: str | None
 
     # side-effect-confirmation: the download gate appears conversationally
     p = probes["side-effect-confirmation"]
-    reply = headless(p["prompt"], GATE_TOOLS, max_turns, model, timeout, cwd=work)
-    if reply["model"]:
-        models.add(reply["model"])
-    path = keep(evidence, "side-effect-confirmation", reply)
-    unmatched = expect_all(reply["text"], p["expect"])
-    wrote = any(t in {"Write", "Bash", "Edit"} for t in reply["tools"])
-    record("side-effect-confirmation", "pass" if not unmatched and not wrote and reply["text"].strip() else "fail",
-           (f"gate stated, nothing written ({reply['status']}, {reply['turns']} turns) {path}" if not unmatched and not wrote
-            else f"unmatched {unmatched}, tools {sorted(set(reply['tools']))} ({reply['status']}) {path}"), prompt=p["prompt"])
+    if not skip("side-effect-confirmation"):
+        reply = headless(p["prompt"], GATE_TOOLS, max_turns, model, timeout, cwd=work)
+        if reply["model"]:
+            models.add(reply["model"])
+        path = keep(evidence, "side-effect-confirmation", reply)
+        unmatched = expect_all(reply["text"], p["expect"])
+        wrote = any(t in {"Write", "Bash", "Edit"} for t in reply["tools"])
+        attempted = f"; denied attempts {sorted(set(reply['attempted']))}" if reply["attempted"] else ""
+        record("side-effect-confirmation", "pass" if not unmatched and not wrote and reply["text"].strip() else "fail",
+               (f"gate stated, nothing written ({reply['status']}, {reply['turns']} turns){attempted} {path}" if not unmatched and not wrote
+                else f"unmatched {unmatched}, tools that ran {sorted(set(reply['tools']))}{attempted} ({reply['status']}) {path}"),
+               prompt=p["prompt"])
 
     # release-lock: the installed tree carries the lock it digests to, at the version installed
     lock_path = install_path / ".osp" / "release-lock.json" if install_path else None
-    if not install_path or not lock_path.is_file():
+    if skip("release-lock"):
+        pass
+    elif not install_path or not lock_path.is_file():
         record("release-lock", "fail", f"the installed {name} {installed_version} carries no .osp/release-lock.json; "
                                        "a release cut before the lock existed cannot be qualified, the next release carries it")
     else:
@@ -751,6 +793,9 @@ def main() -> int:
     ap.add_argument("--candidate", action="store_true",
                     help="install the candidate from a local catalog built from this checkout (the release will install "
                          "the same tree from the organization's catalog); overrides --marketplace")
+    ap.add_argument("--only", default=None,
+                    help="comma-separated tests to re-run into the existing record (a single failed conversational "
+                         "test is re-run before it is a fail); the others keep their recorded outcome")
     ap.add_argument("--waive", action="store_true", help="record the decision to release without this surface")
     ap.add_argument("--reason", default=None, help="why the surface is waived (with --waive)")
     ap.add_argument("--by", default=None, help="who waives it (with --waive)")
@@ -793,9 +838,23 @@ def main() -> int:
                 head = run(["git", "-C", str(cap["dir"]), "rev-parse", "--short", "HEAD"], timeout=30).stdout.strip()
                 source = f"headless run against the release candidate (a local catalog built from the checkout at {head or 'unknown'})"
             print(f"qualifying {cap['name']} {cap['version']} on claude-code ({claude_version()}) from {marketplace}", flush=True)
-            out = qualify_claude_code(cap, marketplace, args.model, evidence, args.max_turns, args.timeout)
-            rec = make_record(cap, "claude-code", claude_version(), source,
-                              out["tests"], out["models"], evidence, out["installed_version"])
+            only = {t.strip() for t in args.only.split(",") if t.strip()} if args.only else None
+            if only and not only <= set(TESTS):
+                raise QualifyError(f"--only names tests outside the matrix: {sorted(only - set(TESTS))}")
+            out = qualify_claude_code(cap, marketplace, args.model, evidence, args.max_turns, args.timeout, only)
+            tests = out["tests"]
+            models = out["models"]
+            if only:
+                previous_path = record_path(cap, "claude-code", record_dir)
+                previous = osp.read_json(previous_path) if previous_path.is_file() else None
+                if not previous or str(previous.get("version")) != str(cap["version"]):
+                    raise QualifyError("--only re-runs into an existing record for this version; run the whole matrix first")
+                merged = dict(previous.get("tests") or {})
+                merged.update(tests)
+                tests = merged
+                models = sorted(set(previous.get("models") or []) | set(models))
+                source = previous.get("source", source) + f"; {', '.join(sorted(only))} re-run on {dt.date.today().isoformat()}"
+            rec = make_record(cap, "claude-code", claude_version(), source, tests, models, evidence, out["installed_version"])
             if evidence is None:
                 rec["evidence_dir"] = "not kept"
         else:
