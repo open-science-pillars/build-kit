@@ -1,14 +1,11 @@
 schema_version: 2
 repository: build-kit
 maintainers:
-  users: [PaulMRamirez]
-  teams: []
+  users:
+  - PaulMRamirez
+  teams:
+  - foundation-maintainers
   status: interim
-runtime_maintainers:
-  agent-plugins:
-    users: [PaulMRamirez]
-    teams: []
-    status: interim
 roadmap:
   proposals: enabled
   authority: repository-maintainers

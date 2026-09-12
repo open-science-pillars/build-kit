@@ -96,6 +96,23 @@ the same `users`, `teams`, `status` shape as `maintainers`, and the
 `reviews.runtime_adapter: org-runtime-policy` line. Version 1 files stay
 valid until every repository has moved.
 
+## Teams and CODEOWNERS
+
+`osp/teams.yaml` declares the organization's teams: one foundation
+team, five sphere teams, a composites team, the provider steward
+parent with its child teams (PO.DAAC, ESDIS, the Hydrosphere methods
+stewards) and three runtime maintainer teams. Every CODEOWNERS owner
+is a team from this file, written `@open-science-pillars/<team>`; the
+validator refuses an individual handle, a team the file does not
+declare, and a repository with no root CODEOWNERS. A repository's
+`governance.yaml` names its teams from the same file. Accepting a
+maintainer or a steward is then a team membership change, never a
+CODEOWNERS rewrite.
+
+`osp.py teams` prints the `gh` commands that create the declared teams
+(parents first) and add the interim member; creating teams is
+organization administration and is never run by the tool.
+
 ## Commands
 
 ```bash
@@ -107,6 +124,7 @@ uv run build-kit/scripts/osp.py topics --check      # compare with the live repo
 uv run build-kit/scripts/osp.py topics --apply --confirm-org open-science-pillars
 uv run build-kit/scripts/osp.py sphere-view         # write build-kit/SPHERE-VIEW.md
 uv run build-kit/scripts/osp.py sphere-view --check # drift check
+uv run build-kit/scripts/osp.py teams               # gh commands that create the declared teams
 ```
 
 Topics are `osp`, which finds every Open Science Pillars repository in

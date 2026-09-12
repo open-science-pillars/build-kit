@@ -346,7 +346,7 @@ Pillar means sphere; canonical .osp metadata drives organization and runtime pro
 | `m1-templates`: Teach the templates the canonical metadata and the sphere examples | `plugin-template` | accepted | done | ready | not seeded |
 | `m2-badges-consolidation`: Retire ecco-budget-badge; the workflow and badge writer move beside the canonical attester | `nasa-daac-knowledge` | accepted | done | needs-context | not seeded |
 | `m2-evals-consolidation`: Rename ecco-agent-evals to agent-evals, the one benchmark repository, with the ECCO cases in a product subtree | `marketplace` | accepted | done | needs-context | not seeded |
-| `m3-governance-teams`: Create sphere, provider steward and runtime maintainer teams and rewrite CODEOWNERS to teams | `.github` | draft | proposed | owner-only | not seeded |
+| `m3-governance-teams`: Create sphere, provider steward and runtime maintainer teams and rewrite CODEOWNERS to teams | `.github` | accepted | done | owner-only | not seeded |
 | `m4-documentation-alignment`: Align the profile, marketplace README, specification, glossary, guides and tutorials to spheres and runtime projections | `marketplace` | draft | proposed | needs-context | not seeded |
 | `m5-planned-repositories`: Instantiate the eleven planned repositories under the planned convention | `.github` | draft | proposed | owner-only | not seeded |
 | `r1-runtime-renderer`: Render the Claude and Agent Plugins projections from canonical source and detect drift | `build-kit` | draft | proposed | needs-context | not seeded |
@@ -414,6 +414,7 @@ Pillar means sphere; canonical .osp metadata drives organization and runtime pro
 - [ ] The composite cross-sphere review rule and the runtime authority boundaries are documented.
 - Depends on: `m1-canonical-metadata`
 - Gate: Review-enforcing rulesets stay off until a repository has two maintainers, as GOVERNANCE.md records.
+- Evidence: `build-kit osp/teams.yaml declares the foundation team, five sphere teams, the composites team, the provider steward parent with podaac, esdis and hydrosphere-methods child teams, and three runtime maintainer teams; osp.py teams prints the creation commands and osp.py validate refuses an individual or undeclared owner`, `Every non-archived repository names teams only in CODEOWNERS, provider bundle paths map to their steward teams, recipes and computations to the methods stewards, the Claude package files to the runtime maintainers; governance.yaml names the teams`, `GOVERNANCE.md in .github documents the four kinds of team, the composite review rule, the runtime authority boundaries, interim membership and the planned-repository rule`
 
 **`m4-documentation-alignment`**
 

@@ -14,6 +14,8 @@ repositories:
   - evals
   - build-kit
   - .github
+  - archive-observatory
+  - agent-evals
 
 labels:
   roadmap:
@@ -816,8 +818,8 @@ initiatives:
       - id: m3-governance-teams
         title: Create sphere, provider steward and runtime maintainer teams and rewrite CODEOWNERS to teams
         repo: .github
-        proposal_state: draft
-        status: proposed
+        proposal_state: accepted
+        status: done
         priority: P1
         depends_on: [m1-canonical-metadata]
         gate: "Review-enforcing rulesets stay off until a repository has two maintainers, as GOVERNANCE.md records."
@@ -825,7 +827,10 @@ initiatives:
           - "A foundation team, five sphere teams, a provider steward hierarchy, a composites team and the Cowork and Codex runtime maintainer teams exist; one person may hold several during the interim solo period."
           - "Every non-archived repository uses team CODEOWNERS; provider paths map to provider steward teams."
           - "The composite cross-sphere review rule and the runtime authority boundaries are documented."
-        evidence: []
+        evidence:
+          - "build-kit osp/teams.yaml declares the foundation team, five sphere teams, the composites team, the provider steward parent with podaac, esdis and hydrosphere-methods child teams, and three runtime maintainer teams; osp.py teams prints the creation commands and osp.py validate refuses an individual or undeclared owner"
+          - "Every non-archived repository names teams only in CODEOWNERS, provider bundle paths map to their steward teams, recipes and computations to the methods stewards, the Claude package files to the runtime maintainers; governance.yaml names the teams"
+          - "GOVERNANCE.md in .github documents the four kinds of team, the composite review rule, the runtime authority boundaries, interim membership and the planned-repository rule"
         contributor:
           readiness: owner-only
           champion: PaulMRamirez
