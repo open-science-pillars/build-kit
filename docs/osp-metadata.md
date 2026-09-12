@@ -124,6 +124,7 @@ uv run build-kit/scripts/osp.py topics --check      # compare with the live repo
 uv run build-kit/scripts/osp.py topics --apply --confirm-org open-science-pillars
 uv run build-kit/scripts/osp.py sphere-view         # write build-kit/SPHERE-VIEW.md
 uv run build-kit/scripts/osp.py sphere-view --check # drift check
+uv run build-kit/scripts/osp.py sphere-view --into .github/profile/README.md   # the org profile's block
 uv run build-kit/scripts/osp.py teams               # gh commands that create the declared teams
 ```
 

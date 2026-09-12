@@ -27,7 +27,10 @@ repository, docs/decisions):
                                       (gh api), --apply --confirm-org
                                       open-science-pillars sets them
   osp.py sphere-view [--check]        render SPHERE-VIEW.md from the
-                                      workspace's repository.yaml files
+                                      workspace's repository.yaml files;
+                                      --into FILE writes the view between
+                                      osp-sphere-view markers in FILE (the
+                                      org profile) instead
   osp.py teams                        print the gh commands that create the
                                       teams osp/teams.yaml declares
 
@@ -387,6 +390,58 @@ def render_sphere_view(repos: list[tuple[str, dict[str, Any]]]) -> str:
     return "\n".join(lines).rstrip() + "\n"
 
 
+MARK_START = "<!-- osp-sphere-view:start -->"
+MARK_END = "<!-- osp-sphere-view:end -->"
+
+
+def splice(text: str, block: str) -> str:
+    """Replace what lies between the sphere-view markers in text with block."""
+    if MARK_START not in text or MARK_END not in text:
+        raise OspError(f"no {MARK_START} ... {MARK_END} markers to write between")
+    head, rest = text.split(MARK_START, 1)
+    _, tail = rest.split(MARK_END, 1)
+    return f"{head}{MARK_START}\n{block.rstrip()}\n{MARK_END}{tail}"
+
+
+def render_profile_block(repos: list[tuple[str, dict[str, Any]]]) -> str:
+    """The sphere view as the organization profile shows it: the five
+    spheres with their capabilities, then provider knowledge, composites,
+    and the foundation and tooling repositories, each linked."""
+    by_name = {n: m for n, m in repos}
+    org_url = f"https://github.com/{ORG}"
+    lines = ["Rendered by build-kit's `osp.py sphere-view --into` from every repository's",
+             "`.osp/repository.yaml`; edit the files, not this block.", ""]
+    for sphere in SPHERES:
+        rows = sorted(n for n, m in repos
+                      if m["repository"]["kind"] == "capability" and m["classification"]["primary_sphere"] == sphere)
+        lines.append(f"**{SPHERE_TITLES[sphere]}**")
+        if not rows:
+            lines += ["", "- no domain capability yet", ""]
+            continue
+        lines.append("")
+        for n in rows:
+            m = by_name[n]
+            also = [SPHERE_TITLES[s] for s in m["classification"]["spheres"] if s != sphere]
+            extra = f"; also {', '.join(also)}" if also else ""
+            lines.append(f"- [{n}]({org_url}/{n}) *({m['repository']['status']})*: {m['classification']['discipline']}{extra}")
+        lines.append("")
+    for title, kinds in (("**Provider knowledge** (signed by its stewards; cuts across spheres)", {"provider"}),
+                         ("**Composites** (cross-sphere)", {"composite"}),
+                         ("**Foundation and tooling** (serve every sphere)", {"foundation", "tooling"})):
+        rows = sorted(n for n, m in repos if m["repository"]["kind"] in kinds)
+        lines.append(title)
+        lines.append("")
+        if not rows:
+            lines += ["- none yet", ""]
+            continue
+        for n in rows:
+            m = by_name[n]
+            note = m["repository"].get("audience") or m["repository"].get("notes") or ""
+            lines.append(f"- [{n}]({org_url}/{n}) *({m['repository']['status']})*: {note}")
+        lines.append("")
+    return "\n".join(lines).rstrip() + "\n"
+
+
 def resolve_dirs(args: argparse.Namespace) -> list[Path]:
     if args.repos:
         return [Path(p).resolve() for p in args.repos]
@@ -451,8 +506,13 @@ def command_sphere_view(args: argparse.Namespace) -> int:
         if errors:
             raise OspError("cannot render from invalid metadata:\n" + "\n".join(errors))
         repos.append((repo_dir.name, meta))
-    expected = render_sphere_view(repos)
-    target = Path(args.output).resolve() if args.output else SPHERE_VIEW
+    if args.into:
+        target = Path(args.into).resolve()
+        current = target.read_text(encoding="utf-8")
+        expected = splice(current, render_profile_block(repos))
+    else:
+        target = Path(args.output).resolve() if args.output else SPHERE_VIEW
+        expected = render_sphere_view(repos)
     if args.check:
         if not target.exists() or target.read_text(encoding="utf-8") != expected:
             print(f"{target.name} is out of date", file=sys.stderr)
@@ -503,6 +563,7 @@ def parser() -> argparse.ArgumentParser:
     s.add_argument("--check", action="store_true")
     s.add_argument("--workspace")
     s.add_argument("--output")
+    s.add_argument("--into", help="write the view between osp-sphere-view markers in this file (the org profile)")
     tm = sub.add_parser("teams")
     tm.add_argument("--member", default="PaulMRamirez", help="the interim member added to every team ('' for none)")
     return p

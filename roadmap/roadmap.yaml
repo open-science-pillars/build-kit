@@ -840,8 +840,8 @@ initiatives:
       - id: m4-documentation-alignment
         title: Align the profile, marketplace README, specification, glossary, guides and tutorials to spheres and runtime projections
         repo: marketplace
-        proposal_state: draft
-        status: proposed
+        proposal_state: accepted
+        status: done
         priority: P1
         depends_on: [m1-canonical-metadata, m3-governance-teams]
         gate: null
@@ -849,7 +849,10 @@ initiatives:
           - "No pillar-means-plugin or three-pillars wording survives; the profile sphere view renders from canonical metadata."
           - "The specification states where the measurement, applications and planetary rows of its repository table go under a sphere taxonomy."
           - "Runtime documentation distinguishes development environment, qualified runtime, package conformance and compatibility testing; contributor docs explain KNOW, ACT, PROVE and REACH and state that portable behavior must have a skill representation."
-        evidence: []
+        evidence:
+          - "Org profile: the five spheres as the primary figure, the block rendered by osp.py sphere-view --into from every repository.yaml and checked for drift in the organization audit; no three-pillars wording remains anywhere"
+          - "Specification 0.6.15: section 0 opens with the organization, capability and runtime model (0.6 Pillar means sphere and the four planes, 0.7 canonical metadata and projections, 0.8 the four runtime words), the packaging matrix records status per runtime, and 1.1 places the measurement, applications and planetary rows"
+          - "Marketplace: README positioning, runtime and planned tables, GLOSSARY (sphere, discipline, capability, provider bundle, composite, planned, the four planes, runtime), CONTRIBUTING (skill representation rule, where a contribution goes), steward playbook (runtime independence, spheres, team handoff), the runtime testing guide, docs/runtime-distribution.md and docs/package-authoring-guide.md, ARCHITECTURE 9.10; READMEs of core, ocean-science, hydrology, nasa-daac-knowledge, evals, archive-observatory and the tutorials index state sphere identity and runtime status"
         contributor:
           readiness: needs-context
           champion: PaulMRamirez

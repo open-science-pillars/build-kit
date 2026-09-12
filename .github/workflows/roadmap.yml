@@ -72,6 +72,9 @@ jobs:
       - name: The sphere view is current
         working-directory: ${{ runner.temp }}/osp-workspace
         run: uv run build-kit/scripts/osp.py sphere-view --check
+      - name: The organization profile's sphere block is current
+        working-directory: ${{ runner.temp }}/osp-workspace
+        run: uv run build-kit/scripts/osp.py sphere-view --check --into .github/profile/README.md
       - name: Upload audit report even when findings fail the audit
         if: always()
         uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02 # v4.6.2
