@@ -1095,12 +1095,15 @@ def role_list(surface: dict[str, Any]) -> list[str]:
     return list(role) if isinstance(role, list) else [role]
 
 
-def advertisement(repo_dir: Path) -> dict[str, Any] | None:
+def advertisement(repo_dir: Path, release: bool = False) -> dict[str, Any] | None:
     """What this release may say per runtime, from surfaces.yaml and the
     qualification records: for each surface, the declared status, whether
-    a qualified record exists for this exact version and lock, and the
-    findings the release gate acts on. None for a repository without
-    runtime surfaces."""
+    a qualified record exists for this exact version and lock, whether the
+    surface was waived for this release, and the findings the gate acts
+    on. With release=True (a release candidate) every required surface
+    needs a decision for this version: a record, qualified or not, or a
+    waiver; an unqualified surface with no waiver blocks the release.
+    None for a repository without runtime surfaces."""
     pkg = read_package(repo_dir)
     surfaces_path = repo_dir / ".osp" / "surfaces.yaml"
     if pkg is None or not surfaces_path.is_file():
@@ -1117,17 +1120,30 @@ def advertisement(repo_dir: Path) -> dict[str, Any] | None:
     for runtime, surface in (surfaces.get("surfaces") or {}).items():
         roles = role_list(surface)
         rec = records.get(runtime)
+        # A waiver is for a version, not a lock: the decision to release
+        # without a surface is taken on the candidate and survives the
+        # lock moving with the release commit itself.
         current = bool(rec) and str(rec.get("version")) == version and rec.get("release_lock") == lock_digest
+        waiver = (rec or {}).get("waived") if rec and str(rec.get("version")) == version else None
         qualified = bool(rec and rec.get("qualified") and current)
-        stale = bool(rec) and not current
+        stale = bool(rec) and not current and not waiver
         development = "development" in roles
         status = surface.get("status")
         entry = {"title": RUNTIME_TITLES.get(runtime, runtime), "roles": roles, "required": bool(surface.get("required")),
                  "status": status, "qualified": qualified, "record_date": rec.get("date") if rec else None,
                  "record_source": rec.get("source") if rec else None, "stale_record": stale,
                  "blockers": list(rec.get("blockers") or []) if (rec and current) else [],
+                 "waived": dict(waiver) if isinstance(waiver, dict) else None,
                  "projection": RUNTIME_PROJECTION.get(runtime, "claude"), "development": development}
         runtimes[runtime] = entry
+        if status == "supported" and waiver:
+            errors.append(f"{name}: {runtime} is waived for {version} and cannot be advertised as supported")
+        if release and entry["required"] and not (current or waiver):
+            errors.append(f"{name}: a release candidate needs a decision for {runtime} at {version}: a qualification "
+                          f"record (qualify.py --surface {runtime}) or a waiver (qualify.py --surface {runtime} --waive)")
+        elif release and entry["required"] and current and not qualified and not waiver:
+            errors.append(f"{name}: {runtime} is not qualified for {version} ({'; '.join(entry['blockers']) or 'see the record'}) "
+                          f"and not waived; fix and re-run, or waive it (qualify.py --surface {runtime} --waive)")
         if status == "supported" and not development and not qualified:
             errors.append(f"{name}: advertises {runtime} as supported without a qualified record for {version} "
                           f"(lock {lock_digest}); " + ("the record is stale" if stale else "no record") +
@@ -1145,6 +1161,8 @@ def advertisement(repo_dir: Path) -> dict[str, Any] | None:
 def runtime_verdict(entry: dict[str, Any]) -> str:
     if entry["qualified"]:
         return "Qualified"
+    if entry.get("waived"):
+        return "Not qualified, waived for this release"
     if entry["development"] and entry["status"] == "supported":
         return "Supported (development environment)"
     if "future-runtime" in entry["roles"] or "compatibility" in entry["roles"]:
@@ -1166,6 +1184,8 @@ def render_runtimes_block(adv: dict[str, Any]) -> str:
         verdict = runtime_verdict(e)
         if e["qualified"]:
             verdict += f" on {e['record_date']}"
+        elif e.get("waived"):
+            verdict += f" ({e['waived'].get('reason', '')}; {e['waived'].get('by', '')}, {e['waived'].get('date', '')})"
         elif e["blockers"]:
             verdict += " (" + "; ".join(e["blockers"]) + ")"
         elif e["stale_record"]:
@@ -1201,7 +1221,7 @@ def shipped_files(root: Path) -> list[Path]:
 def command_advertise(args: argparse.Namespace) -> int:
     total = 0
     for repo_dir in package_dirs(args):
-        adv = advertisement(repo_dir)
+        adv = advertisement(repo_dir, release=args.release)
         if adv is None:
             print(f"{repo_dir.name}: no runtime surfaces (a knowledge package advertises no runtime)")
             continue
@@ -1437,6 +1457,7 @@ def parser() -> argparse.ArgumentParser:
     ad.add_argument("repos", nargs="*")
     ad.add_argument("--check", action="store_true", help="fail on a support claim with no qualified record for this release, or a stale README block")
     ad.add_argument("--into", help="write the runtime block between osp-runtimes markers in this file of each repository (README.md)")
+    ad.add_argument("--release", action="store_true", help="a release candidate: every required surface needs a record or a waiver for this version")
     pb = sub.add_parser("publish")
     pb.add_argument("repo", nargs="?", default=".")
     pb.add_argument("--out", help="the dist directory (default: <repo>/dist)")

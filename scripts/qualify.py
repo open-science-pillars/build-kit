@@ -23,6 +23,12 @@ with its evidence, so a support claim can be traced to the run behind it.
       write the checklist (prompts verbatim, pass criteria) for a run by hand
   qualify.py --capability core --surface claude-cowork --from-checklist FILE
       validate the filled checklist and write the record from it
+  qualify.py --capability core --surface claude-code --candidate
+      the same, installing the candidate from a local catalog built from
+      this checkout (what a maintainer runs on a release candidate)
+  qualify.py --capability core --surface claude-cowork --waive --reason TEXT --by NAME
+      record the decision to release without this surface: not qualified,
+      not advertised, the release proceeds
   qualify.py --capability core --status
       the state per runtime from the records on disk
 
@@ -585,6 +591,38 @@ def make_record(cap: dict[str, Any], runtime: str, runtime_ver: str | None, sour
     }
 
 
+def waive(cap: dict[str, Any], runtime: str, reason: str, by: str, record_dir: Path | None) -> dict[str, Any]:
+    """The decision to release without a surface: a record for this version
+    saying not qualified and waived by whom, why and when. An existing
+    record for this version keeps its tests and gains the waiver."""
+    path = record_path(cap, runtime, record_dir)
+    rec = osp.read_json(path) if path.is_file() else None
+    if not rec or str(rec.get("version")) != str(cap["version"]):
+        rec = make_record(cap, runtime, None, "waiver", {}, [], None, None)
+    rec["qualified"] = False
+    rec["waived"] = {"by": by, "reason": reason, "date": dt.datetime.now(dt.timezone.utc).date().isoformat()}
+    rec["blockers"] = rec.get("blockers") or [f"waived: {reason}"]
+    return rec
+
+
+def candidate_catalog(cap: dict[str, Any], where: Path) -> Path:
+    """A local marketplace whose one entry is this checkout, so the
+    candidate installs the way a release will, from a catalog."""
+    root = where / "candidate-marketplace"
+    plugin = root / "plugins" / cap["name"]
+    if root.exists():
+        shutil.rmtree(root)
+    shutil.copytree(cap["dir"], plugin, ignore=shutil.ignore_patterns(".git", "dist", "__pycache__", "*.pyc"))
+    (root / ".claude-plugin").mkdir(parents=True)
+    catalog = {"name": "osp-candidate", "version": "0.0.0",
+               "description": "Release candidate catalog for a qualification run; never published",
+               "owner": {"name": "Open Science Pillars Community"},
+               "plugins": [{"name": cap["name"], "description": f"{cap['name']} {cap['version']} release candidate",
+                            "source": f"./plugins/{cap['name']}"}]}
+    (root / ".claude-plugin" / "marketplace.json").write_text(json.dumps(catalog, indent=1), encoding="utf-8")
+    return root
+
+
 def record_path(cap: dict[str, Any], runtime: str, record_dir: Path | None) -> Path:
     return (record_dir or (cap["dir"] / ".osp" / "qualification")) / f"{runtime}.json"
 
@@ -683,6 +721,8 @@ def print_status(cap: dict[str, Any], record_dir: Path | None) -> int:
         rec = osp.read_json(p)
         stale = "" if rec.get("release_lock") == cap["lock_digest"] and str(rec.get("version")) == str(cap["version"]) \
             else f" (recorded for {rec.get('version')} lock {rec.get('release_lock')}; stale)"
+        if rec.get("waived"):
+            stale = f" waived by {rec['waived'].get('by')}: {rec['waived'].get('reason')}"
         print(f"  {rt}: {'QUALIFIED' if rec.get('qualified') else 'not qualified'} on {rec.get('date')} "
               f"({rec.get('source')}, {rec['runtime'].get('version') or 'version unknown'}){stale}")
         for t, r in rec.get("tests", {}).items():
@@ -708,6 +748,12 @@ def main() -> int:
     ap.add_argument("--checklist", help="write the checklist for a run by hand to this file")
     ap.add_argument("--from-checklist", help="read a filled checklist and write the record")
     ap.add_argument("--status", action="store_true", help="print the state per runtime from the records")
+    ap.add_argument("--candidate", action="store_true",
+                    help="install the candidate from a local catalog built from this checkout (the release will install "
+                         "the same tree from the organization's catalog); overrides --marketplace")
+    ap.add_argument("--waive", action="store_true", help="record the decision to release without this surface")
+    ap.add_argument("--reason", default=None, help="why the surface is waived (with --waive)")
+    ap.add_argument("--by", default=None, help="who waives it (with --waive)")
     args = ap.parse_args()
 
     cap_path = Path(args.capability)
@@ -723,6 +769,16 @@ def main() -> int:
             write_checklist(cap, args.surface, Path(args.checklist))
             print(f"wrote {args.checklist}")
             return 0
+        if args.waive:
+            if not (args.reason and args.by):
+                raise QualifyError("--waive needs --reason and --by")
+            rec = waive(cap, args.surface, args.reason, args.by, record_dir)
+            path = record_path(cap, args.surface, record_dir)
+            path.parent.mkdir(parents=True, exist_ok=True)
+            path.write_text(osp.dump_json(rec), encoding="utf-8")
+            print(f"{cap['name']} {cap['version']} on {args.surface}: WAIVED by {args.by}: {args.reason}")
+            print(f"wrote {path}")
+            return 0
         if args.from_checklist:
             tests, doc = read_checklist(cap, args.surface, Path(args.from_checklist))
             rec = make_record(cap, args.surface, str(doc["runtime_version"]), f"checklist by {doc['operator']}",
@@ -730,10 +786,18 @@ def main() -> int:
             rec["date"] = str(doc["date"])
         elif args.surface == "claude-code":
             evidence = Path(args.evidence).resolve() if args.evidence else None
-            print(f"qualifying {cap['name']} {cap['version']} on claude-code ({claude_version()})", flush=True)
-            out = qualify_claude_code(cap, args.marketplace, args.model, evidence, args.max_turns, args.timeout)
-            rec = make_record(cap, "claude-code", claude_version(), f"headless run from {args.marketplace}",
+            marketplace = args.marketplace
+            source = f"headless run from {marketplace}"
+            if args.candidate:
+                marketplace = str(candidate_catalog(cap, evidence or Path(tempfile.mkdtemp(prefix="osp-candidate-"))))
+                head = run(["git", "-C", str(cap["dir"]), "rev-parse", "--short", "HEAD"], timeout=30).stdout.strip()
+                source = f"headless run against the release candidate (a local catalog built from the checkout at {head or 'unknown'})"
+            print(f"qualifying {cap['name']} {cap['version']} on claude-code ({claude_version()}) from {marketplace}", flush=True)
+            out = qualify_claude_code(cap, marketplace, args.model, evidence, args.max_turns, args.timeout)
+            rec = make_record(cap, "claude-code", claude_version(), source,
                               out["tests"], out["models"], evidence, out["installed_version"])
+            if evidence is None:
+                rec["evidence_dir"] = "not kept"
         else:
             raise QualifyError(f"{args.surface} is not driven headlessly here; write a checklist with --checklist "
                                "and record the run with --from-checklist")
