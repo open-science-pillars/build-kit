@@ -21,7 +21,8 @@ repository, docs/decisions):
 
   osp.py validate [REPO_DIR ...]      default: every workspace sibling
                                       that carries .osp/repository.yaml
-  osp.py topics [REPO_DIR ...]        print the expected topics; --check
+  osp.py topics [REPO_DIR ...]        print the expected topics (osp and the
+                                      plain sphere words); --check
                                       compares with the live repository
                                       (gh api), --apply --confirm-org
                                       open-science-pillars sets them
@@ -262,12 +263,14 @@ def validate_repo(repo_dir: Path, workspace: Path | None = None) -> tuple[list[s
 
 
 def topics_for(meta: dict[str, Any]) -> list[str]:
-    repo = meta["repository"]
+    """The topics rendered from repository.yaml: `osp`, which finds every
+    Open Science Pillars repository in one search, and each sphere as the
+    plain word people search for. Kind and status stay in the file and
+    the sphere view; nobody searches for them, and a topic is one more
+    place for them to go stale. Hand-curated topics (the science, the
+    tools) are kept as they are."""
     cls = meta["classification"]
-    out = ["osp"]
-    out += [f"osp-sphere-{s}" for s in sorted(cls["spheres"])]
-    out += [f"osp-kind-{repo['kind']}", f"osp-status-{repo['status']}"]
-    return out
+    return ["osp"] + sorted(cls["spheres"])
 
 
 def gh_json(args: list[str]) -> Any:
@@ -382,7 +385,7 @@ def command_topics(args: argparse.Namespace) -> int:
             print(f"{name}: {' '.join(expected)}")
             continue
         live = live_topics(name)
-        managed_live = {t for t in live if t == "osp" or t.startswith("osp-")}
+        managed_live = {t for t in live if t == "osp" or t.startswith("osp-") or t in SPHERES}
         keep = live - managed_live
         if managed_live == set(expected):
             print(f"{name}: topics current")
