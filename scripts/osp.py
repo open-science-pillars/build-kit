@@ -37,6 +37,7 @@ from __future__ import annotations
 
 import argparse
 import json
+import os
 import re
 import subprocess
 import sys
@@ -149,12 +150,17 @@ def validate_repo(repo_dir: Path, workspace: Path | None = None) -> tuple[list[s
     repo = meta["repository"]
     cls = meta["classification"]
     declared = repo["name"]
-    if declared != name:
-        if declared in TEMPLATE_NAMES:
-            errors.append(f"{name}: repository.yaml still names the template ({declared}); "
-                          "a copied template is renamed before it validates")
-        else:
-            errors.append(f"{name}: repository.yaml names {declared!r}, not the directory")
+    # The repository's name is the checkout directory's name, or, inside a
+    # GitHub Actions job that checks the repository out under another
+    # directory (plugin/, bundle/), the repository the job runs for.
+    actions_repo = os.environ.get("GITHUB_REPOSITORY", "").rpartition("/")[2]
+    if declared == name or (actions_repo and declared == actions_repo):
+        name = declared
+    elif declared in TEMPLATE_NAMES:
+        errors.append(f"{name}: repository.yaml still names the template ({declared}); "
+                      "a copied template is renamed before it validates")
+    else:
+        errors.append(f"{name}: repository.yaml names {declared!r}, not the repository")
     for field in ("name", "audience", "notes"):
         value = repo.get(field)
         if isinstance(value, str) and PLACEHOLDER.search(value) and field == "name":

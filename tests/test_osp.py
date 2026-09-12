@@ -98,6 +98,20 @@ class OspTests(unittest.TestCase):
         errors, _ = osp.validate_repo(repo)
         self.assertTrue(any("not among spheres" in e for e in errors), errors)
 
+    def test_actions_checkout_directory_may_differ_from_the_name(self):
+        import os
+        repo = capability(self.root, name="ocean-science")
+        checkout = self.root / "plugin"
+        repo.rename(checkout)
+        errors, _ = osp.validate_repo(checkout)
+        self.assertTrue(any("not the repository" in e for e in errors), errors)
+        os.environ["GITHUB_REPOSITORY"] = "open-science-pillars/ocean-science"
+        try:
+            errors, _ = osp.validate_repo(checkout)
+        finally:
+            del os.environ["GITHUB_REPOSITORY"]
+        self.assertEqual([], errors, errors)
+
     def test_copied_template_fails_until_renamed(self):
         repo = capability(self.root, name="my-plugin")
         meta = yaml.safe_load((repo / ".osp" / "repository.yaml").read_text())
