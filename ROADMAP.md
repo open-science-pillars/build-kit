@@ -240,8 +240,8 @@ The hydrology plugin answers basin and event questions end to end with receipts,
 | `hydro-basin-unit`: Add basin delineation as the unit of analysis | `hydrology` | accepted | done | ready | not seeded |
 | `hydro-p-et-connectors`: Add IMERG precipitation and MOD16 and OpenET evapotranspiration with their trap sets | `hydrology` | accepted | done | needs-context | not seeded |
 | `hydro-w1-basin-balance`: Close a basin water balance as an attested computation | `hydrology` | accepted | done | owner-only | not seeded |
-| `hydro-w2-w5-workflows`: Event reconstruction, flood frequency, drought anatomy, and the reservoir ledger | `hydrology` | draft | proposed | needs-context | not seeded |
-| `hydro-scout-and-confrontation`: Teach the scout to plan by workflow and confront SWOT water surface elevation with gauge stage | `hydrology` | draft | proposed | needs-context | not seeded |
+| `hydro-w2-w5-workflows`: Event reconstruction, flood frequency, drought anatomy, and the reservoir ledger | `hydrology` | accepted | done | needs-context | not seeded |
+| `hydro-scout-and-confrontation`: Teach the scout to plan by workflow and confront SWOT water surface elevation with gauge stage | `hydrology` | accepted | done | needs-context | not seeded |
 | `hydro-investigation-tutorial`: Write the hydrology investigation tutorial and run it with a non-author reader | `tutorials` | draft | proposed | ready | not seeded |
 | `hydro-stewards-and-releases`: Steward scaffolds, CODEOWNERS scopes, and the general-availability flip | `nasa-daac-knowledge` | draft | proposed | owner-only | not seeded |
 | `hydro-coastal-water`: Coastal composites where hydrology meets ocean science | `ocean-science` | draft | proposed | needs-context | not seeded |
@@ -288,6 +288,7 @@ The hydrology plugin answers basin and event questions end to end with receipts,
 - [ ] Every high-severity gotcha added carries an eval case; DSWx concepts enter the podaac bundle.
 - [ ] Flood frequency exports a WATSTORE file for PeakFQ, parses its output, and refuses a return period without an interval; the export and screening steps have a green notebook, the parse is verified against a PeakFQ output the analyst produces.
 - Depends on: `hydro-w1-basin-balance`
+- Evidence: `hydrology--v0.7.0: the Tulare event reconstruction, annual peaks with the WATSTORE hand-off and screening fit, the five-panel drought anatomy, and the Lake Powell reservoir ledger, each with a golden and its cases registered in the evals hydrology manifest`, `nasa-daac-knowledge PR #111 and #112: the four OPERA DSWx concepts entered the podaac bundle and were signed by the steward`
 
 **`hydro-scout-and-confrontation`**
 
@@ -295,6 +296,7 @@ The hydrology plugin answers basin and event questions end to end with receipts,
 - [ ] A confrontation recipe scores SWOT reach water surface elevation against gauge stage at a steward-accepted pair with intervals and receipts; reach discharge against gauge discharge is reported as a consistency check.
 - [ ] The Hydrocron collection gotcha and the version transition facts enter the hydrology bundle; the core Hydrocron tools take a collection_name parameter and core is released with it.
 - Depends on: `hydro-w2-w5-workflows`
+- Evidence: `hydrology--v0.7.0: the SWOT confrontation at Baton Rouge scored on changes with the level difference published and not called a bias; the Hydrocron collection gotcha and the version transition facts in the hydrology bundle`, `core--v0.5.0: hydrocron_timeseries takes collection_name and the response names the collection that answered`
 
 **`hydro-investigation-tutorial`**
 
