@@ -202,3 +202,212 @@ class OspTests(unittest.TestCase):
 
 if __name__ == "__main__":
     unittest.main()
+
+
+def packaged(root: Path, name="ocean-science", **kwargs):
+    """A capability whose package carries metadata and REACH, with one
+    canonical skill, ready to render."""
+    repo = capability(root, name=name, **kwargs)
+    pkg = yaml.safe_load((repo / ".osp" / "package.yaml").read_text())
+    pkg["metadata"] = {"description": "Physical oceanography.", "keywords": ["ecco", "swot"]}
+    pkg["reach"] = {"servers": {
+        "earthdata": {"type": "streamable-http", "url": "https://cmr.earthdata.nasa.gov/mcp/v1"},
+        "observations": {"type": "stdio", "command": "uv",
+                         "args": ["run", "${PLUGIN_ROOT}/connectors/observations_mcp.py"]},
+        "cowork-only": {"type": "stdio", "command": "./bin/host", "portable": False},
+    }}
+    write(repo / ".osp" / "package.yaml", pkg)
+    (repo / "skills" / "load-ecco").mkdir(parents=True, exist_ok=True)
+    (repo / "skills" / "load-ecco" / "SKILL.md").write_text(
+        "---\nname: load-ecco\ndescription: Load ECCO fields.\nuser-invocable: true\n---\n\nBody.\n")
+    return repo
+
+
+class RenderTests(unittest.TestCase):
+    def setUp(self):
+        self.tmp = tempfile.TemporaryDirectory()
+        self.root = Path(self.tmp.name)
+
+    def tearDown(self):
+        self.tmp.cleanup()
+
+    def test_claude_manifest_is_the_form_the_repositories_already_use(self):
+        repo = packaged(self.root)
+        pkg = yaml.safe_load((repo / ".osp" / "package.yaml").read_text())
+        manifest = osp.render_claude_manifest(pkg, "ocean-science")
+        self.assertEqual(["name", "version", "description", "dependencies", "author", "homepage", "license", "keywords"],
+                         list(manifest))
+        self.assertEqual(["core", {"name": "nasa-daac-knowledge", "version": ">=2026.9.2"}], manifest["dependencies"])
+        self.assertEqual({"name": "Open Science Pillars Community"}, manifest["author"])
+        self.assertEqual("Apache-2.0", manifest["license"])
+        # the rendered manifest satisfies the validator's agreement check
+        errors, _ = osp.validate_repo(repo)
+        self.assertEqual([], errors, errors)
+
+    def test_claude_mcp_and_portable_mcp_are_two_spellings_of_one_reach(self):
+        repo = packaged(self.root)
+        pkg = yaml.safe_load((repo / ".osp" / "package.yaml").read_text())
+        claude = osp.render_claude_mcp(pkg)["mcpServers"]
+        self.assertEqual({"type": "http", "url": "https://cmr.earthdata.nasa.gov/mcp/v1"}, claude["earthdata"])
+        self.assertEqual(["run", "${CLAUDE_PLUGIN_ROOT}/connectors/observations_mcp.py"], claude["observations"]["args"])
+        self.assertIn("cowork-only", claude)
+        portable = osp.render_portable_mcp(pkg)
+        self.assertEqual(osp.MCP_SCHEMA_ID, portable["$schema"])
+        self.assertEqual({"type": "streamable-http", "url": "https://cmr.earthdata.nasa.gov/mcp/v1"},
+                         portable["mcpServers"]["earthdata"])
+        self.assertEqual(["run", "${PLUGIN_ROOT}/connectors/observations_mcp.py"], portable["mcpServers"]["observations"]["args"])
+        self.assertNotIn("cowork-only", portable["mcpServers"])
+        self.assertNotIn("portable", json.dumps(portable))
+
+    def test_portable_manifest_validates_against_the_vendored_schema(self):
+        repo = packaged(self.root)
+        pkg = yaml.safe_load((repo / ".osp" / "package.yaml").read_text())
+        manifest = osp.render_portable_manifest(pkg, osp.read_repository(repo), "ocean-science")
+        self.assertEqual([], osp.schema_errors(manifest, osp.AGENT_PLUGINS_SCHEMAS / "plugin.schema.json"))
+        self.assertEqual(osp.PLUGIN_SCHEMA_ID, manifest["$schema"])
+        ext = manifest["extensions"][osp.OSP_NAMESPACE]
+        self.assertEqual("capability", ext["kind"])
+        self.assertEqual(["hydrosphere"], ext["spheres"])
+        self.assertEqual([{"name": "core"}], ext["dependencies"]["capabilities"])
+        self.assertNotIn("dependencies", manifest)  # the closed portable schema has no such field
+
+    def test_no_reach_means_no_mcp_files(self):
+        repo = packaged(self.root)
+        pkg = yaml.safe_load((repo / ".osp" / "package.yaml").read_text())
+        del pkg["reach"]
+        write(repo / ".osp" / "package.yaml", pkg)
+        self.assertIsNone(osp.render_claude_mcp(pkg))
+        self.assertIsNone(osp.render_portable_mcp(pkg))
+        expected = osp.projections(repo)
+        self.assertIsNone(expected[osp.CLAUDE_MCP])
+        (repo / "mcp.json").write_text("{}")
+        self.assertTrue(any("hand-written" in d for d in osp.projection_drift(repo, expected)))
+
+    def test_render_writes_and_check_detects_a_hand_edit(self):
+        repo = packaged(self.root)
+        expected = osp.projections(repo)
+        self.assertTrue(osp.projection_drift(repo, expected))  # portable files not yet written
+        osp.write_projections(repo, expected)
+        self.assertEqual([], osp.projection_drift(repo, expected))
+        # formatting alone is not drift
+        path = repo / "plugin.json"
+        path.write_text(json.dumps(json.loads(path.read_text()), separators=(",", ":")))
+        self.assertEqual([], osp.projection_drift(repo, expected))
+        # a hand edit is
+        manifest = json.loads(path.read_text())
+        manifest["version"] = "9.9.9"
+        path.write_text(json.dumps(manifest))
+        self.assertTrue(any("plugin.json differs" in d for d in osp.projection_drift(repo, expected)))
+        claude = repo / ".claude-plugin" / "plugin.json"
+        data = json.loads(claude.read_text())
+        data["keywords"] = ["hand", "edited"]
+        claude.write_text(json.dumps(data))
+        self.assertTrue(any(".claude-plugin/plugin.json differs" in d for d in osp.projection_drift(repo, expected)))
+
+    def test_render_needs_a_description(self):
+        repo = capability(self.root)
+        with self.assertRaises(osp.OspError):
+            osp.projections(repo)
+
+    def test_lock_is_deterministic_and_tracks_content(self):
+        repo = packaged(self.root)
+        osp.write_projections(repo, osp.projections(repo))
+        first = osp.render_lock(repo)
+        self.assertEqual(first, osp.render_lock(repo))
+        self.assertEqual("1.0.0", first["agent_plugins_spec"])
+        self.assertEqual({"core": None}, first["dependencies"]["capabilities"])
+        self.assertEqual({"nasa-daac-knowledge": ">=2026.9.2"}, first["dependencies"]["knowledge"])
+        self.assertTrue(first["skills_digest"].startswith("sha256:"))
+        self.assertIn("claude", first["adapters"])
+        self.assertIn("agent-plugins", first["adapters"])
+        (repo / "skills" / "load-ecco" / "SKILL.md").write_text(
+            "---\nname: load-ecco\ndescription: Load ECCO fields, differently.\n---\n")
+        second = osp.render_lock(repo)
+        self.assertNotEqual(first["skills_digest"], second["skills_digest"])
+        self.assertEqual(first["adapters"], second["adapters"])
+        (repo / "skills" / "load-ecco" / "__pycache__").mkdir()
+        (repo / "skills" / "load-ecco" / "__pycache__" / "x.pyc").write_bytes(b"\0")
+        self.assertEqual(second["skills_digest"], osp.render_lock(repo)["skills_digest"])
+
+    def test_planned_repository_may_not_carry_a_lock(self):
+        repo = capability(self.root, name="land-ice", status="planned")
+        write(repo / ".osp" / "release-lock.json", {"package": "land-ice"})
+        errors, _ = osp.validate_repo(repo)
+        self.assertTrue(any("release-lock" in e for e in errors), errors)
+
+
+class PluginCheckTests(unittest.TestCase):
+    def setUp(self):
+        self.tmp = tempfile.TemporaryDirectory()
+        self.root = Path(self.tmp.name)
+        self.repo = packaged(self.root)
+        osp.write_projections(self.repo, osp.projections(self.repo))
+
+    def tearDown(self):
+        self.tmp.cleanup()
+
+    def test_rendered_package_conforms(self):
+        errors, warnings = osp.plugin_check(self.repo)
+        self.assertEqual([], errors, errors)
+        self.assertTrue(any("user-invocable" in w for w in warnings), warnings)
+
+    def test_missing_manifest_is_an_error(self):
+        (self.repo / "plugin.json").unlink()
+        errors, _ = osp.plugin_check(self.repo)
+        self.assertTrue(any("plugin.json is missing" in e for e in errors), errors)
+
+    def test_hand_edit_and_unknown_field_fail(self):
+        path = self.repo / "plugin.json"
+        manifest = json.loads(path.read_text())
+        manifest["hooks"] = {}
+        manifest["name"] = "Ocean-Science"
+        path.write_text(json.dumps(manifest))
+        errors, _ = osp.plugin_check(self.repo)
+        self.assertTrue(any("hooks" in e for e in errors), errors)
+        self.assertTrue(any("name" in e and "package name" in e for e in errors), errors)
+        self.assertTrue(any("differs from what package.yaml renders" in e for e in errors), errors)
+
+    def test_mcp_rules_beyond_the_schema(self):
+        bad = {"type": "stdio", "command": "uv run", "args": ["${CLAUDE_PLUGIN_ROOT}/x"], "cwd": "data",
+               "env": {"PLUGIN_ROOT": "/x"}}
+        findings = osp.server_findings("s", bad)
+        for needle in ("single executable token", "CLAUDE_PLUGIN_ROOT", "cwd", "reserved PLUGIN_ROOT"):
+            self.assertTrue(any(needle in f for f in findings), (needle, findings))
+        self.assertTrue(any("escapes" in f for f in osp.server_findings("s", {"type": "stdio", "command": "./../bin/x"})))
+        self.assertTrue(any("bare executable" in f for f in osp.server_findings("s", {"type": "stdio", "command": "/usr/bin/x"})))
+        self.assertEqual([], osp.server_findings("s", {"type": "stdio", "command": "./bin/x", "cwd": "${PLUGIN_DATA}/w"}))
+        remote = {"type": "streamable-http", "url": "http://example.org/mcp#frag", "headers": {"X-A": "1", "x-a": "2"}}
+        findings = osp.server_findings("r", remote)
+        for needle in ("fragment", "https, not http", "different casing"):
+            self.assertTrue(any(needle in f for f in findings), (needle, findings))
+        self.assertEqual([], osp.server_findings("r", {"type": "streamable-http", "url": "http://localhost:8000/mcp"}))
+        self.assertTrue(any("user information" in f for f in
+                            osp.server_findings("r", {"type": "sse", "url": "https://u:p@example.org/sse"})))
+
+    def test_non_portable_reach_declared_portable_fails(self):
+        pkg = yaml.safe_load((self.repo / ".osp" / "package.yaml").read_text())
+        pkg["reach"]["servers"]["observations"]["args"] = ["run", "${CLAUDE_PLUGIN_ROOT}/x.py"]
+        write(self.repo / ".osp" / "package.yaml", pkg)
+        osp.write_projections(self.repo, osp.projections(self.repo))
+        errors, _ = osp.plugin_check(self.repo)
+        self.assertTrue(any("CLAUDE_PLUGIN_ROOT" in e for e in errors), errors)
+
+    def test_skill_rules(self):
+        skills = self.repo / "skills"
+        (skills / "load-ecco" / "SKILL.md").write_text("---\nname: load_ecco\ndescription: x\n---\n")
+        (skills / "claude").mkdir()
+        (skills / "claude" / "SKILL.md").write_text("---\nname: claude\ndescription: x\n---\n")
+        (skills / "notes").mkdir()
+        (skills / "nodesc").mkdir()
+        (skills / "nodesc" / "SKILL.md").write_text("---\nname: nodesc\n---\n")
+        errors, warnings = osp.plugin_check(self.repo)
+        self.assertTrue(any("does not match its directory" in e for e in errors), errors)
+        self.assertTrue(any("not lowercase" in e for e in errors), errors)
+        self.assertTrue(any("runtime-specific skill tree" in e for e in errors), errors)
+        self.assertTrue(any("description is missing" in e for e in errors), errors)
+        self.assertTrue(any("skills/notes/" in w for w in warnings), warnings)
+
+    def test_planned_and_packageless_repositories_have_no_portable_package(self):
+        planned = capability(self.root, name="land-ice", status="planned")
+        errors, _ = osp.plugin_check(planned)
+        self.assertTrue(any("no .osp/package.yaml" in e for e in errors), errors)

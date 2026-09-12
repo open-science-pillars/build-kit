@@ -2,51 +2,224 @@
   "$schema": "https://json-schema.org/draft/2020-12/schema",
   "$id": "https://github.com/open-science-pillars/build-kit/osp/package.schema.json",
   "title": "Open Science Pillars package (.osp/package.yaml)",
-  "description": "Present only in a repository that publishes an installable OSP package. Owns package identity, version, content locations and the capability and knowledge dependencies; the Claude plugin manifest and the Agent Plugins manifest are projections of it and are checked against it.",
+  "description": "Present only in a repository that publishes an installable OSP package. Owns package identity, version, content locations, the capability and knowledge dependencies, the presentation metadata and the REACH declarations; the Claude plugin manifest and .mcp.json and the Agent Plugins plugin.json and mcp.json are rendered from it by osp.py render and checked for drift.",
   "type": "object",
-  "required": ["schema_version", "package", "content", "dependencies"],
+  "required": [
+    "schema_version",
+    "package",
+    "content",
+    "dependencies"
+  ],
   "properties": {
-    "schema_version": {"const": 1},
+    "schema_version": {
+      "const": 1
+    },
     "package": {
       "type": "object",
-      "required": ["name", "version", "type"],
+      "required": [
+        "name",
+        "version",
+        "type"
+      ],
       "properties": {
-        "name": {"type": "string", "pattern": "^[A-Za-z0-9._-]+$"},
-        "version": {"type": "string", "pattern": "^[0-9]+(\\.[0-9]+)+$"},
-        "type": {"enum": ["capability", "foundation", "knowledge"]}
+        "name": {
+          "type": "string",
+          "pattern": "^[A-Za-z0-9._-]+$"
+        },
+        "version": {
+          "type": "string",
+          "pattern": "^[0-9]+(\\.[0-9]+)+$"
+        },
+        "type": {
+          "enum": [
+            "capability",
+            "foundation",
+            "knowledge"
+          ]
+        }
       },
       "additionalProperties": false
     },
     "content": {
       "type": "object",
       "properties": {
-        "skills": {"type": "string"},
-        "agents": {"type": "string"},
-        "knowledge": {"type": "string"},
-        "verification": {"type": "string"},
-        "connectors": {"type": "string"},
-        "evals": {"type": "string"}
+        "skills": {
+          "type": "string"
+        },
+        "agents": {
+          "type": "string"
+        },
+        "knowledge": {
+          "type": "string"
+        },
+        "verification": {
+          "type": "string"
+        },
+        "connectors": {
+          "type": "string"
+        },
+        "evals": {
+          "type": "string"
+        }
       },
       "additionalProperties": false
     },
     "dependencies": {
       "type": "object",
-      "required": ["capabilities", "knowledge"],
+      "required": [
+        "capabilities",
+        "knowledge"
+      ],
       "properties": {
-        "capabilities": {"type": "array", "items": {"$ref": "#/$defs/dependency"}},
-        "knowledge": {"type": "array", "items": {"$ref": "#/$defs/dependency"}}
+        "capabilities": {
+          "type": "array",
+          "items": {
+            "$ref": "#/$defs/dependency"
+          }
+        },
+        "knowledge": {
+          "type": "array",
+          "items": {
+            "$ref": "#/$defs/dependency"
+          }
+        }
       },
       "additionalProperties": false
+    },
+    "metadata": {
+      "type": "object",
+      "description": "Presentation metadata every runtime manifest repeats. Defaults: author Open Science Pillars Community, homepage and repository the GitHub URL, license Apache-2.0.",
+      "required": [
+        "description"
+      ],
+      "properties": {
+        "description": {
+          "type": "string",
+          "minLength": 1
+        },
+        "keywords": {
+          "type": "array",
+          "items": {
+            "type": "string",
+            "minLength": 1
+          },
+          "uniqueItems": true
+        },
+        "author": {
+          "type": "object",
+          "properties": {
+            "name": {
+              "type": "string"
+            },
+            "email": {
+              "type": "string"
+            },
+            "url": {
+              "type": "string"
+            }
+          },
+          "additionalProperties": false
+        },
+        "homepage": {
+          "type": "string"
+        },
+        "repository": {
+          "type": "string"
+        },
+        "license": {
+          "type": "string"
+        }
+      },
+      "additionalProperties": false
+    },
+    "reach": {
+      "type": "object",
+      "description": "REACH: the MCP servers the package registers, declared once in the portable form of the Agent Plugins specification (${PLUGIN_ROOT} for the package root). The Claude .mcp.json and the portable mcp.json are rendered from it. A server marked portable: false is Claude-only and is left out of mcp.json.",
+      "required": [
+        "servers"
+      ],
+      "properties": {
+        "servers": {
+          "type": "object",
+          "additionalProperties": {
+            "$ref": "#/$defs/server"
+          }
+        }
+      },
+      "additionalProperties": false
+    },
+    "extensions": {
+      "type": "object",
+      "description": "Client-specific manifest data for the Agent Plugins plugin.json, keyed by the client's reverse-domain namespace (an OpenAI or Codex extension when one is documented). Copied through unchanged; never a source of scientific semantics.",
+      "additionalProperties": {
+        "type": "object"
+      }
     }
   },
   "additionalProperties": false,
   "$defs": {
     "dependency": {
       "type": "object",
-      "required": ["name"],
+      "required": [
+        "name"
+      ],
       "properties": {
-        "name": {"type": "string", "pattern": "^[A-Za-z0-9._-]+$"},
-        "version": {"type": "string", "pattern": "^(>=|>|==|<=|<|~=)?[0-9]+(\\.[0-9]+)+$"}
+        "name": {
+          "type": "string",
+          "pattern": "^[A-Za-z0-9._-]+$"
+        },
+        "version": {
+          "type": "string",
+          "pattern": "^(>=|>|==|<=|<|~=)?[0-9]+(\\.[0-9]+)+$"
+        }
+      },
+      "additionalProperties": false
+    },
+    "server": {
+      "type": "object",
+      "required": [
+        "type"
+      ],
+      "properties": {
+        "type": {
+          "enum": [
+            "stdio",
+            "streamable-http",
+            "sse"
+          ]
+        },
+        "command": {
+          "type": "string",
+          "minLength": 1
+        },
+        "args": {
+          "type": "array",
+          "items": {
+            "type": "string"
+          }
+        },
+        "env": {
+          "type": "object",
+          "additionalProperties": {
+            "type": "string"
+          }
+        },
+        "cwd": {
+          "type": "string"
+        },
+        "url": {
+          "type": "string",
+          "minLength": 1
+        },
+        "headers": {
+          "type": "object",
+          "additionalProperties": {
+            "type": "string"
+          }
+        },
+        "portable": {
+          "type": "boolean"
+        }
       },
       "additionalProperties": false
     }

@@ -12,7 +12,8 @@ repository, docs/decisions):
 
   repository.yaml   kind, status, spheres, primary sphere, discipline
                     (every non-archived repository)
-  package.yaml      package identity, version, content, dependencies
+  package.yaml      package identity, version, content, dependencies,
+                    presentation metadata and REACH declarations
                     (only a repository that publishes a package)
   surfaces.yaml     runtime support policy and qualification requirements
                     (only a repository that exposes runtime capabilities)
@@ -33,6 +34,18 @@ repository, docs/decisions):
                                       org profile) instead
   osp.py teams                        print the gh commands that create the
                                       teams osp/teams.yaml declares
+  osp.py render [REPO_DIR ...]        write the runtime projections of every
+                                      package: .claude-plugin/plugin.json and
+                                      .mcp.json (Claude), plugin.json and
+                                      mcp.json (Agent Plugins 1.0); --check
+                                      fails on drift
+  osp.py lock [REPO_DIR ...]          write .osp/release-lock.json (digests of
+                                      the canonical source, content and
+                                      projections of one release); --check
+                                      fails when stale, --report only says so
+  osp.py plugin-check [REPO_DIR ...]  Agent Plugins conformance of the
+                                      portable package against the pinned
+                                      specification version
 
 Every GitHub mutation is dry-run unless both --apply and the exact
 --confirm-org value are supplied. Exit 1 on any validation error or
@@ -42,6 +55,7 @@ drift; warnings never fail.
 from __future__ import annotations
 
 import argparse
+import hashlib
 import json
 import os
 import re
@@ -70,7 +84,7 @@ PLACEHOLDER = re.compile(r"<[^>]*>|\breplace\b|\byour-[a-z-]+\b", re.I)
 # What a planned repository must not carry: nothing installable.
 PLANNED_FORBIDDEN = [
     ".osp/package.yaml", ".osp/surfaces.yaml", ".claude-plugin", "plugin.json",
-    "mcp.json", ".mcp.json", "skills", "CITATION.cff",
+    "mcp.json", ".mcp.json", "skills", "CITATION.cff", ".osp/release-lock.json",
 ]
 
 
@@ -448,6 +462,539 @@ def resolve_dirs(args: argparse.Namespace) -> list[Path]:
     return workspace_repos(WORKSPACE)
 
 
+# ---------------------------------------------------------------------------
+# Runtime projections (ADR B): the Claude package files and the Agent
+# Plugins package are rendered from .osp/package.yaml and
+# .osp/repository.yaml and checked for drift; the release lock digests
+# what one governed release consists of.
+# ---------------------------------------------------------------------------
+
+AGENT_PLUGINS_VERSION = "1.0.0"
+AGENT_PLUGINS_SCHEMAS = SCHEMAS / "agent-plugins" / AGENT_PLUGINS_VERSION
+PLUGIN_SCHEMA_ID = f"https://agent-plugins.org/schemas/{AGENT_PLUGINS_VERSION}/plugin.schema.json"
+MCP_SCHEMA_ID = f"https://agent-plugins.org/schemas/{AGENT_PLUGINS_VERSION}/mcp.schema.json"
+# The organization's own extension namespace in the portable manifest: the
+# reverse-domain form of open-science-pillars.github.io, which the
+# organization controls. It carries classification and dependencies for an
+# OSP-aware client; every other client ignores it, as the specification
+# requires.
+OSP_NAMESPACE = "io.github.open-science-pillars"
+DEFAULT_AUTHOR = {"name": "Open Science Pillars Community"}
+DEFAULT_LICENSE = "Apache-2.0"
+CLAUDE_MANIFEST = ".claude-plugin/plugin.json"
+CLAUDE_MCP = ".mcp.json"
+PORTABLE_MANIFEST = "plugin.json"
+PORTABLE_MCP = "mcp.json"
+RELEASE_LOCK = ".osp/release-lock.json"
+PLACEHOLDER_ROOT = "${PLUGIN_ROOT}"
+PLACEHOLDER_DATA = "${PLUGIN_DATA}"
+CLAUDE_ROOT = "${CLAUDE_PLUGIN_ROOT}"
+SKILL_NAME = re.compile(r"^[a-z0-9]+(?:-[a-z0-9]+)*$")
+SKILL_FIELDS = {"name", "description", "license", "compatibility", "metadata", "allowed-tools"}
+RUNTIME_DIR_NAMES = {"claude", "claude-code", "cowork", "claude-cowork", "openai", "codex", "openai-codex",
+                     "gemini", "gemini-cli", "goose", "cursor", "copilot", "kiro"}
+DIGEST_SKIP_DIRS = {"__pycache__", ".git", ".ipynb_checkpoints"}
+DIGEST_SKIP_SUFFIXES = {".pyc", ".pyo"}
+DIGEST_SKIP_NAMES = {".DS_Store"}
+
+
+def read_package(repo_dir: Path) -> dict[str, Any] | None:
+    path = repo_dir / ".osp" / "package.yaml"
+    return load_yaml(path) if path.is_file() else None
+
+
+def read_json(path: Path) -> Any:
+    try:
+        return json.loads(path.read_text(encoding="utf-8"))
+    except json.JSONDecodeError as exc:
+        raise OspError(f"{path}: {exc}") from exc
+
+
+def dump_json(data: Any) -> str:
+    return json.dumps(data, indent=2, ensure_ascii=False) + "\n"
+
+
+def package_metadata(pkg: dict[str, Any], name: str) -> dict[str, Any]:
+    """Presentation fields with the organization's defaults filled in."""
+    meta = dict(pkg.get("metadata") or {})
+    url = f"https://github.com/{ORG}/{name}"
+    return {
+        "description": meta.get("description"),
+        "keywords": list(meta.get("keywords") or []),
+        "author": dict(meta.get("author") or DEFAULT_AUTHOR),
+        "homepage": meta.get("homepage", url),
+        "repository": meta.get("repository", url),
+        "license": meta.get("license", DEFAULT_LICENSE),
+    }
+
+
+def dependency_entries(pkg: dict[str, Any]) -> list[dict[str, Any]]:
+    deps = pkg.get("dependencies") or {}
+    return list(deps.get("capabilities") or []) + list(deps.get("knowledge") or [])
+
+
+def render_claude_manifest(pkg: dict[str, Any], name: str) -> dict[str, Any]:
+    """The Claude plugin manifest: name, version and dependencies from the
+    package, presentation from its metadata. A dependency with no floor is
+    a bare name, the form the Claude manifest has always used."""
+    meta = package_metadata(pkg, name)
+    if not meta["description"]:
+        raise OspError(f"{name}: package.yaml needs metadata.description to render a manifest")
+    out: dict[str, Any] = {"name": pkg["package"]["name"], "version": pkg["package"]["version"],
+                           "description": meta["description"]}
+    deps = [d["name"] if not d.get("version") else {"name": d["name"], "version": d["version"]}
+            for d in dependency_entries(pkg)]
+    if deps:
+        out["dependencies"] = deps
+    out["author"] = meta["author"]
+    out["homepage"] = meta["homepage"]
+    out["license"] = meta["license"]
+    if meta["keywords"]:
+        out["keywords"] = meta["keywords"]
+    return out
+
+
+def substitute(value: Any, old: str, new: str) -> Any:
+    if isinstance(value, str):
+        return value.replace(old, new)
+    if isinstance(value, list):
+        return [substitute(v, old, new) for v in value]
+    if isinstance(value, dict):
+        return {k: substitute(v, old, new) for k, v in value.items()}
+    return value
+
+
+def claude_server(server: dict[str, Any]) -> dict[str, Any]:
+    """One REACH declaration as Claude's .mcp.json spells it: `http` for
+    the streamable transport, and the Claude placeholder for the package
+    root."""
+    kind = server["type"]
+    out: dict[str, Any] = {"type": "http" if kind == "streamable-http" else kind}
+    if kind == "stdio":
+        out["command"] = server["command"]
+        for key in ("args", "env", "cwd"):
+            if key in server:
+                out[key] = substitute(server[key], PLACEHOLDER_ROOT, CLAUDE_ROOT)
+    else:
+        out["url"] = server["url"]
+        if "headers" in server:
+            out["headers"] = dict(server["headers"])
+    return out
+
+
+def portable_server(server: dict[str, Any]) -> dict[str, Any]:
+    return {k: v for k, v in server.items() if k != "portable"}
+
+
+def reach_servers(pkg: dict[str, Any]) -> dict[str, dict[str, Any]]:
+    return dict(((pkg.get("reach") or {}).get("servers")) or {})
+
+
+def render_claude_mcp(pkg: dict[str, Any]) -> dict[str, Any] | None:
+    servers = reach_servers(pkg)
+    if not servers:
+        return None
+    return {"mcpServers": {n: claude_server(s) for n, s in servers.items()}}
+
+
+def render_portable_mcp(pkg: dict[str, Any]) -> dict[str, Any] | None:
+    servers = {n: portable_server(s) for n, s in reach_servers(pkg).items() if s.get("portable", True)}
+    if not servers:
+        return None
+    return {"$schema": MCP_SCHEMA_ID, "mcpServers": servers}
+
+
+def render_portable_manifest(pkg: dict[str, Any], repo_meta: dict[str, Any], name: str) -> dict[str, Any]:
+    """The Agent Plugins 1.0 manifest: the closed portable fields, and the
+    organization's classification and dependencies under its own extension
+    namespace, plus any client extension the package declares."""
+    meta = package_metadata(pkg, name)
+    if not meta["description"]:
+        raise OspError(f"{name}: package.yaml needs metadata.description to render a manifest")
+    cls = repo_meta["classification"]
+    deps = pkg.get("dependencies") or {}
+    osp_ext = {
+        "kind": repo_meta["repository"]["kind"],
+        "status": repo_meta["repository"]["status"],
+        "spheres": list(cls["spheres"]),
+        "primary_sphere": cls["primary_sphere"],
+        "discipline": cls["discipline"],
+        "package_type": pkg["package"]["type"],
+        "dependencies": {
+            "capabilities": [dict(d) for d in deps.get("capabilities") or []],
+            "knowledge": [dict(d) for d in deps.get("knowledge") or []],
+        },
+    }
+    extensions: dict[str, Any] = {OSP_NAMESPACE: osp_ext}
+    for ns, data in (pkg.get("extensions") or {}).items():
+        if ns == OSP_NAMESPACE:
+            raise OspError(f"{name}: package.yaml extensions may not override {OSP_NAMESPACE}; it is rendered")
+        extensions[ns] = data
+    out: dict[str, Any] = {
+        "$schema": PLUGIN_SCHEMA_ID,
+        "name": pkg["package"]["name"],
+        "version": pkg["package"]["version"],
+        "description": meta["description"],
+        "author": meta["author"],
+        "homepage": meta["homepage"],
+        "repository": meta["repository"],
+        "license": meta["license"],
+    }
+    if meta["keywords"]:
+        out["keywords"] = meta["keywords"]
+    out["extensions"] = extensions
+    return out
+
+
+def projections(repo_dir: Path) -> dict[str, dict[str, Any] | None] | None:
+    """{relative path: rendered object or None (must not exist)} for a
+    repository that publishes a package; None for one that does not."""
+    pkg = read_package(repo_dir)
+    repo_meta = read_repository(repo_dir)
+    if pkg is None or repo_meta is None:
+        return None
+    name = pkg["package"]["name"]
+    return {
+        CLAUDE_MANIFEST: render_claude_manifest(pkg, name),
+        CLAUDE_MCP: render_claude_mcp(pkg),
+        PORTABLE_MANIFEST: render_portable_manifest(pkg, repo_meta, name),
+        PORTABLE_MCP: render_portable_mcp(pkg),
+    }
+
+
+def projection_drift(repo_dir: Path, expected: dict[str, dict[str, Any] | None]) -> list[str]:
+    """Which rendered files differ from what is on disk, compared as JSON
+    values so formatting alone is never drift."""
+    out = []
+    for rel, obj in expected.items():
+        path = repo_dir / rel
+        if obj is None:
+            if path.exists():
+                out.append(f"{rel} exists but package.yaml renders nothing there (a hand-written projection)")
+            continue
+        if not path.is_file():
+            out.append(f"{rel} is missing")
+        elif read_json(path) != obj:
+            out.append(f"{rel} differs from what package.yaml renders")
+    return out
+
+
+def write_projections(repo_dir: Path, expected: dict[str, dict[str, Any] | None]) -> list[str]:
+    changed = []
+    for rel, obj in expected.items():
+        path = repo_dir / rel
+        if obj is None:
+            if path.exists():
+                path.unlink()
+                changed.append(f"removed {rel}")
+            continue
+        text = dump_json(obj)
+        if not path.is_file() or path.read_text(encoding="utf-8") != text:
+            path.parent.mkdir(parents=True, exist_ok=True)
+            path.write_text(text, encoding="utf-8")
+            changed.append(f"wrote {rel}")
+    return changed
+
+
+def tree_digest(root: Path) -> str | None:
+    """sha256 over every regular file under root, by sorted relative path
+    and content, so the same tree digests the same anywhere. Caches and
+    editor droppings are skipped."""
+    if not root.is_dir():
+        return None
+    h = hashlib.sha256()
+    for path in sorted(p for p in root.rglob("*") if p.is_file()):
+        rel = path.relative_to(root)
+        if (set(rel.parts[:-1]) & DIGEST_SKIP_DIRS or path.suffix in DIGEST_SKIP_SUFFIXES
+                or path.name in DIGEST_SKIP_NAMES):
+            continue
+        h.update(rel.as_posix().encode("utf-8") + b"\0")
+        h.update(hashlib.sha256(path.read_bytes()).digest())
+    return "sha256:" + h.hexdigest()
+
+
+def value_digest(value: Any) -> str:
+    return "sha256:" + hashlib.sha256(json.dumps(value, sort_keys=True, ensure_ascii=False).encode("utf-8")).hexdigest()
+
+
+def render_lock(repo_dir: Path) -> dict[str, Any]:
+    """The release lock: what one governed release consists of, digested
+    from canonical source and the rendered projections, with no timestamp
+    so two renders of one tree agree."""
+    pkg = read_package(repo_dir)
+    repo_meta = read_repository(repo_dir)
+    if pkg is None or repo_meta is None:
+        raise OspError(f"{repo_dir.name}: a release lock needs .osp/package.yaml and .osp/repository.yaml")
+    name = pkg["package"]["name"]
+    deps = pkg.get("dependencies") or {}
+    lock: dict[str, Any] = {
+        "schema_version": 1,
+        "package": name,
+        "version": pkg["package"]["version"],
+        "package_type": pkg["package"]["type"],
+        "agent_plugins_spec": AGENT_PLUGINS_VERSION,
+        "repository_classification_digest": value_digest(repo_meta),
+        "dependencies": {
+            "capabilities": {d["name"]: d.get("version") for d in deps.get("capabilities") or []},
+            "knowledge": {d["name"]: d.get("version") for d in deps.get("knowledge") or []},
+        },
+    }
+    for key, rel in sorted((pkg.get("content") or {}).items()):
+        lock[f"{key}_digest"] = tree_digest(repo_dir / rel)
+    rendered = projections(repo_dir) or {}
+    lock["adapters"] = {
+        "claude": value_digest({CLAUDE_MANIFEST: rendered.get(CLAUDE_MANIFEST), CLAUDE_MCP: rendered.get(CLAUDE_MCP)}),
+        "agent-plugins": value_digest({PORTABLE_MANIFEST: rendered.get(PORTABLE_MANIFEST),
+                                       PORTABLE_MCP: rendered.get(PORTABLE_MCP)}),
+    }
+    return lock
+
+
+def parse_frontmatter(text: str) -> dict[str, Any] | None:
+    if not text.startswith("---\n"):
+        return None
+    end = text.find("\n---", 4)
+    if end < 0:
+        return None
+    try:
+        data = yaml.safe_load(text[4:end])
+    except yaml.YAMLError:
+        return None
+    return data if isinstance(data, dict) else None
+
+
+def skill_findings(skills_dir: Path, name: str) -> tuple[list[str], list[str]]:
+    """Skill discovery as the specification defines it: each immediate
+    child directory with a regular SKILL.md is a skill, and the skill's
+    frontmatter follows the Agent Skills rules."""
+    errors: list[str] = []
+    warnings: list[str] = []
+    if not skills_dir.exists():
+        return errors, warnings
+    if not skills_dir.is_dir():
+        return [f"{name}: skills exists but is not a directory"], warnings
+    outside: dict[str, list[str]] = {}
+    for child in sorted(skills_dir.iterdir()):
+        if not child.is_dir():
+            continue
+        if child.name in RUNTIME_DIR_NAMES:
+            errors.append(f"{name}: skills/{child.name}/ is a runtime-specific skill tree; one canonical skill, no per-runtime copies")
+            continue
+        skill_md = child / "SKILL.md"
+        if not skill_md.is_file():
+            warnings.append(f"{name}: skills/{child.name}/ has no SKILL.md and is not a skill a client discovers")
+            continue
+        fm = parse_frontmatter(skill_md.read_text(encoding="utf-8"))
+        where = f"{name}: skills/{child.name}/SKILL.md"
+        if fm is None:
+            errors.append(f"{where} has no YAML frontmatter")
+            continue
+        skill_name = fm.get("name")
+        if not isinstance(skill_name, str) or not skill_name:
+            errors.append(f"{where}: frontmatter name is missing")
+        else:
+            if skill_name != child.name:
+                errors.append(f"{where}: name {skill_name!r} does not match its directory")
+            if len(skill_name) > 64 or not SKILL_NAME.match(skill_name):
+                errors.append(f"{where}: name {skill_name!r} is not lowercase alphanumeric words joined by single hyphens, at most 64 characters")
+        desc = fm.get("description")
+        if not isinstance(desc, str) or not desc.strip():
+            errors.append(f"{where}: frontmatter description is missing")
+        elif len(desc) > 1024:
+            errors.append(f"{where}: description is longer than 1024 characters")
+        compat = fm.get("compatibility")
+        if compat is not None and (not isinstance(compat, str) or not 1 <= len(compat) <= 500):
+            errors.append(f"{where}: compatibility is a string of 1 to 500 characters")
+        metadata = fm.get("metadata")
+        if metadata is not None and (not isinstance(metadata, dict)
+                                     or not all(isinstance(k, str) and isinstance(v, str) for k, v in metadata.items())):
+            errors.append(f"{where}: metadata is a map of string keys to string values")
+        for field in sorted(set(fm) - SKILL_FIELDS):
+            outside.setdefault(field, []).append(child.name)
+    for field, names in sorted(outside.items()):
+        warnings.append(f"{name}: frontmatter field {field!r} is outside the Agent Skills specification and a portable "
+                        f"client ignores it ({len(names)} skills: {', '.join(names)})")
+    return errors, warnings
+
+
+LOOPBACK = re.compile(r"^(localhost|127(?:\.\d{1,3}){3}|\[::1\]|0:0:0:0:0:0:0:1)$", re.I)
+
+
+def server_findings(label: str, server: dict[str, Any]) -> list[str]:
+    """The specification's rules beyond the schema for one mcp.json entry."""
+    from urllib.parse import urlsplit
+    out = []
+    kind = server.get("type")
+    if kind == "stdio":
+        command = server.get("command", "")
+        if any(ch.isspace() for ch in command):
+            out.append(f"{label}: command {command!r} is not a single executable token")
+        elif command.startswith("./"):
+            if "/../" in command or command.endswith("/..") or command.startswith("./../"):
+                out.append(f"{label}: command {command!r} escapes the plugin root")
+        elif "/" in command or "\\" in command or command.startswith("."):
+            out.append(f"{label}: command {command!r} is neither a bare executable name nor a ./ plugin-relative path")
+        if CLAUDE_ROOT in json.dumps(server):
+            out.append(f"{label}: uses {CLAUDE_ROOT}, which a portable client leaves literal; the portable placeholder is {PLACEHOLDER_ROOT}")
+        cwd = server.get("cwd")
+        if cwd is not None and not (cwd.startswith("./") or cwd == PLACEHOLDER_ROOT or cwd.startswith(PLACEHOLDER_ROOT + "/")
+                                    or cwd == PLACEHOLDER_DATA or cwd.startswith(PLACEHOLDER_DATA + "/")):
+            out.append(f"{label}: cwd {cwd!r} is not ./, ${{PLUGIN_ROOT}} or ${{PLUGIN_DATA}} rooted")
+        for key in (server.get("env") or {}):
+            if key in {"PLUGIN_ROOT", "PLUGIN_DATA"}:
+                out.append(f"{label}: env may not set the reserved {key}")
+    elif kind in {"streamable-http", "sse"}:
+        url = server.get("url", "")
+        parts = urlsplit(url)
+        if parts.scheme not in {"http", "https"} or not parts.netloc:
+            out.append(f"{label}: url {url!r} is not an absolute http or https URL")
+        else:
+            if parts.username is not None or parts.password is not None:
+                out.append(f"{label}: url carries user information")
+            if parts.fragment:
+                out.append(f"{label}: url carries a fragment")
+            if parts.scheme == "http" and not LOOPBACK.match(parts.hostname or ""):
+                out.append(f"{label}: a non-loopback endpoint uses https, not http")
+        headers = server.get("headers") or {}
+        seen: dict[str, str] = {}
+        for h in headers:
+            low = h.lower()
+            if low in seen:
+                out.append(f"{label}: header {h!r} repeats {seen[low]!r} under different casing")
+            seen[low] = h
+    return out
+
+
+def plugin_check(repo_dir: Path) -> tuple[list[str], list[str]]:
+    """Agent Plugins conformance of the portable package at repo_dir, and
+    its agreement with the canonical package file."""
+    errors: list[str] = []
+    warnings: list[str] = []
+    name = repo_dir.name
+    pkg = read_package(repo_dir)
+    repo_meta = read_repository(repo_dir)
+    if pkg is None:
+        return [f"{name}: no .osp/package.yaml; only a package has a portable projection"], warnings
+    if repo_meta is None:
+        return [f"{name}: no .osp/repository.yaml"], warnings
+    manifest_path = repo_dir / PORTABLE_MANIFEST
+    if not manifest_path.is_file():
+        return [f"{name}: {PORTABLE_MANIFEST} is missing; run osp.py render"], warnings
+    manifest = read_json(manifest_path)
+    errors += [f"{name} {PORTABLE_MANIFEST} {e}" for e in schema_errors(manifest, AGENT_PLUGINS_SCHEMAS / "plugin.schema.json")]
+    if isinstance(manifest, dict):
+        if manifest.get("$schema") != PLUGIN_SCHEMA_ID:
+            errors.append(f"{name} {PORTABLE_MANIFEST}: $schema is not the pinned {PLUGIN_SCHEMA_ID}")
+        if manifest.get("name") != pkg["package"]["name"]:
+            errors.append(f"{name} {PORTABLE_MANIFEST}: name {manifest.get('name')!r} is not the package name")
+        if manifest.get("version") != pkg["package"]["version"]:
+            errors.append(f"{name} {PORTABLE_MANIFEST}: version {manifest.get('version')!r} is not the package version")
+        expected = render_portable_manifest(pkg, repo_meta, pkg["package"]["name"])
+        if manifest != expected:
+            errors.append(f"{name} {PORTABLE_MANIFEST}: differs from what package.yaml renders; run osp.py render")
+    mcp_path = repo_dir / PORTABLE_MCP
+    if mcp_path.exists():
+        if not mcp_path.is_file():
+            errors.append(f"{name}: {PORTABLE_MCP} is not a regular file")
+        else:
+            mcp = read_json(mcp_path)
+            errors += [f"{name} {PORTABLE_MCP} {e}" for e in schema_errors(mcp, AGENT_PLUGINS_SCHEMAS / "mcp.schema.json")]
+            if isinstance(mcp, dict):
+                if mcp.get("$schema") != MCP_SCHEMA_ID:
+                    errors.append(f"{name} {PORTABLE_MCP}: $schema is not the pinned {MCP_SCHEMA_ID}")
+                for label, server in (mcp.get("mcpServers") or {}).items():
+                    if isinstance(server, dict):
+                        errors += [f"{name} {PORTABLE_MCP} {f}" for f in server_findings(label, server)]
+                if mcp != render_portable_mcp(pkg):
+                    errors.append(f"{name} {PORTABLE_MCP}: differs from what package.yaml renders; run osp.py render")
+    elif render_portable_mcp(pkg) is not None:
+        errors.append(f"{name}: package.yaml declares portable REACH but {PORTABLE_MCP} is missing; run osp.py render")
+    # The declared REACH itself is checked in its canonical form too, so a
+    # non-portable entry is caught even before it is rendered.
+    for label, server in reach_servers(pkg).items():
+        if server.get("portable", True):
+            errors += [f"{name} package.yaml reach.servers.{label}: {f.split(': ', 1)[1]}" for f in server_findings(label, server)]
+    skills_rel = (pkg.get("content") or {}).get("skills", "./skills")
+    s_err, s_warn = skill_findings(repo_dir / skills_rel, name)
+    errors += s_err
+    warnings += s_warn
+    if skills_rel not in {"./skills", "skills"} and (repo_dir / skills_rel).is_dir():
+        errors.append(f"{name}: skills live at {skills_rel}, but a portable client discovers only skills/")
+    return errors, warnings
+
+
+def package_dirs(args: argparse.Namespace) -> list[Path]:
+    dirs = [d for d in resolve_dirs(args) if (d / ".osp" / "package.yaml").is_file()]
+    if not dirs:
+        raise OspError("no repository carries .osp/package.yaml")
+    return dirs
+
+
+def command_render(args: argparse.Namespace) -> int:
+    drift_total = 0
+    for repo_dir in package_dirs(args):
+        errors, _ = validate_repo(repo_dir, None)
+        if errors:
+            raise OspError("cannot render from invalid metadata:\n" + "\n".join(errors))
+        expected = projections(repo_dir) or {}
+        if args.check:
+            drift = projection_drift(repo_dir, expected)
+            for d in drift:
+                print(f"drift: {repo_dir.name}: {d}")
+            drift_total += len(drift)
+            print(f"{repo_dir.name}: {'DRIFT' if drift else 'projections current'}")
+        else:
+            for line in write_projections(repo_dir, expected):
+                print(f"{repo_dir.name}: {line}")
+            print(f"{repo_dir.name}: projections rendered")
+    if args.check:
+        print(f"osp render --check: {'FAILED' if drift_total else 'PASSED'} ({drift_total} drifted files)")
+        return 1 if drift_total else 0
+    return 0
+
+
+def command_lock(args: argparse.Namespace) -> int:
+    stale = 0
+    for repo_dir in package_dirs(args):
+        lock = render_lock(repo_dir)
+        path = repo_dir / RELEASE_LOCK
+        if args.check or args.report:
+            current = read_json(path) if path.is_file() else None
+            if current == lock:
+                print(f"{repo_dir.name}: release lock current")
+                continue
+            stale += 1
+            if current is None:
+                print(f"{repo_dir.name}: no release lock; run osp.py lock")
+            else:
+                changed = sorted(k for k in set(current) | set(lock) if current.get(k) != lock.get(k))
+                print(f"{repo_dir.name}: release lock stale ({', '.join(changed)})")
+        else:
+            path.parent.mkdir(parents=True, exist_ok=True)
+            path.write_text(dump_json(lock), encoding="utf-8")
+            print(f"{repo_dir.name}: wrote {RELEASE_LOCK}")
+    if args.check:
+        print(f"osp lock --check: {'FAILED' if stale else 'PASSED'} ({stale} stale)")
+        return 1 if stale else 0
+    if args.report and stale:
+        print(f"osp lock --report: {stale} stale (a release commit re-runs osp.py lock)")
+    return 0
+
+
+def command_plugin_check(args: argparse.Namespace) -> int:
+    total = 0
+    for repo_dir in package_dirs(args):
+        errors, warnings = plugin_check(repo_dir)
+        for w in warnings:
+            print(f"warning: {w}")
+        for e in errors:
+            print(f"error: {e}")
+        total += len(errors)
+        print(f"{repo_dir.name}: {'FAILED' if errors else 'conforms to Agent Plugins ' + AGENT_PLUGINS_VERSION}")
+    print(f"osp plugin-check: {'FAILED' if total else 'PASSED'} (Agent Plugins {AGENT_PLUGINS_VERSION}, {total} errors)")
+    return 1 if total else 0
+
+
 def command_validate(args: argparse.Namespace) -> int:
     dirs = resolve_dirs(args)
     if not dirs:
@@ -564,13 +1111,23 @@ def parser() -> argparse.ArgumentParser:
     s.add_argument("--workspace")
     s.add_argument("--output")
     s.add_argument("--into", help="write the view between osp-sphere-view markers in this file (the org profile)")
+    r = sub.add_parser("render")
+    r.add_argument("repos", nargs="*")
+    r.add_argument("--check", action="store_true", help="fail on a projection that differs from what package.yaml renders")
+    lk = sub.add_parser("lock")
+    lk.add_argument("repos", nargs="*")
+    lk.add_argument("--check", action="store_true", help="fail when the release lock is not what the tree digests to")
+    lk.add_argument("--report", action="store_true", help="print a stale lock without failing")
+    pc = sub.add_parser("plugin-check")
+    pc.add_argument("repos", nargs="*")
     tm = sub.add_parser("teams")
     tm.add_argument("--member", default="PaulMRamirez", help="the interim member added to every team ('' for none)")
     return p
 
 
 COMMANDS = {"validate": command_validate, "topics": command_topics, "sphere-view": command_sphere_view,
-            "teams": command_teams}
+            "teams": command_teams, "render": command_render, "lock": command_lock,
+            "plugin-check": command_plugin_check}
 
 
 def main() -> int:
