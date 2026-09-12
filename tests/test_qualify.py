@@ -88,6 +88,20 @@ class QualifyTests(unittest.TestCase):
         bare["probes"] = {}
         self.assertEqual("start", q.probes_for(bare)["skill-invocation"]["skill"])
 
+    def test_golden_scripts_leave_the_prove_scripts_out(self):
+        cap = q.load_capability(capability(self.root))
+        ver = cap["dir"] / "verification"
+        ver.mkdir()
+        for n in ("analysis_pipeline.py", "trend_computation.py", "trend_attester.py"):
+            (ver / n).write_text("")
+        self.assertEqual([ver / "analysis_pipeline.py", ver / "trend_attester.py", ver / "trend_computation.py"],
+                         q.golden_scripts(cap, cap["dir"]))
+        cap["probes"]["prove"] = {"prompt": "run ${PLUGIN_ROOT}/verification/trend_computation.py",
+                                  "command": ["uv", "run", "${PLUGIN_ROOT}/verification/trend_attester.py"]}
+        self.assertEqual([ver / "analysis_pipeline.py"], q.golden_scripts(cap, cap["dir"]))
+        cap["probes"]["golden-computation"] = ["verification/analysis_pipeline.py"]
+        self.assertEqual([cap["dir"] / "verification/analysis_pipeline.py"], q.golden_scripts(cap, cap["dir"]))
+
     def test_verdict_needs_every_required_test(self):
         cap = q.load_capability(capability(self.root))
         tests = {t: {"status": "pass", "evidence": "x"} for t in cap["required"]}

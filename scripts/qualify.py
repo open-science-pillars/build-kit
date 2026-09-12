@@ -106,6 +106,22 @@ def skill_names(root: Path, pkg: dict[str, Any]) -> list[str]:
     return sorted(p.name for p in d.iterdir() if p.is_dir() and (p / "SKILL.md").is_file())
 
 
+def golden_scripts(cap: dict[str, Any], root: Path) -> list[Path]:
+    """The scripts the golden test runs, with no arguments: those the
+    capability lists under probes.golden-computation, else every script
+    at the top of its verification tree except the executor and attester
+    the prove probe names (they take arguments and are the prove test)."""
+    listed = cap["probes"].get("golden-computation")
+    if listed:
+        return [root / str(rel) for rel in listed]
+    ver_rel = (cap["package"].get("content") or {}).get("verification")
+    if not ver_rel or not (root / ver_rel).is_dir():
+        return []
+    prove = cap["probes"].get("prove") or {}
+    prove_text = " ".join([str(prove.get("prompt", ""))] + [str(c) for c in prove.get("command") or []])
+    return [s for s in sorted((root / ver_rel).glob("*.py")) if s.name not in prove_text]
+
+
 def probes_for(cap: dict[str, Any]) -> dict[str, dict[str, Any]]:
     """The prompts each conversational test uses, verbatim on every runtime:
     from surfaces.yaml `probes` where the capability states them, with the
@@ -420,11 +436,10 @@ def qualify_claude_code(cap: dict[str, Any], marketplace: str, model: str | None
         else:
             record("connector-invocation", "pass", f"registered as plugin:{name}:<server>; {summary}")
 
-    # golden-computation: the installed package's verification scripts run green
-    ver_rel = (pkg.get("content") or {}).get("verification")
-    scripts = sorted((install_path / ver_rel).glob("*.py")) if install_path and ver_rel and (install_path / ver_rel).is_dir() else []
+    # golden-computation: the installed package's golden scripts run green
+    scripts = golden_scripts(cap, install_path) if install_path else []
     if not scripts:
-        record("golden-computation", "skip", "no verification scripts declared")
+        record("golden-computation", "skip", "no golden scripts declared")
     else:
         outcomes = []
         for s in scripts:

@@ -116,11 +116,15 @@
           "skill-invocation",
           "knowledge-resolution",
           "side-effect-confirmation",
-          "prove"
+          "prove",
+          "golden-computation"
         ]
       },
       "additionalProperties": {
-        "type": "object"
+        "type": [
+          "object",
+          "array"
+        ]
       }
     }
   },
