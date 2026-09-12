@@ -357,7 +357,7 @@ Pillar means sphere; canonical .osp metadata drives organization and runtime pro
 | `r1-runtime-renderer`: Render the Claude and Agent Plugins projections from canonical source and detect drift | `build-kit` | accepted | done | needs-context | not seeded |
 | `r2-core-reference`: Qualify core as the reference capability on Claude Code, Cowork and Codex from one SKILL.md | `core` | accepted | active | needs-context | not seeded |
 | `r3-dependency-reference`: Validate dependency realization on ocean-science across runtimes | `ocean-science` | draft | proposed | needs-context | not seeded |
-| `r4-shared-prove`: Feed Cowork and Codex results through the same deterministic attester | `nasa-daac-knowledge` | draft | proposed | needs-context | not seeded |
+| `r4-shared-prove`: Feed Cowork and Codex results through the same deterministic attester | `nasa-daac-knowledge` | accepted | done | needs-context | not seeded |
 | `r5-cross-runtime-evals`: Record capability, release lock, runtime and model on every eval result | `evals` | accepted | done | ready | not seeded |
 | `r6-compat-probes`: Add non-blocking compatibility probes for Gemini CLI and Goose | `build-kit` | draft | proposed | ready | not seeded |
 | `r7-release-qualification`: Advertise a runtime as supported only when the qualification harness passes | `build-kit` | draft | proposed | owner-only | not seeded |
@@ -448,8 +448,8 @@ Pillar means sphere; canonical .osp metadata drives organization and runtime pro
 
 - [ ] One canonical skill is discovered and invoked on Claude Code, Claude Cowork and, through the Agent Plugins projection, Codex; the shared script and PROVE step run; the same release identity is recorded on each.
 - [ ] Claude Code installs the capability through one normal install after marketplace setup; Cowork presents the capability rather than its internal KNOW and PROVE dependencies.
-- Depends on: `r1-runtime-renderer`, `r5-cross-runtime-evals`
-- Gate: Three things stand between the harness and a qualified record: a core release that carries the lock (0.5.0 predates it), the attester and receipt (r4-shared-prove), and the Cowork and Codex legs, which the owner runs from the generated checklists.
+- Depends on: `r1-runtime-renderer`, `r5-cross-runtime-evals`, `r4-shared-prove`
+- Gate: Two things stand between the harness and a qualified record: a core release that carries the lock and the attester (0.5.0 predates both), and the Cowork and Codex legs, which the owner runs from the generated checklists.
 - Evidence: `build-kit scripts/qualify.py runs the qualification matrix a capability's surfaces.yaml requires: headlessly on Claude Code (install from the marketplace, dependency check from the installer's record, skill discovery against the runtime's inventory, skill invocation in slash and conversational form, knowledge resolution, connector health, the verification scripts on the installed tree, the side-effect gate, the release-lock match) and by checklist for a runtime it cannot drive; one record per runtime under .osp/qualification/ with each test's status and evidence`, `core 0.5.0 on Claude Code 2.1.269, 2026-09-12: install, skill discovery (12 of 12), skill invocation (start, both forms), knowledge resolution (a concept cited by bundle path), connector registration, golden computation and the side-effect gate pass; dependency resolution is not applicable; prove and receipt are blocked on the attester; release-lock fails because the 0.5.0 release predates the lock; not qualified, recorded in core/.osp/qualification/claude-code.json`
 
 **`r3-dependency-reference`**
@@ -461,7 +461,9 @@ Pillar means sphere; canonical .osp metadata drives organization and runtime pro
 **`r4-shared-prove`**
 
 - [ ] Results produced on both runtimes verify under one attester; the receipt format identifies the capability release.
-- Depends on: `r2-core-reference`
+- Depends on: `r1-runtime-renderer`
+- Gate: The attester and the receipt convention exist and verify a Claude Code result; a Cowork or Codex result verifying under them is the reference capability's evidence (r2), which depends on this.
+- Evidence: `nasa-daac-knowledge: docs/receipt-identity.md states the capability (name, version, release-lock digest) and runtime blocks every receipt and attestation carries; tools/receipt_identity.py checks them, with --package DIR against a package tree, and runs its selftest in the check routine; the ECCO computations gain the blocks at their next re-attestation`, `core: verification/trend_computation.py is the reference executor (the golden notebook's chain on the regenerated synthetic fixture, receipt naming the capability release and the runtime the caller declares, the weighting detector as mutation evidence) and verification/trend_attester.py the deterministic attester (sanctioned code digest, release identity, fixture regenerated and re-hashed, the series checked against it, trend, p value and interval recomputed at 1e-9, evidence and plausibility); knowledge/computations/synthetic-trend.md is the attested computation concept (draft); a tampered series and a wrong release fail; the PROVE step runs in the goldens gate`, `build-kit qualify.py: the prove test has the runtime produce the receipt by running the executor from the installed package, then runs the attester; the receipt test reads the attestation and requires PASS naming the installed version and the runtime; core's surfaces.yaml declares the probe`
 
 **`r5-cross-runtime-evals`**
 

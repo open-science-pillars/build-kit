@@ -918,8 +918,8 @@ initiatives:
         proposal_state: accepted
         status: active
         priority: P1
-        depends_on: [r1-runtime-renderer, r5-cross-runtime-evals]
-        gate: "Three things stand between the harness and a qualified record: a core release that carries the lock (0.5.0 predates it), the attester and receipt (r4-shared-prove), and the Cowork and Codex legs, which the owner runs from the generated checklists."
+        depends_on: [r1-runtime-renderer, r5-cross-runtime-evals, r4-shared-prove]
+        gate: "Two things stand between the harness and a qualified record: a core release that carries the lock and the attester (0.5.0 predates both), and the Cowork and Codex legs, which the owner runs from the generated checklists."
         acceptance:
           - "One canonical skill is discovered and invoked on Claude Code, Claude Cowork and, through the Agent Plugins projection, Codex; the shared script and PROVE step run; the same release identity is recorded on each."
           - "Claude Code installs the capability through one normal install after marketplace setup; Cowork presents the capability rather than its internal KNOW and PROVE dependencies."
@@ -953,17 +953,20 @@ initiatives:
       - id: r4-shared-prove
         title: Feed Cowork and Codex results through the same deterministic attester
         repo: nasa-daac-knowledge
-        proposal_state: draft
-        status: proposed
+        proposal_state: accepted
+        status: done
         priority: P1
-        depends_on: [r2-core-reference]
-        gate: null
+        depends_on: [r1-runtime-renderer]
+        gate: "The attester and the receipt convention exist and verify a Claude Code result; a Cowork or Codex result verifying under them is the reference capability's evidence (r2), which depends on this."
         acceptance:
           - "Results produced on both runtimes verify under one attester; the receipt format identifies the capability release."
-        evidence: []
+        evidence:
+          - "nasa-daac-knowledge: docs/receipt-identity.md states the capability (name, version, release-lock digest) and runtime blocks every receipt and attestation carries; tools/receipt_identity.py checks them, with --package DIR against a package tree, and runs its selftest in the check routine; the ECCO computations gain the blocks at their next re-attestation"
+          - "core: verification/trend_computation.py is the reference executor (the golden notebook's chain on the regenerated synthetic fixture, receipt naming the capability release and the runtime the caller declares, the weighting detector as mutation evidence) and verification/trend_attester.py the deterministic attester (sanctioned code digest, release identity, fixture regenerated and re-hashed, the series checked against it, trend, p value and interval recomputed at 1e-9, evidence and plausibility); knowledge/computations/synthetic-trend.md is the attested computation concept (draft); a tampered series and a wrong release fail; the PROVE step runs in the goldens gate"
+          - "build-kit qualify.py: the prove test has the runtime produce the receipt by running the executor from the installed package, then runs the attester; the receipt test reads the attestation and requires PASS naming the installed version and the runtime; core's surfaces.yaml declares the probe"
         contributor:
           readiness: needs-context
-          champion: needed
+          champion: PaulMRamirez
           prerequisites: [Attested computation pattern]
         labels: [roadmap, enhancement, priority:P1]
         issue: {seed: true, number: null, url: null}

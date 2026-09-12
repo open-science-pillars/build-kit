@@ -44,6 +44,7 @@ import re
 import shutil
 import subprocess
 import sys
+import tempfile
 from pathlib import Path
 from typing import Any
 
@@ -68,6 +69,7 @@ SIZE_WORDS = re.compile(r"\b(?:gb|tb|mb|gigabyte|terabyte|size|estimate)\b", re.
 DEFAULT_TURNS = 30
 DEFAULT_TOOLS = "Read,Glob,Grep,Skill,Bash(claude plugin list*)"
 GATE_TOOLS = "Read,Glob,Grep,Skill"
+PROVE_TOOLS = "Read,Glob,Grep,Skill,Bash(uv run*)"
 
 
 class QualifyError(RuntimeError):
@@ -168,9 +170,15 @@ def plugin_list() -> list[dict[str, Any]]:
         raise QualifyError(f"claude plugin list --json: {exc}: {r.stdout[:200]}") from exc
 
 
-def installed_entry(name: str, entries: list[dict[str, Any]]) -> dict[str, Any] | None:
+def installed_entry(name: str, entries: list[dict[str, Any]], marketplace: str | None = None) -> dict[str, Any] | None:
+    """The installer's entry for name; from the given marketplace when one is
+    named, so a release candidate installed from a local catalog is never
+    confused with the same package installed from the organization's."""
     for e in entries:
-        if e.get("id", "").split("@", 1)[0] == name:
+        pid = e.get("id", "")
+        if marketplace and pid == f"{name}@{marketplace}":
+            return e
+        if not marketplace and pid.split("@", 1)[0] == name:
             return e
     return None
 
@@ -317,7 +325,7 @@ def qualify_claude_code(cap: dict[str, Any], marketplace: str, model: str | None
         mp_name = marketplace_name(marketplace)
     inst = run(["claude", "plugin", "install", f"{name}@{mp_name}", "--json", "-y"], timeout=900)
     entries = plugin_list()
-    entry = installed_entry(name, entries)
+    entry = installed_entry(name, entries, mp_name)
     if inst.returncode != 0 or entry is None:
         record("install", "fail", f"claude plugin install {name}@{mp_name}: {(inst.stdout or inst.stderr)[-300:]}")
         install_path = None
@@ -428,23 +436,58 @@ def qualify_claude_code(cap: dict[str, Any], marketplace: str, model: str | None
         record("golden-computation", "fail" if bad else "pass",
                "; ".join(bad) if bad else "green on the installed tree: " + ", ".join(n for n, _, _ in outcomes))
 
-    # prove and receipt: an attester and the receipt it writes, when the capability declares one
+    # prove and receipt: the runtime produces the result by running the
+    # shared executor, the attester verifies it, and the attestation names
+    # the capability release and the runtime.
     prove = cap["probes"].get("prove") or {}
-    if not prove.get("command"):
+    if not (prove.get("command") and prove.get("prompt")):
         for test in ("prove", "receipt"):
-            record(test, "blocked", "no attester declared in surfaces.yaml probes.prove; the golden notebook is the "
-                                    "deterministic check today, and the shared attester with its receipt is the "
-                                    "r4-shared-prove deliverable")
+            record(test, "blocked", "no attester declared in surfaces.yaml probes.prove (prompt, receipt, command, "
+                                    "attestation); the shared attester with its receipt is the r4-shared-prove deliverable")
+    elif not install_path:
+        for test in ("prove", "receipt"):
+            record(test, "fail", "nothing installed to run the executor from")
     else:
-        cmd = [str(c).replace("${PLUGIN_ROOT}", str(install_path)) for c in prove["command"]]
-        r = run(cmd, timeout=timeout, cwd=install_path)
-        record("prove", "pass" if r.returncode == 0 else "fail", f"{' '.join(cmd)} exit {r.returncode}")
-        receipt = prove.get("receipt")
-        rp = (install_path / receipt) if receipt else None
-        if rp and rp.is_file() and version in rp.read_text(encoding="utf-8", errors="replace"):
-            record("receipt", "pass", f"{receipt} names {version}")
+        work = evidence if evidence is not None else Path(tempfile.mkdtemp(prefix="osp-qualify-"))
+        work.mkdir(parents=True, exist_ok=True)
+        subs = {"${PLUGIN_ROOT}": str(install_path), "${WORK}": str(work), "${RUNTIME}": "claude-code"}
+
+        def fill(value: str) -> str:
+            for k, v in subs.items():
+                value = value.replace(k, v)
+            return value
+
+        prompt = fill(prove["prompt"])
+        reply = headless(prompt, PROVE_TOOLS, max_turns, model, timeout)
+        if reply["model"]:
+            models.add(reply["model"])
+        path = keep(evidence, "prove-produce", reply)
+        receipt_path = Path(fill(prove.get("receipt", "${WORK}/receipt.json")))
+        if not receipt_path.is_file():
+            record("prove", "fail", f"the runtime did not write the receipt {receipt_path.name} ({reply['status']}, "
+                                    f"{reply['turns']} turns, tools {sorted(set(reply['tools']))}) {path}")
+            record("receipt", "fail", "no receipt to attest")
         else:
-            record("receipt", "fail", f"receipt {receipt} missing or does not name {version}")
+            cmd = [fill(str(c)) for c in prove["command"]]
+            r = run(cmd, timeout=timeout, cwd=install_path)
+            if evidence is not None:
+                (evidence / "prove-attest.log").write_text((r.stdout or "") + "\n" + (r.stderr or ""), encoding="utf-8")
+            last = (r.stdout or r.stderr or "").strip().splitlines()[-1:] or [""]
+            record("prove", "pass" if r.returncode == 0 else "fail",
+                   f"the runtime wrote {receipt_path.name} ({reply['status']}, {reply['turns']} turns) {path}; "
+                   f"attester exit {r.returncode}: {last[0][:160]}", prompt=prove["prompt"])
+            att_path = Path(fill(prove.get("attestation", "${WORK}/attestation.json")))
+            if not att_path.is_file():
+                record("receipt", "fail", f"the attester wrote no attestation at {att_path.name}")
+            else:
+                att = osp.read_json(att_path)
+                a_cap, a_rt = att.get("capability") or {}, att.get("runtime") or {}
+                ok = (att.get("verdict") == "PASS" and a_cap.get("name") == name
+                      and str(a_cap.get("version")) == str(installed_version) and a_rt.get("name") == "claude-code")
+                record("receipt", "pass" if ok else "fail",
+                       f"attestation {att.get('verdict')}: names {a_cap.get('name')} {a_cap.get('version')} "
+                       f"(lock {a_cap.get('release_lock')}) on {a_rt.get('name')}; installed {installed_version}",
+                       release_lock_in_receipt=a_cap.get("release_lock"))
 
     # side-effect-confirmation: the download gate appears conversationally
     p = probes["side-effect-confirmation"]
@@ -549,8 +592,16 @@ def write_checklist(cap: dict[str, Any], runtime: str, path: Path) -> None:
             item.update(status="skip", evidence="no declared dependencies")
         if t == "connector-invocation" and not osp.reach_servers(cap["package"]):
             item.update(status="skip", evidence="no REACH declared")
-        if t in {"prove", "receipt"} and not (cap["probes"].get("prove") or {}).get("command"):
+        prove = cap["probes"].get("prove") or {}
+        if t in {"prove", "receipt"} and not (prove.get("command") and prove.get("prompt")):
             item.update(status="blocked", evidence="no attester declared; r4-shared-prove")
+        elif t == "prove":
+            item["prompt"] = prove["prompt"].replace("${RUNTIME}", runtime)
+            item["criteria"] = ("The runtime runs the shared executor and writes the receipt (${PLUGIN_ROOT} is the "
+                                "installed package's root, ${WORK} a directory you choose); then the attester command "
+                                "passes on it: " + " ".join(str(c) for c in prove["command"]))
+        elif t == "receipt":
+            item["criteria"] = "The attestation says PASS and names this capability version and the runtime."
         items.append(item)
     doc = {
         "capability": cap["name"], "version": cap["version"], "release_lock": cap["lock_digest"],
