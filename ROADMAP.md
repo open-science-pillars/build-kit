@@ -70,11 +70,11 @@ Core, ocean-science, and hydrology install through a native Codex marketplace wi
 
 | Deliverable | Repository | Proposal | Status | Contributor | Issue |
 |---|---|---|---|---|---|
-| `codex-core-manifest`: Package core as a Codex plugin | `core` | draft | proposed | ready | not seeded |
-| `codex-ocean-manifest`: Package ocean-science as a Codex plugin | `ocean-science` | draft | proposed | ready | not seeded |
-| `codex-hydrology-manifest`: Package hydrology as a Codex plugin | `hydrology` | draft | proposed | ready | not seeded |
-| `codex-plugin-template`: Add dual Claude and Codex packaging to plugin-template | `plugin-template` | draft | proposed | ready | not seeded |
-| `codex-marketplace-catalog`: Publish the native Codex marketplace catalog | `marketplace` | draft | proposed | ready | not seeded |
+| `codex-core-manifest`: Package core as a Codex plugin | `core` | rejected | declined | ready | not seeded |
+| `codex-ocean-manifest`: Package ocean-science as a Codex plugin | `ocean-science` | rejected | declined | ready | not seeded |
+| `codex-hydrology-manifest`: Package hydrology as a Codex plugin | `hydrology` | rejected | declined | ready | not seeded |
+| `codex-plugin-template`: Add dual Claude and Codex packaging to plugin-template | `plugin-template` | rejected | declined | ready | not seeded |
+| `codex-marketplace-catalog`: Publish the native Codex marketplace catalog | `marketplace` | rejected | declined | ready | not seeded |
 
 #### Acceptance details
 
@@ -83,29 +83,34 @@ Core, ocean-science, and hydrology install through a native Codex marketplace wi
 - [ ] A valid .codex-plugin/plugin.json is present.
 - [ ] A clean Codex install exposes all core skills.
 - Depends on: `codex-surface-policy`
+- Gate: Superseded in form by r1-runtime-renderer: the Agent Plugins projection is rendered from canonical source (plugin.json, mcp.json at the repository root), so no hand-written .codex-plugin manifest is added; the clean-install intent survives as Codex qualification in r2-core-reference and r3-dependency-reference.
 
 **`codex-ocean-manifest`**
 
 - [ ] A valid .codex-plugin/plugin.json is present.
 - [ ] A clean Codex install exposes all ocean-science skills.
 - Depends on: `codex-surface-policy`
+- Gate: Superseded in form by r1-runtime-renderer: the Agent Plugins projection is rendered from canonical source (plugin.json, mcp.json at the repository root), so no hand-written .codex-plugin manifest is added; the clean-install intent survives as Codex qualification in r2-core-reference and r3-dependency-reference.
 
 **`codex-hydrology-manifest`**
 
 - [ ] A valid .codex-plugin/plugin.json is present.
 - [ ] A clean Codex install exposes all hydrology skills.
 - Depends on: `codex-surface-policy`
+- Gate: Superseded in form by r1-runtime-renderer: the Agent Plugins projection is rendered from canonical source (plugin.json, mcp.json at the repository root), so no hand-written .codex-plugin manifest is added; the clean-install intent survives as Codex qualification in r2-core-reference and r3-dependency-reference.
 
 **`codex-plugin-template`**
 
 - [ ] A newly scaffolded plugin validates on Claude and Codex.
 - Depends on: `codex-core-manifest`
+- Gate: Superseded in form by r1-runtime-renderer: the Agent Plugins projection is rendered from canonical source (plugin.json, mcp.json at the repository root), so no hand-written .codex-plugin manifest is added; the clean-install intent survives as Codex qualification in r2-core-reference and r3-dependency-reference.
 
 **`codex-marketplace-catalog`**
 
 - [ ] The Codex marketplace installs every accepted plugin from its repository root.
 - [ ] Clean-install and update evidence is recorded.
 - Depends on: `codex-core-manifest`, `codex-ocean-manifest`, `codex-hydrology-manifest`
+- Gate: Superseded in form by r1-runtime-renderer: the Agent Plugins projection is rendered from canonical source (plugin.json, mcp.json at the repository root), so no hand-written .codex-plugin manifest is added; the clean-install intent survives as Codex qualification in r2-core-reference and r3-dependency-reference.
 
 ### Refined powered knowledge-bundle ablation
 
@@ -349,7 +354,7 @@ Pillar means sphere; canonical .osp metadata drives organization and runtime pro
 | `m3-governance-teams`: Create sphere, provider steward and runtime maintainer teams and rewrite CODEOWNERS to teams | `.github` | accepted | done | owner-only | not seeded |
 | `m4-documentation-alignment`: Align the profile, marketplace README, specification, glossary, guides and tutorials to spheres and runtime projections | `marketplace` | accepted | done | needs-context | not seeded |
 | `m5-planned-repositories`: Instantiate the eleven planned repositories under the planned convention | `.github` | accepted | done | owner-only | not seeded |
-| `r1-runtime-renderer`: Render the Claude and Agent Plugins projections from canonical source and detect drift | `build-kit` | draft | proposed | needs-context | not seeded |
+| `r1-runtime-renderer`: Render the Claude and Agent Plugins projections from canonical source and detect drift | `build-kit` | accepted | done | needs-context | not seeded |
 | `r2-core-reference`: Qualify core as the reference capability on Claude Code, Cowork and Codex from one SKILL.md | `core` | draft | proposed | needs-context | not seeded |
 | `r3-dependency-reference`: Validate dependency realization on ocean-science across runtimes | `ocean-science` | draft | proposed | needs-context | not seeded |
 | `r4-shared-prove`: Feed Cowork and Codex results through the same deterministic attester | `nasa-daac-knowledge` | draft | proposed | needs-context | not seeded |
@@ -437,6 +442,7 @@ Pillar means sphere; canonical .osp metadata drives organization and runtime pro
 - [ ] osp render produces the Claude plugin manifest, the Agent Plugins 1.0 plugin.json and mcp.json where REACH is portable, optional OpenAI extension metadata and the release lock from .osp metadata and the skills tree.
 - [ ] osp plugin-check validates the portable package against the pinned Agent Plugins specification version; CI fails on a hand edit to any generated projection.
 - Depends on: `m1-canonical-metadata`
+- Evidence: `build-kit #22: osp.py render writes .claude-plugin/plugin.json, .mcp.json, plugin.json and mcp.json from .osp/package.yaml (which gained metadata, reach and extensions) and .osp/repository.yaml; render --check fails on a hand edit, compared as JSON values; on core the rendered Claude files were identical to the hand-written ones`, `osp.py plugin-check validates the portable package against the Agent Plugins specification pinned at 1.0.0, its two schemas vendored under osp/agent-plugins/1.0.0/, plus the specification's text rules (single-token command, cwd forms, reserved environment names, URL and header rules, skill discovery and the Agent Skills frontmatter rules, no per-runtime skills tree); osp.py lock writes .osp/release-lock.json with the classification, content and projection digests and the Agent Plugins version; fifteen tests`, `core #32, ocean-science #40, hydrology #53, nasa-daac-knowledge #118 and plugin-template #12 carry the rendered projections and the lock, and their gates run render --check, plugin-check and the lock (reported on pull requests, enforced on a release tag); the portable files belong to the Agent Plugins runtime maintainers in CODEOWNERS; specification 0.6.16 (marketplace #88) and the guides describe it; OpenAI extension metadata is a package.yaml extensions block copied through, unused until Codex documents a namespace`
 
 **`r2-core-reference`**
 
