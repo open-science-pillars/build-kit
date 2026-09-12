@@ -325,6 +325,23 @@ qualified and which are not), and `--check --into README.md` fails
 when the table is out of date. A release stays valid when a runtime is
 not qualified; that runtime is simply not advertised.
 
+On a release candidate (`advertise --check --release`) every required
+surface needs a decision for that version: a qualification record,
+qualified or not, or a waiver. An unqualified surface with no waiver
+blocks the release; a waiver (`qualify.py --surface <runtime> --waive
+--reason TEXT --by NAME`) records who released without the surface and
+why, the surface is not advertised for that release, and the release
+proceeds. A waiver is for one version. `scripts/release_tickets.py
+sync`, run by a package's release-qualification workflow with the
+workflow's own token, opens one issue per required surface with no
+decision, carrying the checklist and the commands, closes it when the
+record or waiver lands on the branch, and keeps one comment on the pull
+request with the state per surface; the procedure for maintainers is
+the release qualification guide in the marketplace repository.
+`qualify.py --candidate` builds a local catalog from the checkout and
+installs the candidate from it, so the Claude Code leg runs on a
+maintainer's machine against what the release will ship.
+
 `osp.py publish` emits `dist/` for one release, refusing while the
 metadata, the projections, the lock, the portable package or a support
 claim is not clean: `claude/<name>-<version>.zip`, the Claude package

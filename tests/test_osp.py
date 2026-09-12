@@ -535,3 +535,36 @@ class AdvertiseTests(unittest.TestCase):
         args = type("A", (), {"repo": str(self.repo), "out": None})()
         with self.assertRaises(osp.OspError):
             osp.command_publish(args)
+
+
+class ReleaseCandidateTests(AdvertiseTests):
+    """The release-candidate mode: every required surface needs a decision."""
+
+    def test_release_needs_a_record_or_a_waiver_for_every_required_surface(self):
+        adv = osp.advertisement(self.repo, release=True)
+        needs = [e for e in adv["errors"] if "needs a decision" in e]
+        self.assertEqual(3, len(needs), adv["errors"])   # claude-code, claude-cowork, openai-codex are required
+        self.record("claude-code", qualified=True)
+        self.record("claude-cowork", qualified=False, blockers=["prove: blocked"])
+        adv = osp.advertisement(self.repo, release=True)
+        self.assertTrue(any("claude-cowork is not qualified" in e and "not waived" in e for e in adv["errors"]), adv["errors"])
+        self.assertTrue(any("decision for openai-codex" in e for e in adv["errors"]), adv["errors"])
+        # waivers are the way through
+        for rt in ("claude-cowork", "openai-codex"):
+            write(self.repo / ".osp" / "qualification" / f"{rt}.json", {
+                "schema_version": 1, "capability": "ocean-science", "version": "0.8.2", "release_lock": None,
+                "runtime": {"name": rt}, "date": "2026-09-12", "source": "waiver", "qualified": False,
+                "waived": {"by": "pmr", "reason": "no shell on this runtime", "date": "2026-09-12"},
+                "blockers": ["waived"], "tests": {}})
+        adv = osp.advertisement(self.repo, release=True)
+        self.assertEqual([], adv["errors"], adv["errors"])
+        self.assertEqual("Not qualified, waived for this release", osp.runtime_verdict(adv["runtimes"]["claude-cowork"]))
+        self.assertIn("no shell on this runtime", osp.render_runtimes_block(adv))
+        # a waived surface can never be advertised
+        surfaces = yaml.safe_load((self.repo / ".osp" / "surfaces.yaml").read_text())
+        surfaces["surfaces"]["claude-cowork"]["status"] = "supported"
+        write(self.repo / ".osp" / "surfaces.yaml", surfaces)
+        self.assertTrue(any("waived" in e and "cannot be advertised" in e for e in osp.advertisement(self.repo)["errors"]))
+
+    def test_ordinary_check_does_not_demand_decisions(self):
+        self.assertEqual([], osp.advertisement(self.repo)["errors"])

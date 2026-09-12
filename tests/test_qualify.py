@@ -158,3 +158,39 @@ class QualifyTests(unittest.TestCase):
         with contextlib.redirect_stdout(buf):
             q.print_status(cap, None)
         self.assertIn("claude-code: QUALIFIED", buf.getvalue())
+
+
+class WaiverAndCandidateTests(unittest.TestCase):
+    def setUp(self):
+        self.tmp = tempfile.TemporaryDirectory()
+        self.root = Path(self.tmp.name)
+        self.cap = q.load_capability(capability(self.root))
+
+    def tearDown(self):
+        self.tmp.cleanup()
+
+    def test_waiver_record(self):
+        rec = q.waive(self.cap, "claude-cowork", "no shell on Cowork", "pmr", None)
+        self.assertFalse(rec["qualified"])
+        self.assertEqual("pmr", rec["waived"]["by"])
+        self.assertEqual("0.8.2", rec["version"])
+        self.assertEqual("waiver", rec["source"])
+        # an existing record for this version keeps its tests
+        path = q.record_path(self.cap, "claude-cowork", None)
+        path.parent.mkdir(parents=True, exist_ok=True)
+        full = q.make_record(self.cap, "claude-cowork", "1.0", "checklist by pmr",
+                             {"install": {"status": "pass", "evidence": "x"}, "prove": {"status": "blocked", "evidence": "no shell"}},
+                             ["m"], None, "0.8.2")
+        path.write_text(json.dumps(full))
+        rec = q.waive(self.cap, "claude-cowork", "no shell on Cowork", "pmr", None)
+        self.assertIn("install", rec["tests"])
+        self.assertEqual("checklist by pmr", rec["source"])
+        self.assertTrue(rec["waived"])
+
+    def test_candidate_catalog_is_a_marketplace_over_the_checkout(self):
+        root = q.candidate_catalog(self.cap, self.root / "work")
+        cat = json.loads((root / ".claude-plugin" / "marketplace.json").read_text())
+        self.assertEqual("osp-candidate", cat["name"])
+        self.assertEqual("./plugins/ocean-science", cat["plugins"][0]["source"])
+        self.assertTrue((root / "plugins" / "ocean-science" / ".osp" / "package.yaml").is_file())
+        self.assertTrue((root / "plugins" / "ocean-science" / "skills" / "ecco" / "SKILL.md").is_file())
