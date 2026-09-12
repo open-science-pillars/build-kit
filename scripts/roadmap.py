@@ -235,8 +235,8 @@ def validate_data(data: dict[str, Any], check_files: bool = True) -> list[str]:
                 errors.append(str(exc))
                 continue
             errors.extend(f"{repo} {error}" for error in schema_errors(gov, GOVERNANCE_SCHEMA))
-            if gov.get("schema_version") != 1:
-                errors.append(f"{repo} governance schema_version must be 1")
+            if gov.get("schema_version") not in {1, 2}:
+                errors.append(f"{repo} governance schema_version must be 1 or 2")
             if gov.get("repository") != repo:
                 errors.append(f"{repo} governance declares {gov.get('repository')!r}")
             maintainers = gov.get("maintainers", {})

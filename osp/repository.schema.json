@@ -1,0 +1,43 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://github.com/open-science-pillars/build-kit/osp/repository.schema.json",
+  "title": "Open Science Pillars repository classification (.osp/repository.yaml)",
+  "description": "The canonical organization-level classification of one repository: what kind of thing it is, how far along it is, and which Earth science spheres it serves. GitHub topics, the profile sphere view, the catalog's classification and every runtime manifest are rendered from this file, never the other way round.",
+  "type": "object",
+  "required": ["schema_version", "repository", "classification"],
+  "properties": {
+    "schema_version": {"const": 1},
+    "repository": {
+      "type": "object",
+      "required": ["name", "kind", "status"],
+      "properties": {
+        "name": {"type": "string", "pattern": "^[A-Za-z0-9._-]+$"},
+        "kind": {"enum": ["foundation", "provider", "capability", "composite", "tooling"]},
+        "status": {"enum": ["planned", "scaffold", "developing", "available"]},
+        "audience": {"type": "string", "minLength": 1},
+        "notes": {"type": "string", "minLength": 1}
+      },
+      "additionalProperties": false
+    },
+    "classification": {
+      "type": "object",
+      "required": ["spheres", "primary_sphere", "discipline"],
+      "properties": {
+        "spheres": {
+          "type": "array",
+          "uniqueItems": true,
+          "items": {"enum": ["atmosphere", "biosphere", "cryosphere", "geosphere", "hydrosphere"]}
+        },
+        "primary_sphere": {
+          "anyOf": [
+            {"enum": ["atmosphere", "biosphere", "cryosphere", "geosphere", "hydrosphere"]},
+            {"type": "null"}
+          ]
+        },
+        "discipline": {"anyOf": [{"type": "string", "minLength": 1}, {"type": "null"}]}
+      },
+      "additionalProperties": false
+    }
+  },
+  "additionalProperties": false
+}

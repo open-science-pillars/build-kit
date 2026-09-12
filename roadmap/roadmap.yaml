@@ -682,7 +682,7 @@ initiatives:
         title: Record the sphere alignment and multi-runtime packaging decisions
         repo: marketplace
         proposal_state: accepted
-        status: active
+        status: done
         priority: P1
         depends_on: []
         gate: null
@@ -690,7 +690,8 @@ initiatives:
           - "ADR A (pillar means sphere) is merged under docs/decisions."
           - "ADR B (multi-runtime capability packaging) is merged under docs/decisions."
           - "The design document the records cite is merged with consistent numbering and passes the wording gate."
-        evidence: []
+        evidence:
+          - "marketplace PR #81: docs/decisions/adr-a-pillar-means-sphere.md, adr-b-multi-runtime-capability-packaging.md, design-sphere-alignment-multi-runtime.md"
         contributor:
           readiness: owner-only
           champion: PaulMRamirez
@@ -701,13 +702,14 @@ initiatives:
         title: Append the dated Phase-2 pre-registration reading of the architecture work
         repo: marketplace
         proposal_state: accepted
-        status: active
+        status: done
         priority: P1
         depends_on: []
         gate: null
         acceptance:
           - "A dated entry states that sphere metadata, provider-neutral .osp metadata, runtime packaging scaffolding and planned repositories are organizational work that neither triggers nor pre-empts the Phase-2 domain gate."
-        evidence: []
+        evidence:
+          - "marketplace PR #81: the 2026-09-11 entry in docs/phase2-preregistration.md"
         contributor:
           readiness: owner-only
           champion: PaulMRamirez
@@ -717,8 +719,8 @@ initiatives:
       - id: m1-canonical-metadata
         title: Add the canonical .osp metadata schemas and apply them to every non-archived repository
         repo: build-kit
-        proposal_state: draft
-        status: proposed
+        proposal_state: accepted
+        status: done
         priority: P1
         depends_on: [m0-decision-records, m0-prereg-amendment]
         gate: null
@@ -726,7 +728,9 @@ initiatives:
           - "Schemas for .osp/repository.yaml, .osp/package.yaml and .osp/surfaces.yaml validate; .osp/governance.yaml gains runtime maintainer teams."
           - "Every existing non-archived repository carries repository.yaml; the sphere view renders from data; expected GitHub topics are computed from it and compared in CI."
           - "No Claude manifest is required as a source of sphere truth."
-        evidence: []
+        evidence:
+          - "build-kit: osp/repository.schema.json, package.schema.json, surfaces.schema.json; roadmap/governance-schema.json at version 2; scripts/osp.py validate, topics, sphere-view; tests/test_osp.py; docs/osp-metadata.md; SPHERE-VIEW.md rendered from data"
+          - "Every non-archived repository carries .osp/repository.yaml and governance.yaml at version 2; core, ocean-science, hydrology and nasa-daac-knowledge carry package.yaml; the plugin, template and bundle gates run osp.py validate so the Claude manifest is checked against the canonical file"
         contributor:
           readiness: needs-context
           champion: PaulMRamirez
@@ -736,15 +740,16 @@ initiatives:
       - id: m1-concept-spheres
         title: Require sphere tags on scientific concepts
         repo: nasa-daac-knowledge
-        proposal_state: draft
-        status: proposed
+        proposal_state: accepted
+        status: done
         priority: P1
         depends_on: [m0-decision-records]
         gate: null
         acceptance:
           - "Concept frontmatter accepts spheres (required for scientific concepts) and gcmd (optional)."
           - "The linter rejects a scientific concept with no sphere; every existing concept is tagged and re-signed where the steward requires it."
-        evidence: []
+        evidence:
+          - "nasa-daac-knowledge tools/check_okf_v02.py E10 and E11; tools/signature_check.py leaves spheres and gcmd outside the signed text; 104 podaac, 36 hydrology, 5 ocean-science and 9 core concepts tagged, the core bundle declared cross-cutting"
         contributor:
           readiness: needs-context
           champion: PaulMRamirez
@@ -754,17 +759,18 @@ initiatives:
       - id: m1-templates
         title: Teach the templates the canonical metadata and the sphere examples
         repo: plugin-template
-        proposal_state: draft
-        status: proposed
+        proposal_state: accepted
+        status: done
         priority: P1
         depends_on: [m1-canonical-metadata]
         gate: null
         acceptance:
           - "plugin-template and knowledge-template carry .osp metadata examples and sphere and status placeholders that fail validation until replaced."
-        evidence: []
+        evidence:
+          - "plugin-template .osp/ with repository, package, surfaces and governance files and a README section; knowledge-template .osp/ and the spheres key on every example concept; a copied template fails osp.py validate until renamed"
         contributor:
           readiness: ready
-          champion: needed
+          champion: PaulMRamirez
           prerequisites: [Plugin scaffolding]
         labels: [roadmap, enhancement, help wanted, priority:P1]
         issue: {seed: true, number: null, url: null}

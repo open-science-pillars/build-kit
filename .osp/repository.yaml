@@ -1,0 +1,15 @@
+# Canonical classification of this repository (the decision record ADR A,
+# docs/decisions in the marketplace repository). GitHub topics, the sphere
+# view and every runtime manifest are rendered from this file.
+schema_version: 1
+
+repository:
+  name: build-kit
+  kind: tooling
+  status: available
+  audience: "Maintainers: the development harness, the roadmap and the metadata tooling"
+
+classification:
+  spheres: []
+  primary_sphere: null
+  discipline: null

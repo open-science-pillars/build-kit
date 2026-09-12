@@ -1,0 +1,35 @@
+name: OSP metadata
+
+on:
+  pull_request:
+    paths:
+      - "osp/**"
+      - "scripts/osp.py"
+      - "tests/test_osp.py"
+      - ".osp/**"
+      - "roadmap/governance-schema.json"
+      - ".github/workflows/osp.yml"
+  push:
+    branches: [main]
+    paths:
+      - "osp/**"
+      - "scripts/osp.py"
+      - "tests/test_osp.py"
+      - ".osp/**"
+      - "roadmap/governance-schema.json"
+      - ".github/workflows/osp.yml"
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  metadata:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@34e114876b0b11c390a56381ad16ebd13914f8d5 # v4.3.1
+      - uses: astral-sh/setup-uv@d0cc045d04ccac9d8b7881df0226f9e82c39688e # v6.8.0
+      - name: This repository's own metadata validates
+        run: uv run scripts/osp.py validate . --standalone
+      - name: Test the tool
+        run: uv run --with pyyaml==6.0.2 --with jsonschema==4.25.1 python -m unittest discover -s tests -p 'test_osp.py'

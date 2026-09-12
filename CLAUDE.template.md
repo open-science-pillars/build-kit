@@ -77,6 +77,46 @@ build-kit: this harness. .github: org files.
     When uncertain, it is knowledge. No concept content is duplicated into a
     skill.
 
+## OSP architecture law
+
+Pillar means an ESSRP sphere (Atmosphere, Biosphere, Cryosphere,
+Geosphere, Hydrosphere). The decision records are ADR A and ADR B in
+marketplace/docs/decisions; the design is
+marketplace/docs/design-sphere-alignment-multi-runtime.md.
+
+Scientific organization:
+- Sphere and discipline answer who asks.
+- Provider bundles answer who signs.
+- Runtime adapters answer where the capability runs.
+
+Canonical scientific behavior belongs in `skills/`.
+Canonical scientific facts belong in governed knowledge bundles.
+Canonical deterministic verification belongs in PROVE implementations.
+External action surfaces belong in REACH.
+
+`.osp/repository.yaml` is the source of repository classification and status.
+`.osp/package.yaml` is the source of package and dependency semantics.
+`.osp/surfaces.yaml` is the source of runtime support policy.
+`.osp/governance.yaml` is the source of repository and runtime governance.
+Claude package files and the Agent Plugins `plugin.json` and `mcp.json`
+files are projections; `build-kit/scripts/osp.py validate` checks they
+agree with the canonical files (build-kit/docs/osp-metadata.md).
+
+Do not:
+- introduce provider-specific scientific behavior;
+- put unique scientific behavior in a runtime agent;
+- duplicate KNOW into a skill to solve packaging;
+- vendor another OSP repository to solve a dependency;
+- hand-maintain GitHub topics that should be rendered from canonical metadata;
+- make a planned repository installable;
+- add a dedicated harness adapter when Agent Plugins 1.0 is sufficient;
+- introduce an upstream model without a concrete external-source case.
+
+Every runtime advertised as supported must pass qualification.
+Claude Code is both a development environment and a runtime.
+Claude Science remains a future runtime candidate until broad
+availability and qualification are practical.
+
 ## Roadmap work protocol
 Start future work with `/osp-session <roadmap-id>` and end with `/osp-close`.
 Numeric sessions are historical compatibility only. Do not start an unaccepted,
