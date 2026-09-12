@@ -11,19 +11,31 @@ installable.
 
 ## Atmosphere
 
-No domain capability yet.
+| Repository | Discipline | Status | Also |
+|---|---|---|---|
+| `atmospheric-composition` | Atmospheric Composition | planned |  |
+| `atmospheric-physics` | Atmospheric Physics | planned |  |
 
 ## Biosphere
 
-No domain capability yet.
+| Repository | Discipline | Status | Also |
+|---|---|---|---|
+| `land-ecosystems` | Land Ecosystems | planned |  |
+| `ocean-biology` | Ocean Biology | planned |  |
 
 ## Cryosphere
 
-No domain capability yet.
+| Repository | Discipline | Status | Also |
+|---|---|---|---|
+| `land-ice` | Land Ice | planned |  |
+| `sea-ice` | Sea Ice | planned |  |
 
 ## Geosphere
 
-No domain capability yet.
+| Repository | Discipline | Status | Also |
+|---|---|---|---|
+| `land-surface` | Land Surface | planned |  |
+| `solid-earth` | Solid Earth | planned |  |
 
 ## Hydrosphere
 
@@ -31,16 +43,20 @@ No domain capability yet.
 |---|---|---|---|
 | `hydrology` | Terrestrial Hydrology | developing | Cryosphere |
 | `ocean-science` | Ocean Physics | available |  |
+| `precipitation` | Precipitation Science | planned | Atmosphere |
 
 ## Provider knowledge
 
 | Repository | Kind | Status | Spheres | Notes |
 |---|---|---|---|---|
 | `nasa-daac-knowledge` | provider | available | all | Provider knowledge bundles (PO.DAAC, ESDIS), signed by their stewards; installed as a dependency of the domain capabilities |
+| `partner-knowledge` | provider | planned | all | Provider knowledge from non-NASA stewards, signed by them; none engaged yet |
 
 ## Composites
 
-None yet.
+| Repository | Kind | Status | Spheres | Notes |
+|---|---|---|---|---|
+| `composites` | composite | planned | all | Cross-sphere composites, each with its own steward, joint knowledge and validation; none yet |
 
 ## Foundation and tooling
 
