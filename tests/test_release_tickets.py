@@ -94,6 +94,9 @@ class ReleaseTicketTests(unittest.TestCase):
 
     def test_tickets_open_for_missing_decisions_and_close_on_records(self):
         rt.sync("o/r", 99, self.cap, dry_run=False)
+        bodies = [i["body"] for i in self.gh.issues]
+        self.assertTrue(any("needs a decision for **OpenAI Codex**" in b for b in bodies), bodies[0][:200])
+        self.assertFalse(any("decision for **agent-plugins**" in b or "decision for **claude**" in b for b in bodies))
         titles = sorted(i["title"] for i in self.gh.issues)
         self.assertEqual(["Qualify ocean-science 0.8.2 on claude-code", "Qualify ocean-science 0.8.2 on claude-cowork",
                           "Qualify ocean-science 0.8.2 on openai-codex"], titles)

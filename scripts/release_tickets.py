@@ -80,7 +80,7 @@ def team_for(cap: dict, runtime: str) -> str | None:
 
 
 def ticket_body(cap: dict, runtime: str, pr: int, checklist_text: str, team: str | None) -> str:
-    title = qualify.RUNTIMES.get(runtime, runtime)
+    title = osp.RUNTIME_TITLES.get(runtime, runtime)
     name, version = cap["name"], cap["version"]
     who = f"@open-science-pillars/{team}" if team else "the runtime maintainers"
     if runtime == "claude-code":
