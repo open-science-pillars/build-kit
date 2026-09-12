@@ -49,10 +49,11 @@ def capability(root: Path, name="ocean-science", status="available", version="0.
             "surfaces": {"claude-code": {"role": ["development", "runtime"], "required": True, "status": "supported"}},
             "qualification": {"require": ["install", "skill-discovery"]},
         })
+    (repo / "CODEOWNERS").write_text("* @open-science-pillars/hydrosphere-maintainers\n")
     write(repo / ".osp" / "governance.yaml", {
         "schema_version": 2, "repository": name,
-        "maintainers": {"users": ["someone"], "teams": [], "status": "interim"},
-        "runtime_maintainers": {"claude-cowork": {"users": ["someone"], "teams": [], "status": "interim"}},
+        "maintainers": {"users": ["someone"], "teams": ["hydrosphere-maintainers"], "status": "interim"},
+        "runtime_maintainers": {"claude-cowork": {"users": [], "teams": ["runtime-cowork-maintainers"], "status": "interim"}},
         "roadmap": {"proposals": "enabled", "authority": "repository-maintainers"},
         "reviews": {"ordinary": 1, "cross_repository": "org-policy", "knowledge": "org-knowledge-policy",
                     "runtime_adapter": "org-runtime-policy"},
@@ -154,6 +155,33 @@ class OspTests(unittest.TestCase):
             self.assertIn(f"## {sphere}", first)
         self.assertIn("| `ocean-science` | Ocean Physics | available |", first)
         self.assertIn("No domain capability yet.", first)
+
+    def test_codeowners_names_registered_teams_only(self):
+        repo = capability(self.root)
+        (repo / "CODEOWNERS").write_text("* @someone\n/knowledge/ @open-science-pillars/no-such-team\n")
+        errors, _ = osp.validate_repo(repo)
+        self.assertTrue(any("names an individual" in e for e in errors), errors)
+        self.assertTrue(any("does not declare" in e for e in errors), errors)
+        (repo / "CODEOWNERS").unlink()
+        errors, _ = osp.validate_repo(repo)
+        self.assertTrue(any("no root CODEOWNERS" in e for e in errors), errors)
+
+    def test_governance_teams_must_be_registered(self):
+        repo = capability(self.root)
+        gov = yaml.safe_load((repo / ".osp" / "governance.yaml").read_text())
+        gov["maintainers"]["teams"] = ["nobody-maintainers"]
+        write(repo / ".osp" / "governance.yaml", gov)
+        errors, _ = osp.validate_repo(repo)
+        self.assertTrue(any("nobody-maintainers" in e for e in errors), errors)
+
+    def test_teams_registry_is_consistent(self):
+        teams = osp.registered_teams()
+        for slug, meta in teams.items():
+            self.assertIn(meta["kind"], {"maintainers", "sphere", "composite", "stewards", "runtime"})
+            if meta.get("parent"):
+                self.assertIn(meta["parent"], teams)
+        for sphere in osp.SPHERES:
+            self.assertIn(f"{sphere}-maintainers", teams)
 
     def test_build_kit_own_metadata_validates(self):
         errors, _ = osp.validate_repo(osp.BUILD_KIT)

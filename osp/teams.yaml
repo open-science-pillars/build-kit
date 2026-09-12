@@ -1,0 +1,66 @@
+# The organization's teams (ADR A, decision 10): who may own what in
+# CODEOWNERS and who a repository's governance.yaml may name. One person
+# occupies every team during the interim solo period; the structure
+# exists so that accepting a maintainer or a steward is a membership
+# change, never a CODEOWNERS rewrite. Review-enforcing rulesets stay off
+# until a repository has two maintainers (GOVERNANCE.md in .github).
+#
+# `osp.py teams` prints the gh commands that create what is declared
+# here; `osp.py validate` refuses a CODEOWNERS owner or a governance team
+# that is not declared here, and an individual handle in CODEOWNERS.
+schema_version: 1
+organization: open-science-pillars
+teams:
+  foundation-maintainers:
+    kind: maintainers
+    scope: The foundation and tooling repositories, and the tooling and gates of every repository
+  hydrosphere-maintainers:
+    kind: sphere
+    sphere: hydrosphere
+    scope: Implementation and roadmap of the Hydrosphere capabilities
+  cryosphere-maintainers:
+    kind: sphere
+    sphere: cryosphere
+    scope: Implementation and roadmap of the Cryosphere capabilities (planned)
+  geosphere-maintainers:
+    kind: sphere
+    sphere: geosphere
+    scope: Implementation and roadmap of the Geosphere capabilities (planned)
+  atmosphere-maintainers:
+    kind: sphere
+    sphere: atmosphere
+    scope: Implementation and roadmap of the Atmosphere capabilities (planned)
+  biosphere-maintainers:
+    kind: sphere
+    sphere: biosphere
+    scope: Implementation and roadmap of the Biosphere capabilities (planned)
+  composites-maintainers:
+    kind: composite
+    scope: Cross-sphere composites; a composite change needs review from each sphere it touches
+  provider-stewards:
+    kind: stewards
+    scope: Parent of the provider steward teams; scientific correctness, evidence, provenance and staleness of provider bundles
+  podaac-stewards:
+    kind: stewards
+    parent: provider-stewards
+    scope: The PO.DAAC bundle (nasa-daac-knowledge/knowledge/podaac) and the plugins' use of its products
+  esdis-stewards:
+    kind: stewards
+    parent: provider-stewards
+    scope: The ESDIS requirements bundle (nasa-daac-knowledge/knowledge/esdis)
+  hydrosphere-methods-stewards:
+    kind: stewards
+    parent: provider-stewards
+    scope: Recipes and attested computations in the Hydrosphere capabilities (the methods steward type the architecture document records)
+  runtime-cowork-maintainers:
+    kind: runtime
+    surface: claude-cowork
+    scope: The Claude projection (.claude-plugin, .mcp.json), Cowork packaging and qualification
+  runtime-agent-plugins-maintainers:
+    kind: runtime
+    surface: agent-plugins
+    scope: The Agent Plugins projection (plugin.json, mcp.json) and its conformance
+  runtime-codex-maintainers:
+    kind: runtime
+    surface: openai-codex
+    scope: Codex qualification of the portable projection

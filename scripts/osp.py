@@ -28,6 +28,8 @@ repository, docs/decisions):
                                       open-science-pillars sets them
   osp.py sphere-view [--check]        render SPHERE-VIEW.md from the
                                       workspace's repository.yaml files
+  osp.py teams                        print the gh commands that create the
+                                      teams osp/teams.yaml declares
 
 Every GitHub mutation is dry-run unless both --apply and the exact
 --confirm-org value are supplied. Exit 1 on any validation error or
@@ -53,6 +55,7 @@ WORKSPACE = BUILD_KIT.parent
 SCHEMAS = BUILD_KIT / "osp"
 GOVERNANCE_SCHEMA = BUILD_KIT / "roadmap" / "governance-schema.json"
 SPHERE_VIEW = BUILD_KIT / "SPHERE-VIEW.md"
+TEAMS_FILE = SCHEMAS / "teams.yaml"
 ORG = "open-science-pillars"
 
 SPHERES = ["atmosphere", "biosphere", "cryosphere", "geosphere", "hydrosphere"]
@@ -88,6 +91,33 @@ def schema_errors(data: Any, schema_path: Path) -> list[str]:
     for error in sorted(validator.iter_errors(normalized), key=lambda e: list(e.absolute_path)):
         where = ".".join(str(x) for x in error.absolute_path) or "root"
         out.append(f"schema {where}: {error.message}")
+    return out
+
+
+def registered_teams() -> dict[str, dict[str, Any]]:
+    data = load_yaml(TEAMS_FILE) if TEAMS_FILE.is_file() else {}
+    return dict((data or {}).get("teams", {}))
+
+
+CODEOWNERS_HANDLE = re.compile(r"(?<!\S)@([A-Za-z0-9_.-]+(?:/[A-Za-z0-9_.-]+)?)")
+
+
+def codeowners_findings(repo_dir: Path, name: str, teams: dict[str, Any]) -> list[str]:
+    """CODEOWNERS names teams from the registry, never individuals."""
+    path = repo_dir / "CODEOWNERS"
+    if not path.is_file():
+        return [f"{name}: no root CODEOWNERS; every repository names its owning team"]
+    out = []
+    for lineno, line in enumerate(path.read_text(encoding="utf-8").splitlines(), 1):
+        text = line.split("#", 1)[0]
+        for handle in CODEOWNERS_HANDLE.findall(text):
+            org, _, team = handle.partition("/")
+            if not team:
+                out.append(f"{name}: CODEOWNERS line {lineno} names an individual (@{handle}); owners are teams")
+            elif org != ORG:
+                out.append(f"{name}: CODEOWNERS line {lineno} names a team outside the organization (@{handle})")
+            elif team not in teams:
+                out.append(f"{name}: CODEOWNERS line {lineno} names @{handle}, which osp/teams.yaml does not declare")
     return out
 
 
@@ -233,15 +263,24 @@ def validate_repo(repo_dir: Path, workspace: Path | None = None) -> tuple[list[s
         if repo["kind"] == "capability" and repo["status"] in {"developing", "available"} and package is None:
             errors.append(f"{name}: a {repo['status']} capability publishes a package (package.yaml)")
 
+    teams = registered_teams()
     governance_path = osp / "governance.yaml"
     if governance_path.is_file():
         gov = load_yaml(governance_path)
         gerrors = schema_errors(gov, GOVERNANCE_SCHEMA)
         errors += [f"{name} governance.yaml {e}" for e in gerrors]
-        if not gerrors and gov.get("repository") != name:
-            errors.append(f"{name}: governance.yaml declares {gov.get('repository')!r}")
+        if not gerrors:
+            if gov.get("repository") != name:
+                errors.append(f"{name}: governance.yaml declares {gov.get('repository')!r}")
+            groups = [("maintainers", gov.get("maintainers", {}))]
+            groups += list((gov.get("runtime_maintainers") or {}).items())
+            for label, group in groups:
+                for team in (group or {}).get("teams", []):
+                    if team not in teams:
+                        errors.append(f"{name}: governance {label} names team {team!r}, which osp/teams.yaml does not declare")
     else:
         warnings.append(f"{name}: no .osp/governance.yaml")
+    errors += codeowners_findings(repo_dir, name, teams)
 
     if workspace is not None and not is_template:
         catalog = catalog_entries(workspace)
@@ -425,6 +464,30 @@ def command_sphere_view(args: argparse.Namespace) -> int:
     return 0
 
 
+def command_teams(args: argparse.Namespace) -> int:
+    """The gh commands that create the declared teams: parents first, then
+    children with the parent's id, then the interim member. Printed, never
+    run: team creation is organization administration."""
+    teams = registered_teams()
+    member = args.member
+    print("# Create the teams osp/teams.yaml declares (organization administration; run with gh logged in as an owner).")
+    print("set -e")
+    ordered = sorted(teams, key=lambda t: (teams[t].get("parent") is not None, t))
+    for slug in ordered:
+        meta = teams[slug]
+        desc = meta.get("scope", "").replace('"', "'")
+        parent = meta.get("parent")
+        cmd = f'gh api -X POST orgs/{ORG}/teams -f name={slug} -f privacy=closed -f description="{desc}"'
+        if parent:
+            cmd += f" -F parent_team_id=$(gh api orgs/{ORG}/teams/{parent} --jq .id)"
+        print(cmd)
+    if member:
+        print(f"# The interim member occupies every team until a handoff.")
+        for slug in ordered:
+            print(f"gh api -X PUT orgs/{ORG}/teams/{slug}/memberships/{member} -f role=maintainer")
+    return 0
+
+
 def parser() -> argparse.ArgumentParser:
     p = argparse.ArgumentParser(description=__doc__, formatter_class=argparse.RawDescriptionHelpFormatter)
     sub = p.add_subparsers(dest="command", required=True)
@@ -440,10 +503,13 @@ def parser() -> argparse.ArgumentParser:
     s.add_argument("--check", action="store_true")
     s.add_argument("--workspace")
     s.add_argument("--output")
+    tm = sub.add_parser("teams")
+    tm.add_argument("--member", default="PaulMRamirez", help="the interim member added to every team ('' for none)")
     return p
 
 
-COMMANDS = {"validate": command_validate, "topics": command_topics, "sphere-view": command_sphere_view}
+COMMANDS = {"validate": command_validate, "topics": command_topics, "sphere-view": command_sphere_view,
+            "teams": command_teams}
 
 
 def main() -> int:
