@@ -40,6 +40,7 @@ import qualify  # noqa: E402
 
 LABEL = "qualification"
 GUIDE = "https://github.com/open-science-pillars/marketplace/blob/main/docs/release-qualification-guide.md"
+WALKTHROUGH = "https://github.com/open-science-pillars/marketplace/blob/main/docs/release-candidate-walkthrough.md"
 
 
 def gh(args: list[str], dry_run: bool = False, payload: dict | None = None) -> object:
@@ -95,7 +96,7 @@ def ticket_body(cap: dict, runtime: str, pr: int, checklist_text: str, team: str
                f"fields, then record it:\n\n"
                f"```sh\nuv run build-kit/scripts/qualify.py --capability {name} --surface {runtime} --from-checklist {runtime}-checklist.yaml\n```\n\n"
                f"and commit `.osp/qualification/{runtime}.json` to the release branch (pull request #{pr}).")
-    return f"""Release candidate **{name} {version}** (pull request #{pr}) needs a decision for **{title}** before it can merge: a qualification record, or a waiver. Owner: {who}. The guide is [{GUIDE.rsplit('/', 1)[-1]}]({GUIDE}).
+    return f"""Release candidate **{name} {version}** (pull request #{pr}) needs a decision for **{title}** before it can merge: a qualification record, or a waiver. Owner: {who}. The procedure is [{GUIDE.rsplit('/', 1)[-1]}]({GUIDE}); the hands-on walkthrough (where to install the candidate from on {title}, the prompts, what a pass looks like) is [{WALKTHROUGH.rsplit('/', 1)[-1]}]({WALKTHROUGH}).
 
 ## Record a run
 
@@ -150,18 +151,24 @@ def sync(repo: str, pr: int, cap: dict, dry_run: bool) -> int:
         title = f"Qualify {name} {version} on {runtime}"
         issue = existing.get(title)
         if decision == "missing":
+            with tempfile.TemporaryDirectory() as tmp:
+                path = Path(tmp) / f"{runtime}-checklist.yaml"
+                qualify.write_checklist(cap, runtime, path)
+                body = ticket_body(cap, runtime, pr, path.read_text(encoding="utf-8"), team_for(cap, runtime))
             if issue is None:
-                with tempfile.TemporaryDirectory() as tmp:
-                    path = Path(tmp) / f"{runtime}-checklist.yaml"
-                    qualify.write_checklist(cap, runtime, path)
-                    body = ticket_body(cap, runtime, pr, path.read_text(encoding="utf-8"), team_for(cap, runtime))
                 created = gh(["-X", "POST", f"repos/{repo}/issues"], dry_run,
                              {"title": title, "body": body, "labels": [LABEL, f"runtime:{runtime}"]})
                 number = created["number"] if created else "(dry-run)"
                 print(f"opened #{number}: {title}")
                 lines.append(f"- {runtime}: no decision yet; ticket #{number}")
             else:
-                print(f"open #{issue['number']}: {title}")
+                # The branch may have moved since the ticket opened (the
+                # require list, a prompt, the lock); the ticket follows it.
+                if (issue.get("body") or "").strip() != body.strip():
+                    gh(["-X", "PATCH", f"repos/{repo}/issues/{issue['number']}"], dry_run, {"body": body})
+                    print(f"refreshed #{issue['number']}: {title}")
+                else:
+                    print(f"open #{issue['number']}: {title}")
                 lines.append(f"- {runtime}: no decision yet; ticket #{issue['number']}")
         else:
             rec = osp.qualification_records(cap["dir"])[runtime]

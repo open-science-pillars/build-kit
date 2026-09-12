@@ -57,7 +57,10 @@ class FakeGitHub:
                 self.comments.append({"id": len(self.comments) + 1, "body": payload["body"]})
         elif args[1] == "PATCH" and path.startswith("repos/o/r/issues/"):
             number = int(path.rsplit("/", 1)[1])
-            self.issues[number - 1]["state"] = payload["state"]
+            if "state" in payload:
+                self.issues[number - 1]["state"] = payload["state"]
+            if "body" in payload:
+                self.issues[number - 1]["body"] = payload["body"]
         return None
 
 
@@ -114,6 +117,18 @@ class ReleaseTicketTests(unittest.TestCase):
         rt.sync("o/r", 99, self.cap, dry_run=False)
         self.assertEqual(3, len(self.gh.issues))
         self.assertEqual(1, len(self.gh.comments))
+        # the branch moves (the require list grows): the open tickets follow it
+        surfaces = rt.osp.load_yaml(self.cap["dir"] / ".osp" / "surfaces.yaml")
+        surfaces["qualification"]["require"].append("release-lock")
+        write(self.cap["dir"] / ".osp" / "surfaces.yaml", surfaces)
+        self.cap = q.load_capability(self.cap["dir"])
+        writes_before = len(self.gh.writes)
+        rt.sync("o/r", 99, self.cap, dry_run=False)
+        self.assertEqual(3, len(self.gh.issues))
+        self.assertIn("- test: release-lock\n  required: true", self.gh.issues[1]["body"])
+        self.assertIn("release-candidate-walkthrough.md", self.gh.issues[1]["body"])
+        refreshed = [w for w in self.gh.writes[writes_before:] if w[0] == "PATCH" and w[1].startswith("repos/o/r/issues/") and "/comments/" not in w[1] and "body" in (w[2] or {})]
+        self.assertEqual(3, len(refreshed))
         # a record and a waiver close their tickets; the third stays open
         self.cap = q.load_capability(self.cap["dir"])
         rec = q.make_record(self.cap, "claude-code", "2.1", "headless", {t: {"status": "pass", "evidence": "x"} for t in self.cap["required"]}, ["m"], None, "0.8.2")
