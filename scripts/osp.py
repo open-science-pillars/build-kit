@@ -491,6 +491,7 @@ PLACEHOLDER_DATA = "${PLUGIN_DATA}"
 CLAUDE_ROOT = "${CLAUDE_PLUGIN_ROOT}"
 SKILL_NAME = re.compile(r"^[a-z0-9]+(?:-[a-z0-9]+)*$")
 SKILL_FIELDS = {"name", "description", "license", "compatibility", "metadata", "allowed-tools"}
+SKILL_BODY_LINES = 500   # the specification's recommendation for SKILL.md
 RUNTIME_DIR_NAMES = {"claude", "claude-code", "cowork", "claude-cowork", "openai", "codex", "openai-codex",
                      "gemini", "gemini-cli", "goose", "cursor", "copilot", "kiro"}
 DIGEST_SKIP_DIRS = {"__pycache__", ".git", ".ipynb_checkpoints"}
@@ -784,7 +785,8 @@ def skill_findings(skills_dir: Path, name: str) -> tuple[list[str], list[str]]:
         if not skill_md.is_file():
             warnings.append(f"{name}: skills/{child.name}/ has no SKILL.md and is not a skill a client discovers")
             continue
-        fm = parse_frontmatter(skill_md.read_text(encoding="utf-8"))
+        text = skill_md.read_text(encoding="utf-8")
+        fm = parse_frontmatter(text)
         where = f"{name}: skills/{child.name}/SKILL.md"
         if fm is None:
             errors.append(f"{where} has no YAML frontmatter")
@@ -809,6 +811,12 @@ def skill_findings(skills_dir: Path, name: str) -> tuple[list[str], list[str]]:
         if metadata is not None and (not isinstance(metadata, dict)
                                      or not all(isinstance(k, str) and isinstance(v, str) for k, v in metadata.items())):
             errors.append(f"{where}: metadata is a map of string keys to string values")
+        for field in ("license", "allowed-tools"):
+            if field in fm and not isinstance(fm[field], str):
+                errors.append(f"{where}: {field} is a string")
+        if text.count("\n") > SKILL_BODY_LINES:
+            warnings.append(f"{where} is over {SKILL_BODY_LINES} lines; the specification recommends moving detail "
+                            "to references/ so the activated skill stays small")
         for field in sorted(set(fm) - SKILL_FIELDS):
             outside.setdefault(field, []).append(child.name)
     for field, names in sorted(outside.items()):
