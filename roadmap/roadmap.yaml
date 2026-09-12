@@ -187,11 +187,11 @@ initiatives:
       - id: codex-core-manifest
         title: Package core as a Codex plugin
         repo: core
-        proposal_state: draft
-        status: proposed
+        proposal_state: rejected
+        status: declined
         priority: P1
         depends_on: [codex-surface-policy]
-        gate: null
+        gate: "Superseded in form by r1-runtime-renderer: the Agent Plugins projection is rendered from canonical source (plugin.json, mcp.json at the repository root), so no hand-written .codex-plugin manifest is added; the clean-install intent survives as Codex qualification in r2-core-reference and r3-dependency-reference."
         acceptance:
           - "A valid .codex-plugin/plugin.json is present."
           - "A clean Codex install exposes all core skills."
@@ -205,11 +205,11 @@ initiatives:
       - id: codex-ocean-manifest
         title: Package ocean-science as a Codex plugin
         repo: ocean-science
-        proposal_state: draft
-        status: proposed
+        proposal_state: rejected
+        status: declined
         priority: P1
         depends_on: [codex-surface-policy]
-        gate: null
+        gate: "Superseded in form by r1-runtime-renderer: the Agent Plugins projection is rendered from canonical source (plugin.json, mcp.json at the repository root), so no hand-written .codex-plugin manifest is added; the clean-install intent survives as Codex qualification in r2-core-reference and r3-dependency-reference."
         acceptance:
           - "A valid .codex-plugin/plugin.json is present."
           - "A clean Codex install exposes all ocean-science skills."
@@ -223,11 +223,11 @@ initiatives:
       - id: codex-hydrology-manifest
         title: Package hydrology as a Codex plugin
         repo: hydrology
-        proposal_state: draft
-        status: proposed
+        proposal_state: rejected
+        status: declined
         priority: P1
         depends_on: [codex-surface-policy]
-        gate: null
+        gate: "Superseded in form by r1-runtime-renderer: the Agent Plugins projection is rendered from canonical source (plugin.json, mcp.json at the repository root), so no hand-written .codex-plugin manifest is added; the clean-install intent survives as Codex qualification in r2-core-reference and r3-dependency-reference."
         acceptance:
           - "A valid .codex-plugin/plugin.json is present."
           - "A clean Codex install exposes all hydrology skills."
@@ -241,11 +241,11 @@ initiatives:
       - id: codex-plugin-template
         title: Add dual Claude and Codex packaging to plugin-template
         repo: plugin-template
-        proposal_state: draft
-        status: proposed
+        proposal_state: rejected
+        status: declined
         priority: P1
         depends_on: [codex-core-manifest]
-        gate: null
+        gate: "Superseded in form by r1-runtime-renderer: the Agent Plugins projection is rendered from canonical source (plugin.json, mcp.json at the repository root), so no hand-written .codex-plugin manifest is added; the clean-install intent survives as Codex qualification in r2-core-reference and r3-dependency-reference."
         acceptance:
           - "A newly scaffolded plugin validates on Claude and Codex."
         evidence: []
@@ -258,11 +258,11 @@ initiatives:
       - id: codex-marketplace-catalog
         title: Publish the native Codex marketplace catalog
         repo: marketplace
-        proposal_state: draft
-        status: proposed
+        proposal_state: rejected
+        status: declined
         priority: P1
         depends_on: [codex-core-manifest, codex-ocean-manifest, codex-hydrology-manifest]
-        gate: null
+        gate: "Superseded in form by r1-runtime-renderer: the Agent Plugins projection is rendered from canonical source (plugin.json, mcp.json at the repository root), so no hand-written .codex-plugin manifest is added; the clean-install intent survives as Codex qualification in r2-core-reference and r3-dependency-reference."
         acceptance:
           - "The Codex marketplace installs every accepted plugin from its repository root."
           - "Clean-install and update evidence is recorded."
@@ -894,18 +894,21 @@ initiatives:
       - id: r1-runtime-renderer
         title: Render the Claude and Agent Plugins projections from canonical source and detect drift
         repo: build-kit
-        proposal_state: draft
-        status: proposed
+        proposal_state: accepted
+        status: done
         priority: P1
         depends_on: [m1-canonical-metadata]
         gate: null
         acceptance:
           - "osp render produces the Claude plugin manifest, the Agent Plugins 1.0 plugin.json and mcp.json where REACH is portable, optional OpenAI extension metadata and the release lock from .osp metadata and the skills tree."
           - "osp plugin-check validates the portable package against the pinned Agent Plugins specification version; CI fails on a hand edit to any generated projection."
-        evidence: []
+        evidence:
+          - "build-kit #22: osp.py render writes .claude-plugin/plugin.json, .mcp.json, plugin.json and mcp.json from .osp/package.yaml (which gained metadata, reach and extensions) and .osp/repository.yaml; render --check fails on a hand edit, compared as JSON values; on core the rendered Claude files were identical to the hand-written ones"
+          - "osp.py plugin-check validates the portable package against the Agent Plugins specification pinned at 1.0.0, its two schemas vendored under osp/agent-plugins/1.0.0/, plus the specification's text rules (single-token command, cwd forms, reserved environment names, URL and header rules, skill discovery and the Agent Skills frontmatter rules, no per-runtime skills tree); osp.py lock writes .osp/release-lock.json with the classification, content and projection digests and the Agent Plugins version; fifteen tests"
+          - "core #32, ocean-science #40, hydrology #53, nasa-daac-knowledge #118 and plugin-template #12 carry the rendered projections and the lock, and their gates run render --check, plugin-check and the lock (reported on pull requests, enforced on a release tag); the portable files belong to the Agent Plugins runtime maintainers in CODEOWNERS; specification 0.6.16 (marketplace #88) and the guides describe it; OpenAI extension metadata is a package.yaml extensions block copied through, unused until Codex documents a namespace"
         contributor:
           readiness: needs-context
-          champion: needed
+          champion: PaulMRamirez
           prerequisites: [Agent Plugins 1.0, Claude plugin format, Python]
         labels: [roadmap, enhancement, help wanted, priority:P1]
         issue: {seed: true, number: null, url: null}
