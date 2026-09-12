@@ -5,7 +5,9 @@ on:
     paths:
       - "osp/**"
       - "scripts/osp.py"
+      - "scripts/qualify.py"
       - "tests/test_osp.py"
+      - "tests/test_qualify.py"
       - ".osp/**"
       - "roadmap/governance-schema.json"
       - ".github/workflows/osp.yml"
@@ -14,7 +16,9 @@ on:
     paths:
       - "osp/**"
       - "scripts/osp.py"
+      - "scripts/qualify.py"
       - "tests/test_osp.py"
+      - "tests/test_qualify.py"
       - ".osp/**"
       - "roadmap/governance-schema.json"
       - ".github/workflows/osp.yml"
@@ -32,4 +36,4 @@ jobs:
       - name: This repository's own metadata validates
         run: uv run scripts/osp.py validate . --standalone
       - name: Test the tool
-        run: uv run --with pyyaml==6.0.2 --with jsonschema==4.25.1 python -m unittest discover -s tests -p 'test_osp.py'
+        run: uv run --with pyyaml==6.0.2 --with jsonschema==4.25.1 python -m unittest discover -s tests -p 'test_*.py'

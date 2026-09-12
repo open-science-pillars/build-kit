@@ -355,7 +355,7 @@ Pillar means sphere; canonical .osp metadata drives organization and runtime pro
 | `m4-documentation-alignment`: Align the profile, marketplace README, specification, glossary, guides and tutorials to spheres and runtime projections | `marketplace` | accepted | done | needs-context | not seeded |
 | `m5-planned-repositories`: Instantiate the eleven planned repositories under the planned convention | `.github` | accepted | done | owner-only | not seeded |
 | `r1-runtime-renderer`: Render the Claude and Agent Plugins projections from canonical source and detect drift | `build-kit` | accepted | done | needs-context | not seeded |
-| `r2-core-reference`: Qualify core as the reference capability on Claude Code, Cowork and Codex from one SKILL.md | `core` | draft | proposed | needs-context | not seeded |
+| `r2-core-reference`: Qualify core as the reference capability on Claude Code, Cowork and Codex from one SKILL.md | `core` | accepted | active | needs-context | not seeded |
 | `r3-dependency-reference`: Validate dependency realization on ocean-science across runtimes | `ocean-science` | draft | proposed | needs-context | not seeded |
 | `r4-shared-prove`: Feed Cowork and Codex results through the same deterministic attester | `nasa-daac-knowledge` | draft | proposed | needs-context | not seeded |
 | `r5-cross-runtime-evals`: Record capability, release lock, runtime and model on every eval result | `evals` | accepted | done | ready | not seeded |
@@ -449,6 +449,8 @@ Pillar means sphere; canonical .osp metadata drives organization and runtime pro
 - [ ] One canonical skill is discovered and invoked on Claude Code, Claude Cowork and, through the Agent Plugins projection, Codex; the shared script and PROVE step run; the same release identity is recorded on each.
 - [ ] Claude Code installs the capability through one normal install after marketplace setup; Cowork presents the capability rather than its internal KNOW and PROVE dependencies.
 - Depends on: `r1-runtime-renderer`, `r5-cross-runtime-evals`
+- Gate: Three things stand between the harness and a qualified record: a core release that carries the lock (0.5.0 predates it), the attester and receipt (r4-shared-prove), and the Cowork and Codex legs, which the owner runs from the generated checklists.
+- Evidence: `build-kit scripts/qualify.py runs the qualification matrix a capability's surfaces.yaml requires: headlessly on Claude Code (install from the marketplace, dependency check from the installer's record, skill discovery against the runtime's inventory, skill invocation in slash and conversational form, knowledge resolution, connector health, the verification scripts on the installed tree, the side-effect gate, the release-lock match) and by checklist for a runtime it cannot drive; one record per runtime under .osp/qualification/ with each test's status and evidence`, `core 0.5.0 on Claude Code 2.1.269, 2026-09-12: install, skill discovery (12 of 12), skill invocation (start, both forms), knowledge resolution (a concept cited by bundle path), connector registration, golden computation and the side-effect gate pass; dependency resolution is not applicable; prove and receipt are blocked on the attester; release-lock fails because the 0.5.0 release predates the lock; not qualified, recorded in core/.osp/qualification/claude-code.json`
 
 **`r3-dependency-reference`**
 

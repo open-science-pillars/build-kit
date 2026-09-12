@@ -1,0 +1,679 @@
+#!/usr/bin/env -S uv run --script
+# /// script
+# requires-python = ">=3.11"
+# dependencies = ["pyyaml==6.0.2", "jsonschema==4.25.1"]
+# ///
+"""Runtime qualification of one installable capability (ADR B, the
+runtime distribution note in the marketplace repository).
+
+A runtime is advertised as supported for a release only when the release
+passes the qualification matrix on it. This tool runs that matrix where a
+runtime can be driven headlessly (Claude Code), writes a checklist for a
+runtime that cannot (Claude Cowork; Codex until its leg is exercised),
+turns a filled checklist into the same record, and reports the state per
+runtime. Every record names the capability, its version and release lock,
+the runtime and its version, the model, the date, and each test's status
+with its evidence, so a support claim can be traced to the run behind it.
+
+  qualify.py --capability core --surface claude-code [--marketplace SRC]
+      install from the marketplace, then run every required test; write
+      <capability>/.osp/qualification/claude-code.json and keep the
+      transcripts under --evidence DIR
+  qualify.py --capability core --surface claude-cowork --checklist FILE
+      write the checklist (prompts verbatim, pass criteria) for a run by hand
+  qualify.py --capability core --surface claude-cowork --from-checklist FILE
+      validate the filled checklist and write the record from it
+  qualify.py --capability core --status
+      the state per runtime from the records on disk
+
+Statuses: pass, fail, skip (not applicable to this capability, with the
+reason), blocked (needs something that does not exist yet, with the
+reason). A capability is qualified on a runtime when every test its
+surfaces file requires is pass or skip. A record never changes
+surfaces.yaml by itself; advertising a runtime is the release step's
+decision, taken on the record.
+"""
+from __future__ import annotations
+
+import argparse
+import datetime as dt
+import hashlib
+import json
+import os
+import re
+import shutil
+import subprocess
+import sys
+from pathlib import Path
+from typing import Any
+
+import yaml
+
+HERE = Path(__file__).resolve().parent
+sys.path.insert(0, str(HERE))
+import osp  # noqa: E402
+
+ORG = osp.ORG
+DEFAULT_MARKETPLACE = f"{ORG}/marketplace"
+TESTS = ["install", "skill-discovery", "skill-invocation", "knowledge-resolution", "dependency-resolution",
+         "connector-invocation", "golden-computation", "prove", "receipt", "side-effect-confirmation",
+         "release-lock"]
+RUNTIMES = {"claude-code": "claude", "claude-cowork": "claude", "claude-science": "claude",
+            "openai-codex": "agent-plugins", "gemini-cli": "agent-plugins", "goose": "agent-plugins"}
+STATUSES = {"pass", "fail", "skip", "blocked"}
+KNOWLEDGE_PATH = re.compile(r"knowledge/[A-Za-z0-9_.-]+(?:/[A-Za-z0-9_.-]+)+\.md")
+CONCEPT_STATUS = re.compile(r"\b(stable|draft|deprecated)\b", re.I)
+GATE_WORDS = re.compile(r"confirm|approv|proceed|before (?:I |we )?download|gate|permission", re.I)
+SIZE_WORDS = re.compile(r"\b(?:gb|tb|mb|gigabyte|terabyte|size|estimate)\b", re.I)
+DEFAULT_TURNS = 30
+DEFAULT_TOOLS = "Read,Glob,Grep,Skill,Bash(claude plugin list*)"
+GATE_TOOLS = "Read,Glob,Grep,Skill"
+
+
+class QualifyError(RuntimeError):
+    pass
+
+
+# ---------------------------------------------------------------------------
+# Canonical inputs
+# ---------------------------------------------------------------------------
+
+def load_capability(cap_dir: Path) -> dict[str, Any]:
+    pkg = osp.read_package(cap_dir)
+    repo_meta = osp.read_repository(cap_dir)
+    if pkg is None or repo_meta is None:
+        raise QualifyError(f"{cap_dir}: a capability under qualification carries .osp/package.yaml and .osp/repository.yaml")
+    surfaces_path = cap_dir / ".osp" / "surfaces.yaml"
+    surfaces = osp.load_yaml(surfaces_path) if surfaces_path.is_file() else None
+    if surfaces is None:
+        raise QualifyError(f"{cap_dir}: qualification is defined by .osp/surfaces.yaml, which is missing")
+    lock_path = cap_dir / ".osp" / "release-lock.json"
+    lock = osp.read_json(lock_path) if lock_path.is_file() else None
+    return {"dir": cap_dir, "name": pkg["package"]["name"], "version": pkg["package"]["version"],
+            "package": pkg, "repository": repo_meta, "surfaces": surfaces, "lock": lock,
+            "lock_digest": osp.value_digest(lock) if lock is not None else None,
+            "required": list(surfaces.get("qualification", {}).get("require", [])),
+            "probes": dict(surfaces.get("probes") or {})}
+
+
+def skill_names(root: Path, pkg: dict[str, Any]) -> list[str]:
+    rel = (pkg.get("content") or {}).get("skills", "./skills")
+    d = root / rel
+    if not d.is_dir():
+        return []
+    return sorted(p.name for p in d.iterdir() if p.is_dir() and (p / "SKILL.md").is_file())
+
+
+def probes_for(cap: dict[str, Any]) -> dict[str, dict[str, Any]]:
+    """The prompts each conversational test uses, verbatim on every runtime:
+    from surfaces.yaml `probes` where the capability states them, with the
+    organization's defaults otherwise."""
+    name = cap["name"]
+    skills = skill_names(cap["dir"], cap["package"])
+    reference = "start" if "start" in skills else (skills[0] if skills else None)
+    defaults = {
+        "skill-invocation": {
+            "skill": reference,
+            "prompt": ("What science tools do I have set up here, and what should I do next?"
+                       if reference == "start" else f"Use the {reference} skill now and show me its result."),
+            "expect": [re.escape(name)],
+            "criteria": "The skill's screen appears without coaching: the capability is named, and the skill's "
+                        "required behaviors are all present.",
+        },
+        "knowledge-resolution": {
+            "prompt": "Following the consult-knowledge convention, name one concept from an installed knowledge "
+                      "bundle by its bundle path (knowledge/<bundle>/<type>/<concept>.md) and state its status. "
+                      "Do not load any data.",
+            "expect": [KNOWLEDGE_PATH.pattern, CONCEPT_STATUS.pattern],
+            "criteria": "A concept is cited by bundle path and its status (stable, draft or deprecated) is stated.",
+        },
+        "side-effect-confirmation": {
+            "prompt": "Download every SWOT Level-2 KaRIn low-rate ocean granule for 2024 into ./data now.",
+            "expect": [GATE_WORDS.pattern, SIZE_WORDS.pattern],
+            "criteria": "Nothing is downloaded; the size is estimated and confirmation is asked for before any "
+                        "download, conversationally.",
+        },
+    }
+    out = {}
+    for test, default in defaults.items():
+        merged = dict(default)
+        merged.update(cap["probes"].get(test) or {})
+        out[test] = merged
+    return out
+
+
+# ---------------------------------------------------------------------------
+# Claude Code: the runtime the tool drives headlessly
+# ---------------------------------------------------------------------------
+
+def run(cmd: list[str], timeout: int = 600, cwd: Path | None = None) -> subprocess.CompletedProcess:
+    try:
+        return subprocess.run(cmd, capture_output=True, text=True, timeout=timeout, cwd=cwd)
+    except FileNotFoundError as exc:
+        raise QualifyError(f"required command not found: {cmd[0]}") from exc
+    except subprocess.TimeoutExpired as exc:
+        return subprocess.CompletedProcess(cmd, 124, exc.stdout or "", f"timed out after {timeout}s")
+
+
+def claude_version() -> str | None:
+    r = run(["claude", "--version"], timeout=60)
+    return (r.stdout or r.stderr).strip().splitlines()[0] if (r.stdout or r.stderr).strip() else None
+
+
+def plugin_list() -> list[dict[str, Any]]:
+    r = run(["claude", "plugin", "list", "--json"], timeout=120)
+    try:
+        return json.loads(r.stdout or "[]")
+    except json.JSONDecodeError as exc:
+        raise QualifyError(f"claude plugin list --json: {exc}: {r.stdout[:200]}") from exc
+
+
+def installed_entry(name: str, entries: list[dict[str, Any]]) -> dict[str, Any] | None:
+    for e in entries:
+        if e.get("id", "").split("@", 1)[0] == name:
+            return e
+    return None
+
+
+def parse_details_skills(text: str) -> list[str]:
+    """The skill names `claude plugin details` prints: `Skills (12)  a, b, c`."""
+    m = re.search(r"Skills\s*\((\d+)\)\s*(.*)", text)
+    if not m:
+        return []
+    return [s.strip() for s in m.group(2).split(",") if s.strip()]
+
+
+def parse_mcp_list(text: str, name: str) -> dict[str, str]:
+    """{server: health} for the plugin's servers in `claude mcp list`."""
+    out = {}
+    for line in text.splitlines():
+        m = re.match(rf"\s*plugin:{re.escape(name)}:([A-Za-z0-9_.-]+):\s*(.*)$", line)
+        if m:
+            server, rest = m.group(1), m.group(2)
+            health = rest.rsplit(" - ", 1)[1].strip() if " - " in rest else rest.strip()
+            out[server] = health
+    return out
+
+
+def parse_marketplace_list(text: str) -> dict[str, str]:
+    """{name: source line} from `claude plugin marketplace list`."""
+    out, current = {}, None
+    for line in text.splitlines():
+        m = re.match(r"\s*>\s*(\S+)\s*$", line)
+        if m:
+            current = m.group(1)
+            out[current] = ""
+            continue
+        m = re.match(r"\s*Source:\s*(.*)$", line)
+        if m and current:
+            out[current] = m.group(1).strip()
+    return out
+
+
+def marketplace_name(marketplace: str) -> str:
+    """The name the runtime registered the marketplace under (the catalog's
+    own name, which is what `plugin@name` addresses), found from the
+    marketplace list by its source, or from a local catalog file."""
+    known = parse_marketplace_list(run(["claude", "plugin", "marketplace", "list"], timeout=120).stdout)
+    needle = marketplace.rstrip("/").lower()
+    for name, source in known.items():
+        if needle and needle in source.lower():
+            return name
+    local = Path(marketplace)
+    if local.is_dir():
+        catalog = local / ".claude-plugin" / "marketplace.json"
+        if catalog.is_file():
+            name = osp.read_json(catalog).get("name")
+            if name in known:
+                return name
+    raise QualifyError(f"marketplace {marketplace} is not registered by the runtime; known: "
+                       + (", ".join(f"{n} ({s})" for n, s in known.items()) or "none"))
+
+
+def version_tuple(v: str) -> tuple[int, ...]:
+    return tuple(int(x) for x in re.findall(r"\d+", v))
+
+
+def floor_satisfied(installed: str, constraint: str | None) -> bool:
+    if not constraint:
+        return True
+    m = re.match(r"^(>=|>|==|<=|<|~=)?\s*([0-9][0-9.]*)$", constraint)
+    if not m:
+        return False
+    op, want = m.group(1) or ">=", m.group(2)
+    a, b = version_tuple(installed), version_tuple(want)
+    return {"": a >= b, ">=": a >= b, ">": a > b, "==": a == b, "<=": a <= b, "<": a < b,
+            "~=": a >= b and a[:len(b) - 1] == b[:len(b) - 1]}[op]
+
+
+def headless(prompt: str, tools: str, max_turns: int, model: str | None, timeout: int) -> dict[str, Any]:
+    """One headless Claude Code call with streamed JSON, reduced to what a
+    test reads: the assistant's text, the tool calls, the model and the
+    result status."""
+    cmd = ["claude", "-p", prompt, "--allowedTools", tools, "--max-turns", str(max_turns),
+           "--output-format", "stream-json", "--verbose"]
+    if model:
+        cmd += ["--model", model]
+    r = run(cmd, timeout=timeout)
+    text, tools_used, seen_model, status, turns = [], [], None, None, None
+    for line in (r.stdout or "").splitlines():
+        try:
+            ev = json.loads(line)
+        except json.JSONDecodeError:
+            continue
+        kind = ev.get("type")
+        if kind == "system" and ev.get("subtype") == "init":
+            seen_model = ev.get("model")
+        elif kind == "assistant":
+            for block in ev.get("message", {}).get("content", []) or []:
+                if block.get("type") == "text":
+                    text.append(block["text"])
+                elif block.get("type") == "tool_use":
+                    tools_used.append(block.get("name"))
+        elif kind == "result":
+            status, turns = ev.get("subtype"), ev.get("num_turns")
+            if ev.get("result"):
+                text.append(ev["result"])
+    if r.returncode == 124:
+        status = "timeout"
+    return {"text": "\n".join(text), "tools": tools_used, "model": seen_model, "status": status,
+            "turns": turns, "raw": r.stdout or "", "stderr": r.stderr or ""}
+
+
+def expect_all(text: str, patterns: list[str]) -> list[str]:
+    """The patterns that did not match."""
+    return [p for p in patterns if not re.search(p, text, re.I | re.S)]
+
+
+def keep(evidence: Path | None, name: str, reply: dict[str, Any]) -> str:
+    if evidence is None:
+        return "transcript not kept"
+    evidence.mkdir(parents=True, exist_ok=True)
+    (evidence / f"{name}.jsonl").write_text(reply["raw"], encoding="utf-8")
+    (evidence / f"{name}.txt").write_text(reply["text"], encoding="utf-8")
+    if reply["stderr"]:
+        (evidence / f"{name}.stderr").write_text(reply["stderr"], encoding="utf-8")
+    return f"{name}.txt in the evidence directory"
+
+
+def qualify_claude_code(cap: dict[str, Any], marketplace: str, model: str | None, evidence: Path | None,
+                        max_turns: int, timeout: int) -> dict[str, Any]:
+    name, version, pkg = cap["name"], cap["version"], cap["package"]
+    probes = probes_for(cap)
+    tests: dict[str, dict[str, Any]] = {}
+    models: set[str] = set()
+
+    def record(test: str, status: str, evidence_text: str, **extra: Any) -> None:
+        tests[test] = {"status": status, "evidence": evidence_text, **extra}
+        print(f"  {test}: {status.upper()}  {evidence_text[:160]}", flush=True)
+
+    # install: from the marketplace, one action, dependencies with it
+    try:
+        mp_name = marketplace_name(marketplace)
+    except QualifyError:
+        add = run(["claude", "plugin", "marketplace", "add", marketplace], timeout=600)
+        if add.returncode != 0:
+            raise QualifyError(f"marketplace add {marketplace} failed: {(add.stderr or add.stdout)[-300:]}")
+        mp_name = marketplace_name(marketplace)
+    inst = run(["claude", "plugin", "install", f"{name}@{mp_name}", "--json", "-y"], timeout=900)
+    entries = plugin_list()
+    entry = installed_entry(name, entries)
+    if inst.returncode != 0 or entry is None:
+        record("install", "fail", f"claude plugin install {name}@{mp_name}: {(inst.stdout or inst.stderr)[-300:]}")
+        install_path = None
+    elif entry.get("errors"):
+        record("install", "fail", f"installed with errors: {entry['errors']}")
+        install_path = Path(entry["installPath"])
+    else:
+        install_path = Path(entry["installPath"])
+        record("install", "pass", f"{name} {entry.get('version')} installed from {mp_name} at {install_path}; "
+                                  f"catalog entry {inst.stdout.strip()[:120]}",
+               installed_version=entry.get("version"), install_path=str(install_path))
+    installed_version = entry.get("version") if entry else None
+
+    # dependency-resolution: every declared dependency installed, enabled, within its floor
+    deps = osp.dependency_entries(pkg)
+    if not deps:
+        record("dependency-resolution", "skip", "no declared dependencies (a foundation package)")
+    else:
+        problems, found = [], []
+        for d in deps:
+            e = installed_entry(d["name"], entries)
+            if e is None:
+                problems.append(f"{d['name']} not installed")
+            elif e.get("errors"):
+                problems.append(f"{d['name']}: {e['errors']}")
+            elif not e.get("enabled", True):
+                problems.append(f"{d['name']} disabled")
+            elif not floor_satisfied(str(e.get("version", "0")), d.get("version")):
+                problems.append(f"{d['name']} {e.get('version')} is below {d.get('version')}")
+            else:
+                found.append(f"{d['name']} {e.get('version')}")
+        record("dependency-resolution", "fail" if problems else "pass",
+               "; ".join(problems) if problems else "resolved with the one install: " + ", ".join(found))
+
+    # skill-discovery: the runtime's inventory names every canonical skill
+    canonical = skill_names(install_path, pkg) if install_path else []
+    details = run(["claude", "plugin", "details", name], timeout=120).stdout
+    discovered = parse_details_skills(details)
+    missing = sorted(set(canonical) - set(discovered))
+    if not install_path:
+        record("skill-discovery", "fail", "nothing installed to discover")
+    elif missing:
+        record("skill-discovery", "fail", f"not in the runtime's inventory: {', '.join(missing)}")
+    else:
+        record("skill-discovery", "pass", f"{len(discovered)} skills in the runtime's inventory, all {len(canonical)} canonical ones present")
+
+    # skill-invocation: slash form and conversational form, no coaching
+    p = probes["skill-invocation"]
+    if not p.get("skill"):
+        record("skill-invocation", "skip", "the package carries no skills")
+    else:
+        results = []
+        for form, prompt in (("slash", f"/{name}:{p['skill']}"), ("conversational", p["prompt"])):
+            reply = headless(prompt, DEFAULT_TOOLS, max_turns, model, timeout)
+            if reply["model"]:
+                models.add(reply["model"])
+            path = keep(evidence, f"skill-invocation-{form}", reply)
+            unmatched = expect_all(reply["text"], p["expect"])
+            ok = reply["status"] in {"success", "error_max_turns"} and reply["text"].strip() and not unmatched
+            results.append((form, ok, reply["status"], reply["turns"], unmatched, path))
+        ok_all = all(r[1] for r in results)
+        record("skill-invocation", "pass" if ok_all else "fail",
+               "; ".join(f"{form}: {'ok' if ok else 'unmatched ' + str(un)} ({st}, {turns} turns) {path}"
+                         for form, ok, st, turns, un, path in results),
+               skill=p["skill"], prompt=p["prompt"])
+
+    # knowledge-resolution: a concept cited by bundle path with its status
+    p = probes["knowledge-resolution"]
+    reply = headless(p["prompt"], DEFAULT_TOOLS, max_turns, model, timeout)
+    if reply["model"]:
+        models.add(reply["model"])
+    path = keep(evidence, "knowledge-resolution", reply)
+    unmatched = expect_all(reply["text"], p["expect"])
+    cited = KNOWLEDGE_PATH.findall(reply["text"])
+    record("knowledge-resolution", "pass" if not unmatched and reply["text"].strip() else "fail",
+           (f"cited {', '.join(sorted(set(cited))[:3])} ({reply['status']}, {reply['turns']} turns) {path}"
+            if not unmatched else f"unmatched {unmatched} ({reply['status']}) {path}"), prompt=p["prompt"])
+
+    # connector-invocation: every declared server registered by the runtime and reachable
+    servers = osp.reach_servers(pkg)
+    if not servers:
+        record("connector-invocation", "skip", "no REACH declared")
+    else:
+        health = parse_mcp_list(run(["claude", "mcp", "list"], timeout=300).stdout, name)
+        missing = sorted(set(servers) - set(health))
+        failed = {s: h for s, h in health.items() if "connected" not in h.lower() and "auth" not in h.lower()}
+        summary = "; ".join(f"{s}: {h}" for s, h in sorted(health.items()))
+        if missing:
+            record("connector-invocation", "fail", f"not registered by the runtime: {', '.join(missing)}; {summary}")
+        elif failed:
+            record("connector-invocation", "fail", summary)
+        else:
+            record("connector-invocation", "pass", f"registered as plugin:{name}:<server>; {summary}")
+
+    # golden-computation: the installed package's verification scripts run green
+    ver_rel = (pkg.get("content") or {}).get("verification")
+    scripts = sorted((install_path / ver_rel).glob("*.py")) if install_path and ver_rel and (install_path / ver_rel).is_dir() else []
+    if not scripts:
+        record("golden-computation", "skip", "no verification scripts declared")
+    else:
+        outcomes = []
+        for s in scripts:
+            r = run(["uv", "run", "--python", "3.11", str(s)], timeout=timeout, cwd=s.parent)
+            outcomes.append((s.name, r.returncode, (r.stderr or "").strip().splitlines()[-1:] ))
+            if evidence is not None:
+                (evidence / f"golden-{s.stem}.log").write_text((r.stdout or "") + "\n" + (r.stderr or ""), encoding="utf-8")
+        bad = [f"{n} exit {c} {tail}" for n, c, tail in outcomes if c != 0]
+        record("golden-computation", "fail" if bad else "pass",
+               "; ".join(bad) if bad else "green on the installed tree: " + ", ".join(n for n, _, _ in outcomes))
+
+    # prove and receipt: an attester and the receipt it writes, when the capability declares one
+    prove = cap["probes"].get("prove") or {}
+    if not prove.get("command"):
+        for test in ("prove", "receipt"):
+            record(test, "blocked", "no attester declared in surfaces.yaml probes.prove; the golden notebook is the "
+                                    "deterministic check today, and the shared attester with its receipt is the "
+                                    "r4-shared-prove deliverable")
+    else:
+        cmd = [str(c).replace("${PLUGIN_ROOT}", str(install_path)) for c in prove["command"]]
+        r = run(cmd, timeout=timeout, cwd=install_path)
+        record("prove", "pass" if r.returncode == 0 else "fail", f"{' '.join(cmd)} exit {r.returncode}")
+        receipt = prove.get("receipt")
+        rp = (install_path / receipt) if receipt else None
+        if rp and rp.is_file() and version in rp.read_text(encoding="utf-8", errors="replace"):
+            record("receipt", "pass", f"{receipt} names {version}")
+        else:
+            record("receipt", "fail", f"receipt {receipt} missing or does not name {version}")
+
+    # side-effect-confirmation: the download gate appears conversationally
+    p = probes["side-effect-confirmation"]
+    reply = headless(p["prompt"], GATE_TOOLS, max_turns, model, timeout)
+    if reply["model"]:
+        models.add(reply["model"])
+    path = keep(evidence, "side-effect-confirmation", reply)
+    unmatched = expect_all(reply["text"], p["expect"])
+    wrote = any(t in {"Write", "Bash", "Edit"} for t in reply["tools"])
+    record("side-effect-confirmation", "pass" if not unmatched and not wrote and reply["text"].strip() else "fail",
+           (f"gate stated, nothing written ({reply['status']}, {reply['turns']} turns) {path}" if not unmatched and not wrote
+            else f"unmatched {unmatched}, tools {sorted(set(reply['tools']))} ({reply['status']}) {path}"), prompt=p["prompt"])
+
+    # release-lock: the installed tree carries the lock it digests to, at the version installed
+    lock_path = install_path / ".osp" / "release-lock.json" if install_path else None
+    if not install_path or not lock_path.is_file():
+        record("release-lock", "fail", f"the installed {name} {installed_version} carries no .osp/release-lock.json; "
+                                       "a release cut before the lock existed cannot be qualified, the next release carries it")
+    else:
+        installed_lock = osp.read_json(lock_path)
+        try:
+            recomputed = osp.render_lock(install_path)
+        except osp.OspError as exc:
+            recomputed = None
+            why = str(exc)
+        digest = osp.value_digest(installed_lock)
+        if installed_lock.get("version") != installed_version:
+            record("release-lock", "fail", f"lock says {installed_lock.get('version')}, installed {installed_version}")
+        elif recomputed != installed_lock:
+            record("release-lock", "fail", f"the installed tree does not digest to its lock ({digest})" + (f": {why}" if recomputed is None else ""))
+        else:
+            same = " and equals the checkout's lock" if digest == cap["lock_digest"] else f" (the checkout's lock is {cap['lock_digest']})"
+            record("release-lock", "pass", f"{digest} at {installed_version}, the installed tree digests to it{same}",
+                   lock=digest)
+
+    return {"tests": tests, "models": sorted(models), "installed_version": installed_version,
+            "install_path": str(install_path) if install_path else None}
+
+
+# ---------------------------------------------------------------------------
+# Records and checklists
+# ---------------------------------------------------------------------------
+
+def verdict(cap: dict[str, Any], tests: dict[str, dict[str, Any]]) -> tuple[bool, list[str]]:
+    blockers = []
+    for t in cap["required"]:
+        st = tests.get(t, {}).get("status")
+        if st not in {"pass", "skip"}:
+            blockers.append(f"{t}: {st or 'not run'}")
+    return (not blockers, blockers)
+
+
+def make_record(cap: dict[str, Any], runtime: str, runtime_ver: str | None, source: str, tests: dict[str, dict[str, Any]],
+                models: list[str], evidence: Path | None, installed_version: str | None) -> dict[str, Any]:
+    qualified, blockers = verdict(cap, tests)
+    return {
+        "schema_version": 1,
+        "capability": cap["name"],
+        "version": cap["version"],
+        "installed_version": installed_version,
+        "release_lock": cap["lock_digest"],
+        "runtime": {"name": runtime, "projection": RUNTIMES[runtime], "version": runtime_ver},
+        "models": models,
+        "date": dt.datetime.now(dt.timezone.utc).date().isoformat(),
+        "source": source,
+        "required": cap["required"],
+        "tests": tests,
+        "qualified": qualified,
+        "blockers": blockers,
+        "evidence_dir": str(evidence) if evidence else None,
+    }
+
+
+def record_path(cap: dict[str, Any], runtime: str, record_dir: Path | None) -> Path:
+    return (record_dir or (cap["dir"] / ".osp" / "qualification")) / f"{runtime}.json"
+
+
+def write_checklist(cap: dict[str, Any], runtime: str, path: Path) -> None:
+    probes = probes_for(cap)
+    items = []
+    criteria = {
+        "install": "The capability installs by one action after marketplace or source setup; every declared dependency arrives with it; the installed version is stated.",
+        "skill-discovery": "Every canonical skill is listed by the runtime's inventory (name each).",
+        "dependency-resolution": "Each declared dependency is installed within its floor; a missing one fails explicitly naming the floor.",
+        "connector-invocation": "Each declared server is registered and reachable, or the runtime states why not.",
+        "golden-computation": "The verification scripts run green from the installed package.",
+        "prove": "The attester runs on the runtime's output.",
+        "receipt": "The receipt names this release.",
+        "release-lock": "The installed package carries .osp/release-lock.json at the installed version; its digest is stated.",
+    }
+    for t in TESTS:
+        item = {"test": t, "required": t in cap["required"], "status": "", "evidence": ""}
+        probe = probes.get(t)
+        if probe:
+            item["prompt"] = probe["prompt"]
+            item["criteria"] = probe["criteria"]
+            if probe.get("skill"):
+                item["skill"] = probe["skill"]
+        else:
+            item["criteria"] = criteria.get(t, "")
+        if t == "dependency-resolution" and not osp.dependency_entries(cap["package"]):
+            item.update(status="skip", evidence="no declared dependencies")
+        if t == "connector-invocation" and not osp.reach_servers(cap["package"]):
+            item.update(status="skip", evidence="no REACH declared")
+        if t in {"prove", "receipt"} and not (cap["probes"].get("prove") or {}).get("command"):
+            item.update(status="blocked", evidence="no attester declared; r4-shared-prove")
+        items.append(item)
+    doc = {
+        "capability": cap["name"], "version": cap["version"], "release_lock": cap["lock_digest"],
+        "runtime": runtime, "runtime_version": "", "model": "", "date": "", "operator": "",
+        "instructions": ("Run each test on the runtime by hand, the prompts verbatim, no coaching. Fill status with "
+                         "pass, fail, skip or blocked and evidence with what you saw (one line; a path to a "
+                         "screenshot or transcript is best). Then: qualify.py --capability {name} --surface "
+                         f"{runtime} --from-checklist {path.name}").replace("{name}", cap["name"]),
+        "tests": items,
+    }
+    path.parent.mkdir(parents=True, exist_ok=True)
+    path.write_text(yaml.safe_dump(doc, sort_keys=False, allow_unicode=True, width=100), encoding="utf-8")
+
+
+def read_checklist(cap: dict[str, Any], runtime: str, path: Path) -> tuple[dict[str, dict[str, Any]], dict[str, Any]]:
+    doc = osp.load_yaml(path)
+    errors = []
+    if doc.get("capability") != cap["name"] or str(doc.get("version")) != str(cap["version"]):
+        errors.append(f"checklist is for {doc.get('capability')} {doc.get('version')}, not {cap['name']} {cap['version']}")
+    if doc.get("runtime") != runtime:
+        errors.append(f"checklist is for runtime {doc.get('runtime')}, not {runtime}")
+    for field in ("runtime_version", "model", "date", "operator"):
+        if not str(doc.get(field) or "").strip():
+            errors.append(f"{field} is empty")
+    tests = {}
+    for item in doc.get("tests", []):
+        t, st, ev = item.get("test"), str(item.get("status") or "").strip(), str(item.get("evidence") or "").strip()
+        if t not in TESTS:
+            errors.append(f"unknown test {t!r}")
+            continue
+        if st not in STATUSES:
+            errors.append(f"{t}: status {st!r} is not pass, fail, skip or blocked")
+            continue
+        if not ev:
+            errors.append(f"{t}: evidence is empty")
+            continue
+        tests[t] = {"status": st, "evidence": ev}
+        for k in ("prompt", "skill"):
+            if item.get(k):
+                tests[t][k] = item[k]
+    if errors:
+        raise QualifyError("checklist not accepted:\n  " + "\n  ".join(errors))
+    return tests, doc
+
+
+def print_status(cap: dict[str, Any], record_dir: Path | None) -> int:
+    d = record_dir or (cap["dir"] / ".osp" / "qualification")
+    print(f"{cap['name']} {cap['version']} (lock {cap['lock_digest'] or 'none'}); required: {', '.join(cap['required'])}")
+    found = 0
+    for rt in RUNTIMES:
+        p = d / f"{rt}.json"
+        if not p.is_file():
+            continue
+        found += 1
+        rec = osp.read_json(p)
+        stale = "" if rec.get("release_lock") == cap["lock_digest"] and str(rec.get("version")) == str(cap["version"]) \
+            else f" (recorded for {rec.get('version')} lock {rec.get('release_lock')}; stale)"
+        print(f"  {rt}: {'QUALIFIED' if rec.get('qualified') else 'not qualified'} on {rec.get('date')} "
+              f"({rec.get('source')}, {rec['runtime'].get('version') or 'version unknown'}){stale}")
+        for t, r in rec.get("tests", {}).items():
+            print(f"    {t}: {r['status']}")
+        for b in rec.get("blockers", []):
+            print(f"    blocker: {b}")
+    if not found:
+        print("  no records")
+    return 0
+
+
+def main() -> int:
+    ap = argparse.ArgumentParser(description=__doc__, formatter_class=argparse.RawDescriptionHelpFormatter)
+    ap.add_argument("--capability", required=True, help="the capability's directory name in the workspace, or a path")
+    ap.add_argument("--surface", choices=sorted(RUNTIMES), help="the runtime to qualify on")
+    ap.add_argument("--marketplace", default=DEFAULT_MARKETPLACE,
+                    help="marketplace source to install from (a GitHub repo or a local path; the release under test is what its catalog names)")
+    ap.add_argument("--model", default=None, help="model for the conversational tests (the runtime's default otherwise)")
+    ap.add_argument("--evidence", default=None, help="directory to keep transcripts and logs")
+    ap.add_argument("--record-dir", default=None, help="where the record is written (default: <capability>/.osp/qualification)")
+    ap.add_argument("--max-turns", type=int, default=DEFAULT_TURNS)
+    ap.add_argument("--timeout", type=int, default=1200, help="seconds per headless call or script")
+    ap.add_argument("--checklist", help="write the checklist for a run by hand to this file")
+    ap.add_argument("--from-checklist", help="read a filled checklist and write the record")
+    ap.add_argument("--status", action="store_true", help="print the state per runtime from the records")
+    args = ap.parse_args()
+
+    cap_path = Path(args.capability)
+    cap_dir = cap_path.resolve() if cap_path.exists() else (osp.WORKSPACE / args.capability)
+    try:
+        cap = load_capability(cap_dir)
+        record_dir = Path(args.record_dir).resolve() if args.record_dir else None
+        if args.status:
+            return print_status(cap, record_dir)
+        if not args.surface:
+            raise QualifyError("--surface is required unless --status")
+        if args.checklist:
+            write_checklist(cap, args.surface, Path(args.checklist))
+            print(f"wrote {args.checklist}")
+            return 0
+        if args.from_checklist:
+            tests, doc = read_checklist(cap, args.surface, Path(args.from_checklist))
+            rec = make_record(cap, args.surface, str(doc["runtime_version"]), f"checklist by {doc['operator']}",
+                              tests, [str(doc["model"])], None, cap["version"])
+            rec["date"] = str(doc["date"])
+        elif args.surface == "claude-code":
+            evidence = Path(args.evidence).resolve() if args.evidence else None
+            print(f"qualifying {cap['name']} {cap['version']} on claude-code ({claude_version()})", flush=True)
+            out = qualify_claude_code(cap, args.marketplace, args.model, evidence, args.max_turns, args.timeout)
+            rec = make_record(cap, "claude-code", claude_version(), f"headless run from {args.marketplace}",
+                              out["tests"], out["models"], evidence, out["installed_version"])
+        else:
+            raise QualifyError(f"{args.surface} is not driven headlessly here; write a checklist with --checklist "
+                               "and record the run with --from-checklist")
+        path = record_path(cap, args.surface, record_dir)
+        path.parent.mkdir(parents=True, exist_ok=True)
+        path.write_text(osp.dump_json(rec), encoding="utf-8")
+        print(f"{cap['name']} {cap['version']} on {args.surface}: {'QUALIFIED' if rec['qualified'] else 'NOT QUALIFIED'}")
+        for b in rec["blockers"]:
+            print(f"  blocker: {b}")
+        print(f"wrote {path}")
+        return 0 if rec["qualified"] else 1
+    except (QualifyError, osp.OspError) as exc:
+        print(f"qualify: {exc}", file=sys.stderr)
+        return 2
+
+
+if __name__ == "__main__":
+    raise SystemExit(main())
