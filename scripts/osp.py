@@ -703,17 +703,63 @@ def write_projections(repo_dir: Path, expected: dict[str, dict[str, Any] | None]
     return changed
 
 
-def tree_digest(root: Path) -> str | None:
+def ignore_rules(top: Path) -> list[tuple[Path, str, bool, bool]]:
+    """(directory, pattern, directory_only, anchored) from every .gitignore
+    under top. Negations are not honored: what a package ships is what
+    its ignore files do not exclude."""
+    rules = []
+    for gi in sorted(top.rglob(".gitignore")):
+        if set(gi.relative_to(top).parts[:-1]) & DIGEST_SKIP_DIRS:
+            continue
+        for line in gi.read_text(encoding="utf-8", errors="replace").splitlines():
+            pat = line.strip()
+            if not pat or pat.startswith("#") or pat.startswith("!"):
+                continue
+            directory_only = pat.endswith("/")
+            pat = pat.rstrip("/")
+            anchored = pat.startswith("/") or "/" in pat
+            rules.append((gi.parent, pat.lstrip("/"), directory_only, anchored))
+    return rules
+
+
+def ignored(path: Path, is_dir: bool, rules: list[tuple[Path, str, bool, bool]]) -> bool:
+    """Whether a path (or any directory above it) matches an ignore rule,
+    in the subset of gitignore semantics packages use: a bare pattern
+    matches a name at any depth below its file, a pattern with a slash
+    matches the path relative to that file, a trailing slash matches only
+    directories."""
+    import fnmatch
+    for base, pat, directory_only, anchored in rules:
+        try:
+            rel = path.relative_to(base)
+        except ValueError:
+            continue
+        parts = rel.parts
+        for depth in range(1, len(parts) + 1):
+            candidate = Path(*parts[:depth])
+            candidate_is_dir = depth < len(parts) or is_dir
+            if directory_only and not candidate_is_dir:
+                continue
+            target = candidate.as_posix() if anchored else candidate.name
+            if fnmatch.fnmatchcase(target, pat):
+                return True
+    return False
+
+
+def tree_digest(root: Path, package_root: Path | None = None) -> str | None:
     """sha256 over every regular file under root, by sorted relative path
-    and content, so the same tree digests the same anywhere. Caches and
-    editor droppings are skipped."""
+    and content, so the same tree digests the same anywhere. Caches,
+    editor droppings and whatever the package's .gitignore files exclude
+    (generated fixtures, figures) are skipped: the lock digests what the
+    package ships, not what a run left behind."""
     if not root.is_dir():
         return None
+    rules = ignore_rules(package_root or root)
     h = hashlib.sha256()
     for path in sorted(p for p in root.rglob("*") if p.is_file()):
         rel = path.relative_to(root)
         if (set(rel.parts[:-1]) & DIGEST_SKIP_DIRS or path.suffix in DIGEST_SKIP_SUFFIXES
-                or path.name in DIGEST_SKIP_NAMES):
+                or path.name in DIGEST_SKIP_NAMES or path.name == ".gitignore" or ignored(path, False, rules)):
             continue
         h.update(rel.as_posix().encode("utf-8") + b"\0")
         h.update(hashlib.sha256(path.read_bytes()).digest())
@@ -747,7 +793,7 @@ def render_lock(repo_dir: Path) -> dict[str, Any]:
         },
     }
     for key, rel in sorted((pkg.get("content") or {}).items()):
-        lock[f"{key}_digest"] = tree_digest(repo_dir / rel)
+        lock[f"{key}_digest"] = tree_digest(repo_dir / rel, repo_dir)
     rendered = projections(repo_dir) or {}
     lock["adapters"] = {
         "claude": value_digest({CLAUDE_MANIFEST: rendered.get(CLAUDE_MANIFEST), CLAUDE_MCP: rendered.get(CLAUDE_MCP)}),

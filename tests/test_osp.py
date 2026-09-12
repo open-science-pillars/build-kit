@@ -328,6 +328,19 @@ class RenderTests(unittest.TestCase):
         (repo / "skills" / "load-ecco" / "__pycache__").mkdir()
         (repo / "skills" / "load-ecco" / "__pycache__" / "x.pyc").write_bytes(b"\0")
         self.assertEqual(second["skills_digest"], osp.render_lock(repo)["skills_digest"])
+        # what the package's ignore files exclude (a generated fixture, a
+        # figure) is not part of what it ships and does not move the lock
+        (repo / ".gitignore").write_text("*.png\n")
+        (repo / "skills" / "load-ecco" / "fixtures").mkdir()
+        (repo / "skills" / "load-ecco" / "fixtures" / ".gitignore").write_text("*.nc\nscratch/\n")
+        third = osp.render_lock(repo)
+        (repo / "skills" / "load-ecco" / "fixtures" / "big.nc").write_bytes(b"x")
+        (repo / "skills" / "load-ecco" / "figure.png").write_bytes(b"x")
+        (repo / "skills" / "load-ecco" / "fixtures" / "scratch").mkdir()
+        (repo / "skills" / "load-ecco" / "fixtures" / "scratch" / "note.txt").write_text("x")
+        self.assertEqual(third["skills_digest"], osp.render_lock(repo)["skills_digest"])
+        (repo / "skills" / "load-ecco" / "fixtures" / "kept.txt").write_text("x")
+        self.assertNotEqual(third["skills_digest"], osp.render_lock(repo)["skills_digest"])
 
     def test_planned_repository_may_not_carry_a_lock(self):
         repo = capability(self.root, name="land-ice", status="planned")

@@ -176,7 +176,10 @@ deliverables of the architecture alignment initiative).
 ```
 
 Each content tree declared in `package.yaml` is digested by sorted
-relative path and file content (caches skipped), the classification is
+relative path and file content (caches, and whatever the package's
+`.gitignore` files exclude, such as a generated fixture or figure,
+skipped: the lock digests what the package ships, not what a run left
+behind), the classification is
 digested as a value, and each projection is digested as the rendered
 value, with no timestamp, so two renders of one tree agree and two
 runtimes can be shown to have executed the same governed release. The
@@ -293,9 +296,15 @@ becomes the record (`--from-checklist FILE`), refused while any status
 or evidence is empty. `--status` prints the state per runtime.
 
 `surfaces.yaml` may carry a `probes` block naming the reference skill
-and the prompts the conversational tests use (verbatim on every runtime)
-and, once an attester exists, the `prove` command and receipt path;
-defaults apply otherwise. A record never edits `surfaces.yaml`;
+and the prompts the conversational tests use (verbatim on every runtime),
+the golden scripts to run (else every script at the top of the
+verification tree that the prove probe does not name), and the `prove`
+probe: the prompt that has the runtime run the shared executor and write
+the receipt, the attester command and the attestation path, with
+`${PLUGIN_ROOT}`, `${WORK}` and `${RUNTIME}` substituted. The prove test
+passes when the attester passes on the receipt the runtime wrote; the
+receipt test when the attestation says PASS naming the installed version
+and the runtime. Defaults apply otherwise. A record never edits `surfaces.yaml`;
 advertising a runtime is the release step's decision, taken on the
 record (the release-blocking qualification deliverable).
 
