@@ -270,15 +270,17 @@ def floor_satisfied(installed: str, constraint: str | None) -> bool:
             "~=": a >= b and a[:len(b) - 1] == b[:len(b) - 1]}[op]
 
 
-def headless(prompt: str, tools: str, max_turns: int, model: str | None, timeout: int) -> dict[str, Any]:
+def headless(prompt: str, tools: str, max_turns: int, model: str | None, timeout: int,
+             cwd: Path | None = None) -> dict[str, Any]:
     """One headless Claude Code call with streamed JSON, reduced to what a
     test reads: the assistant's text, the tool calls, the model and the
-    result status."""
+    result status. The session's working directory is the only place it
+    may write, so a test that expects a file launches the call there."""
     cmd = ["claude", "-p", prompt, "--allowedTools", tools, "--max-turns", str(max_turns),
            "--output-format", "stream-json", "--verbose"]
     if model:
         cmd += ["--model", model]
-    r = run(cmd, timeout=timeout)
+    r = run(cmd, timeout=timeout, cwd=cwd)
     text, tools_used, seen_model, status, turns = [], [], None, None, None
     for line in (r.stdout or "").splitlines():
         try:
@@ -467,13 +469,15 @@ def qualify_claude_code(cap: dict[str, Any], marketplace: str, model: str | None
         work.mkdir(parents=True, exist_ok=True)
         subs = {"${PLUGIN_ROOT}": str(install_path), "${WORK}": str(work), "${RUNTIME}": "claude-code"}
 
-        def fill(value: str) -> str:
+        def fill(value: str, work_as: str = str(work)) -> str:
             for k, v in subs.items():
-                value = value.replace(k, v)
+                value = value.replace(k, work_as if k == "${WORK}" else v)
             return value
 
-        prompt = fill(prove["prompt"])
-        reply = headless(prompt, PROVE_TOOLS, max_turns, model, timeout)
+        # The runtime writes only inside its working directory, so the call
+        # is launched in the work directory and told to write there.
+        prompt = fill(prove["prompt"], work_as=".")
+        reply = headless(prompt, PROVE_TOOLS, max_turns, model, timeout, cwd=work)
         if reply["model"]:
             models.add(reply["model"])
         path = keep(evidence, "prove-produce", reply)
