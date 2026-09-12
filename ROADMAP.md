@@ -342,8 +342,8 @@ Pillar means sphere; canonical .osp metadata drives organization and runtime pro
 | `m1-canonical-metadata`: Add the canonical .osp metadata schemas and apply them to every non-archived repository | `build-kit` | draft | proposed | needs-context | not seeded |
 | `m1-concept-spheres`: Require sphere tags on scientific concepts | `nasa-daac-knowledge` | draft | proposed | needs-context | not seeded |
 | `m1-templates`: Teach the templates the canonical metadata and the sphere examples | `plugin-template` | draft | proposed | ready | not seeded |
-| `m2-badges-consolidation`: Decide the disposition of ecco-budget-badge and carry it out | `marketplace` | draft | proposed | needs-context | not seeded |
-| `m2-evals-consolidation`: Decide the home of the ECCO benchmark cases and carry it out | `evals` | draft | proposed | needs-context | not seeded |
+| `m2-badges-consolidation`: Retire ecco-budget-badge; the workflow and badge writer move beside the canonical attester | `nasa-daac-knowledge` | draft | proposed | needs-context | not seeded |
+| `m2-evals-consolidation`: Rename ecco-agent-evals to agent-evals, the one benchmark repository, with the ECCO cases in a product subtree | `marketplace` | draft | proposed | needs-context | not seeded |
 | `m3-governance-teams`: Create sphere, provider steward and runtime maintainer teams and rewrite CODEOWNERS to teams | `.github` | draft | proposed | owner-only | not seeded |
 | `m4-documentation-alignment`: Align the profile, marketplace README, specification, glossary, guides and tutorials to spheres and runtime projections | `marketplace` | draft | proposed | needs-context | not seeded |
 | `m5-planned-repositories`: Instantiate the eleven planned repositories under the planned convention | `.github` | draft | proposed | owner-only | not seeded |
@@ -387,19 +387,16 @@ Pillar means sphere; canonical .osp metadata drives organization and runtime pro
 
 **`m2-badges-consolidation`**
 
-- [ ] The decision (retire, or generalize under a product-neutral name) is recorded as a dated note in ADR A and carried out.
-- [ ] If retired: the adopter workflow and badge writer live beside the attester they call, pinned by that repository's release tag, and the old repository is archived with a pointer; if generalized: a product workflow is an input to the service and the existing ECCO badge still resolves and cannot be hand-set.
-- [ ] The specification's repository table and the org profile reflect the outcome.
+- [ ] The adopter workflow and badge writer live beside the ECCO heat budget attester in the provider bundle's tools, pinned by that repository's release tag; an adopter's badge still resolves from the attester's verdict and cannot be hand-set.
+- [ ] ecco-budget-badge is archived with a pointer; the specification's repository table and the org profile reflect it.
 - Depends on: `m1-canonical-metadata`
-- Gate: Owner decision recorded in ADR A's open items; the recommendation is to retire the repository, moving its reusable workflow beside the canonical attester and archiving it with a pointer.
 
 **`m2-evals-consolidation`**
 
-- [ ] The decision (standalone under a product-neutral name, or folded into evals/products/) is recorded as a dated note in ADR A and carried out.
-- [ ] Cases keep concept_basis, expected behavior and deterministic checks; a re-run against the last published tagged set produces identical results; the core linter's ocean coverage rule reads cases from the new home.
-- [ ] Historical links redirect or clearly resolve.
+- [ ] The repository is renamed agent-evals; the charter is kept; the ECCO cases, fixtures, scoring and results sit under a product subtree so later products join under the same charter; evals stays the runner, graders and scoreboard.
+- [ ] Cases keep concept_basis, expected behavior and deterministic checks; a re-run against the last published tagged set produces identical results; the core linter's ocean coverage rule and the ocean-science README read cases from the new name.
+- [ ] Historical links redirect or clearly resolve; the specification's repository table and the org profile name the new repository.
 - Depends on: `m1-canonical-metadata`
-- Gate: Owner decision recorded in ADR A's open items; the recommendation is a standalone, product-neutral benchmark repository (the charter kept, the ECCO cases in a product subtree) with evals remaining the runner.
 
 **`m3-governance-teams`**
 
