@@ -1,6 +1,6 @@
 schema_version: 1
 organization: open-science-pillars
-last_reviewed: 2026-07-15
+last_reviewed: 2026-09-12
 
 repositories:
   - marketplace
@@ -463,7 +463,7 @@ initiatives:
   - id: hydrology-investigations
     title: Hydrology for investigations
     outcome: "The hydrology plugin answers basin and event questions end to end with receipts, closes a basin water balance as an attested computation, and survives the USGS WaterServices decommission, released and installed."
-    status: ready
+    status: active
     priority: P0
     depends_on: []
     gate: "The Phase-2 reading is recorded as a dated addition to docs/phase2-preregistration.md before any provider-product concept is written."
@@ -471,8 +471,8 @@ initiatives:
       - id: hydro-usgs-waterdata-migration
         title: Migrate the USGS connector to the Water Data APIs and release it
         repo: core
-        proposal_state: draft
-        status: proposed
+        proposal_state: accepted
+        status: done
         priority: P0
         depends_on: []
         gate: null
@@ -481,7 +481,9 @@ initiatives:
           - "A recorded live probe on the new endpoints fixes the field map, paging, and depth facts."
           - "Value-level parity against legacy captures is recorded; the legacy endpoint remains only as a dated deprecation fact."
           - "Core and hydrology are tagged and the hydrology pin points at the tagged core commit."
-        evidence: []
+        evidence:
+          - "core--v0.4.2: the observations server on the USGS Water Data API (core PR #22, #23)"
+          - "hydrology--v0.5.0: the USGS skills, fixtures and concepts on the Water Data API, pinned at core 0.4.2"
         contributor:
           readiness: needs-context
           champion: owner
@@ -491,8 +493,8 @@ initiatives:
       - id: hydro-basin-unit
         title: Add basin delineation as the unit of analysis
         repo: hydrology
-        proposal_state: draft
-        status: proposed
+        proposal_state: accepted
+        status: done
         priority: P0
         depends_on: []
         gate: null
@@ -500,7 +502,8 @@ initiatives:
           - "Gauge, point, and hydrologic-unit inputs return a frozen polygon with provenance."
           - "The unsnapped-point trap has an eval case registered in the runner's hydrology manifest and run at the stated N."
           - "Three fixture basins are compared against the monitoring-locations drainage area with a stated tolerance."
-        evidence: []
+        evidence:
+          - "hydrology--v0.6.0: the delineate-basin skill with its four signed concepts; nldi-unsnapped-point registered in the evals hydrology manifest and run at N=5"
         contributor:
           readiness: ready
           champion: owner
@@ -510,8 +513,8 @@ initiatives:
       - id: hydro-p-et-connectors
         title: Add IMERG precipitation and MOD16 and OpenET evapotranspiration with their trap sets
         repo: hydrology
-        proposal_state: draft
-        status: proposed
+        proposal_state: accepted
+        status: done
         priority: P0
         depends_on: [hydro-basin-unit]
         gate: "The Phase-2 dated addition is merged before the IMERG and MOD16 concepts are written."
@@ -519,7 +522,8 @@ initiatives:
           - "Run-mixing, cold-season, MOD16 fill, and OpenET area-cap gotchas each carry an eval case registered in the runner's hydrology manifest and run at the stated N."
           - "One live pull per product is recorded; the IMERG Final gap is a dated fact with stale_after."
           - "Provider-product facts carry upstream pending naming their canonical provider directory."
-        evidence: []
+        evidence:
+          - "hydrology--v0.6.0: IMERG V07 precipitation and MOD16 and OpenET evapotranspiration with the signed concepts; the IMERG and evapotranspiration cases registered in the evals hydrology manifest"
         contributor:
           readiness: needs-context
           champion: owner
@@ -529,8 +533,8 @@ initiatives:
       - id: hydro-w1-basin-balance
         title: Close a basin water balance as an attested computation
         repo: hydrology
-        proposal_state: draft
-        status: proposed
+        proposal_state: accepted
+        status: done
         priority: P0
         depends_on: [hydro-usgs-waterdata-migration, hydro-basin-unit, hydro-p-et-connectors]
         gate: null
@@ -539,7 +543,8 @@ initiatives:
           - "The storage term refuses below the footprint floor the computation states; no gain factor is applied above it."
           - "Receipts name product versions, runs, captures, and data-tree stamps; the attester recomputes from the receipt."
           - "Hydrology is released with the recipe, skill, and a quickstart walkthrough on Lees Ferry."
-        evidence: []
+        evidence:
+          - "hydrology--v0.6.0 and hydrology--v0.6.1: the attested basin water balance, recipe, skill, golden and cases, the release log corrected at 0.6.1"
         contributor:
           readiness: owner-only
           champion: owner
@@ -667,7 +672,7 @@ initiatives:
     status: active
     priority: P1
     depends_on: []
-    gate: "The decision records (ADR A, ADR B) and the dated Phase-2 pre-registration amendment merge immediately. Every other deliverable begins after the first tranche of hydrology-investigations (its P0 deliverables) is recorded done with evidence; that gate is not removed silently."
+    gate: "The decision records (ADR A, ADR B) and the dated Phase-2 pre-registration amendment merge first. Every other deliverable was gated on the first tranche of hydrology-investigations (its P0 deliverables) being recorded done with evidence; that gate was met on 2026-09-12, owner-confirmed, and the four deliverables carry their release tags as evidence."
     deliverables:
       - id: m0-decision-records
         title: Record the sphere alignment and multi-runtime packaging decisions
@@ -712,7 +717,7 @@ initiatives:
         status: proposed
         priority: P1
         depends_on: [m0-decision-records, m0-prereg-amendment]
-        gate: "Begins after the first tranche of hydrology-investigations is recorded done."
+        gate: null
         acceptance:
           - "Schemas for .osp/repository.yaml, .osp/package.yaml and .osp/surfaces.yaml validate; .osp/governance.yaml gains runtime maintainer teams."
           - "Every existing non-archived repository carries repository.yaml; the sphere view renders from data; expected GitHub topics are computed from it and compared in CI."
@@ -731,7 +736,7 @@ initiatives:
         status: proposed
         priority: P1
         depends_on: [m0-decision-records]
-        gate: "Begins after the first tranche of hydrology-investigations is recorded done."
+        gate: null
         acceptance:
           - "Concept frontmatter accepts spheres (required for scientific concepts) and gcmd (optional)."
           - "The linter rejects a scientific concept with no sphere; every existing concept is tagged and re-signed where the steward requires it."
@@ -760,17 +765,17 @@ initiatives:
         labels: [roadmap, enhancement, help wanted, priority:P1]
         issue: {seed: true, number: null, url: null}
       - id: m2-badges-consolidation
-        title: Rename ecco-budget-badge to badges and generalize the attestation service
+        title: Decide the disposition of ecco-budget-badge and carry it out
         repo: marketplace
         proposal_state: draft
         status: proposed
         priority: P1
         depends_on: [m1-canonical-metadata]
-        gate: null
+        gate: "Owner decision recorded in ADR A's open items; the recommendation is to retire the repository, moving its reusable workflow beside the canonical attester and archiving it with a pointer."
         acceptance:
-          - "The ecco-budget-badge repository is renamed badges; a product workflow is an input to the service rather than part of the repository identity."
-          - "The existing ECCO badge still resolves and cannot be hand-set; historical links redirect or clearly resolve."
-          - "The specification's repository table and the catalog name the new repository."
+          - "The decision (retire, or generalize under a product-neutral name) is recorded as a dated note in ADR A and carried out."
+          - "If retired: the adopter workflow and badge writer live beside the attester they call, pinned by that repository's release tag, and the old repository is archived with a pointer; if generalized: a product workflow is an input to the service and the existing ECCO badge still resolves and cannot be hand-set."
+          - "The specification's repository table and the org profile reflect the outcome."
         evidence: []
         contributor:
           readiness: needs-context
@@ -779,16 +784,17 @@ initiatives:
         labels: [roadmap, enhancement, priority:P1]
         issue: {seed: true, number: null, url: null}
       - id: m2-evals-consolidation
-        title: Move the ECCO eval cases into evals and archive ecco-agent-evals with a pointer
+        title: Decide the home of the ECCO benchmark cases and carry it out
         repo: evals
         proposal_state: draft
         status: proposed
         priority: P1
         depends_on: [m1-canonical-metadata]
-        gate: null
+        gate: "Owner decision recorded in ADR A's open items; the recommendation is a standalone, product-neutral benchmark repository (the charter kept, the ECCO cases in a product subtree) with evals remaining the runner."
         acceptance:
-          - "The cases live under evals/products/ecco/ preserving concept_basis, expected behavior and deterministic checks."
-          - "The moved cases produce identical results to the last published run; the old repository is archived with a pointer and stays visible."
+          - "The decision (standalone under a product-neutral name, or folded into evals/products/) is recorded as a dated note in ADR A and carried out."
+          - "Cases keep concept_basis, expected behavior and deterministic checks; a re-run against the last published tagged set produces identical results; the core linter's ocean coverage rule reads cases from the new home."
+          - "Historical links redirect or clearly resolve."
         evidence: []
         contributor:
           readiness: needs-context
