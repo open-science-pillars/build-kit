@@ -47,6 +47,16 @@ repository, docs/decisions):
                                       portable package against the pinned
                                       specification version
 
+  osp.py advertise [REPO_DIR ...]    what a release may say per runtime: a
+                                      surface is supported only on a qualified
+                                      record for this version and lock; --check
+                                      fails a claim without one; --into README.md
+                                      writes the runtime block between
+                                      osp-runtimes markers
+  osp.py publish [REPO_DIR]          emit dist/: the Claude package zip, the
+                                      Agent Plugins directory only when a
+                                      runtime that consumes it is qualified,
+                                      and release.json with the honest status
   qualify.py (beside this tool)      runtime qualification of one capability:
                                       the headless Claude Code run, the
                                       checklist for a runtime run by hand, and
@@ -1055,6 +1065,249 @@ def command_plugin_check(args: argparse.Namespace) -> int:
     return 1 if total else 0
 
 
+# ---------------------------------------------------------------------------
+# Advertising and publishing (ADR B, decision 10; the design's release
+# rule): a runtime is advertised as supported for a release only on a
+# qualified record for that release; a release stays valid when a runtime
+# is not qualified, that runtime is simply not advertised; publication
+# emits only the projections a qualified runtime consumes, with the
+# honest status beside them.
+# ---------------------------------------------------------------------------
+
+RUNTIME_TITLES = {"claude-code": "Claude Code", "claude-cowork": "Claude Cowork", "claude-science": "Claude Science",
+                  "openai-codex": "OpenAI Codex", "gemini-cli": "Gemini CLI", "goose": "Goose"}
+RUNTIME_PROJECTION = {"claude-code": "claude", "claude-cowork": "claude", "claude-science": "claude",
+                      "openai-codex": "agent-plugins", "gemini-cli": "agent-plugins", "goose": "agent-plugins"}
+RUNTIMES_START = "<!-- osp-runtimes:start -->"
+RUNTIMES_END = "<!-- osp-runtimes:end -->"
+PUBLISH_SKIP = {".git", ".github", "dist"}
+
+
+def qualification_records(repo_dir: Path) -> dict[str, dict[str, Any]]:
+    d = repo_dir / ".osp" / "qualification"
+    if not d.is_dir():
+        return {}
+    return {p.stem: read_json(p) for p in sorted(d.glob("*.json"))}
+
+
+def role_list(surface: dict[str, Any]) -> list[str]:
+    role = surface.get("role")
+    return list(role) if isinstance(role, list) else [role]
+
+
+def advertisement(repo_dir: Path) -> dict[str, Any] | None:
+    """What this release may say per runtime, from surfaces.yaml and the
+    qualification records: for each surface, the declared status, whether
+    a qualified record exists for this exact version and lock, and the
+    findings the release gate acts on. None for a repository without
+    runtime surfaces."""
+    pkg = read_package(repo_dir)
+    surfaces_path = repo_dir / ".osp" / "surfaces.yaml"
+    if pkg is None or not surfaces_path.is_file():
+        return None
+    surfaces = load_yaml(surfaces_path)
+    version = str(pkg["package"]["version"])
+    lock_path = repo_dir / ".osp" / "release-lock.json"
+    lock_digest = value_digest(read_json(lock_path)) if lock_path.is_file() else None
+    records = qualification_records(repo_dir)
+    runtimes: dict[str, dict[str, Any]] = {}
+    errors: list[str] = []
+    warnings: list[str] = []
+    name = pkg["package"]["name"]
+    for runtime, surface in (surfaces.get("surfaces") or {}).items():
+        roles = role_list(surface)
+        rec = records.get(runtime)
+        current = bool(rec) and str(rec.get("version")) == version and rec.get("release_lock") == lock_digest
+        qualified = bool(rec and rec.get("qualified") and current)
+        stale = bool(rec) and not current
+        development = "development" in roles
+        status = surface.get("status")
+        entry = {"title": RUNTIME_TITLES.get(runtime, runtime), "roles": roles, "required": bool(surface.get("required")),
+                 "status": status, "qualified": qualified, "record_date": rec.get("date") if rec else None,
+                 "record_source": rec.get("source") if rec else None, "stale_record": stale,
+                 "blockers": list(rec.get("blockers") or []) if (rec and current) else [],
+                 "projection": RUNTIME_PROJECTION.get(runtime, "claude"), "development": development}
+        runtimes[runtime] = entry
+        if status == "supported" and not development and not qualified:
+            errors.append(f"{name}: advertises {runtime} as supported without a qualified record for {version} "
+                          f"(lock {lock_digest}); " + ("the record is stale" if stale else "no record") +
+                          "; a runtime is advertised only on a qualified record, else its status is tested or planned")
+        if qualified and status != "supported":
+            warnings.append(f"{name}: {runtime} is qualified for {version} and may be advertised as supported "
+                            f"(status is {status})")
+        if stale:
+            warnings.append(f"{name}: the {runtime} record is for {rec.get('version')} (lock {rec.get('release_lock')}), "
+                            f"not this release; re-run the qualification")
+    return {"capability": name, "version": version, "release_lock": lock_digest, "runtimes": runtimes,
+            "errors": errors, "warnings": warnings}
+
+
+def runtime_verdict(entry: dict[str, Any]) -> str:
+    if entry["qualified"]:
+        return "Qualified"
+    if entry["development"] and entry["status"] == "supported":
+        return "Supported (development environment)"
+    if "future-runtime" in entry["roles"] or "compatibility" in entry["roles"]:
+        return "Outside the required matrix"
+    return "Not qualified"
+
+
+def render_runtimes_block(adv: dict[str, Any]) -> str:
+    """The honest runtime table for a README or release notes: one line per
+    surface with its declared status and the qualification verdict for
+    this release."""
+    lines = [f"Runtime support for {adv['capability']} {adv['version']}"
+             + (f" (release lock `{adv['release_lock'][:19]}`)" if adv["release_lock"] else "")
+             + ", rendered by build-kit's `osp.py advertise` from `.osp/surfaces.yaml` and the qualification records; "
+             "edit those, not this block.", "",
+             "| Runtime | Role | Declared status | Qualification |", "|---|---|---|---|"]
+    for runtime, e in adv["runtimes"].items():
+        role = " and ".join(r.replace("-", " ") for r in e["roles"]) + (", required" if e["required"] else "")
+        verdict = runtime_verdict(e)
+        if e["qualified"]:
+            verdict += f" on {e['record_date']}"
+        elif e["blockers"]:
+            verdict += " (" + "; ".join(e["blockers"]) + ")"
+        elif e["stale_record"]:
+            verdict += " (record is for another release)"
+        lines.append(f"| {e['title']} | {role} | {e['status']} | {verdict} |")
+    lines += ["", "A runtime is advertised as supported only on a qualified record for this exact release; a release "
+                  "stays valid when a runtime is not qualified, and that runtime is simply not advertised."]
+    return "\n".join(lines) + "\n"
+
+
+def splice_runtimes(text: str, block: str) -> str:
+    if RUNTIMES_START not in text or RUNTIMES_END not in text:
+        raise OspError(f"no {RUNTIMES_START} ... {RUNTIMES_END} markers to write between")
+    head, rest = text.split(RUNTIMES_START, 1)
+    _, tail = rest.split(RUNTIMES_END, 1)
+    return f"{head}{RUNTIMES_START}\n{block.rstrip()}\n{RUNTIMES_END}{tail}"
+
+
+def shipped_files(root: Path) -> list[Path]:
+    """What the package ships: every file not excluded by its ignore files,
+    outside the repository's own machinery (.git, .github, dist)."""
+    rules = ignore_rules(root)
+    out = []
+    for path in sorted(p for p in root.rglob("*") if p.is_file()):
+        rel = path.relative_to(root)
+        if (rel.parts[0] in PUBLISH_SKIP or set(rel.parts[:-1]) & DIGEST_SKIP_DIRS or path.suffix in DIGEST_SKIP_SUFFIXES
+                or path.name in DIGEST_SKIP_NAMES or ignored(path, False, rules)):
+            continue
+        out.append(path)
+    return out
+
+
+def command_advertise(args: argparse.Namespace) -> int:
+    total = 0
+    for repo_dir in package_dirs(args):
+        adv = advertisement(repo_dir)
+        if adv is None:
+            print(f"{repo_dir.name}: no runtime surfaces (a knowledge package advertises no runtime)")
+            continue
+        for w in adv["warnings"]:
+            print(f"warning: {w}")
+        for e in adv["errors"]:
+            print(f"error: {e}")
+        total += len(adv["errors"])
+        block = render_runtimes_block(adv)
+        if args.into:
+            target = repo_dir / args.into
+            current = target.read_text(encoding="utf-8")
+            expected = splice_runtimes(current, block)
+            if args.check:
+                if current != expected:
+                    print(f"error: {repo_dir.name}: {args.into} runtime block is out of date; run osp.py advertise --into {args.into}")
+                    total += 1
+            elif current != expected:
+                target.write_text(expected, encoding="utf-8")
+                print(f"{repo_dir.name}: wrote the runtime block into {args.into}")
+        elif not args.check:
+            print(block)
+        verdicts = ", ".join(f"{e['title']}: {runtime_verdict(e)}" for e in adv["runtimes"].values())
+        print(f"{repo_dir.name} {adv['version']}: {verdicts}")
+    if args.check:
+        print(f"osp advertise --check: {'FAILED' if total else 'PASSED'} ({total} errors)")
+        return 1 if total else 0
+    return 1 if total else 0
+
+
+def command_publish(args: argparse.Namespace) -> int:
+    """Emit the release's projections under dist/: the Claude package as a
+    zip (the Claude family always has its development environment), the
+    Agent Plugins package as a directory only when a runtime that consumes
+    it is qualified, and release.json with the honest status per runtime."""
+    import shutil
+    import zipfile
+    repo_dir = Path(args.repo).resolve()
+    pkg = read_package(repo_dir)
+    if pkg is None:
+        raise OspError(f"{repo_dir.name}: nothing to publish without .osp/package.yaml")
+    errors, _ = validate_repo(repo_dir, None)
+    errors += projection_drift(repo_dir, projections(repo_dir) or {})
+    lock_path = repo_dir / RELEASE_LOCK
+    if not lock_path.is_file() or read_json(lock_path) != render_lock(repo_dir):
+        errors.append(f"{repo_dir.name}: the release lock is missing or stale; run osp.py lock")
+    if (repo_dir / PORTABLE_MANIFEST).is_file():
+        perrors, _ = plugin_check(repo_dir)
+        errors += perrors
+    adv = advertisement(repo_dir)
+    if adv:
+        errors += adv["errors"]
+    if errors:
+        for e in errors:
+            print(f"error: {e}")
+        raise OspError(f"{repo_dir.name}: not publishable; {len(errors)} errors")
+    name, version = pkg["package"]["name"], str(pkg["package"]["version"])
+    dist = Path(args.out).resolve() if args.out else repo_dir / "dist"
+    if dist.exists():
+        shutil.rmtree(dist)
+    files = shipped_files(repo_dir)
+    claude_dir = dist / "claude"
+    claude_dir.mkdir(parents=True)
+    zip_path = claude_dir / f"{name}-{version}.zip"
+    with zipfile.ZipFile(zip_path, "w", zipfile.ZIP_DEFLATED) as zf:
+        for f in files:
+            rel = f.relative_to(repo_dir).as_posix()
+            if rel in {PORTABLE_MANIFEST, PORTABLE_MCP}:
+                continue   # the portable files are the other projection
+            zf.write(f, f"{name}/{rel}")
+    emitted = {"claude": str(zip_path.relative_to(dist))}
+    runtimes = adv["runtimes"] if adv else {}
+    portable_qualified = [r for r, e in runtimes.items() if e["projection"] == "agent-plugins" and e["qualified"]]
+    if portable_qualified and (repo_dir / PORTABLE_MANIFEST).is_file():
+        target = dist / "agent-plugin" / f"{name}-{version}"
+        for f in files:
+            rel = f.relative_to(repo_dir)
+            if rel.parts[0] == ".claude-plugin" or rel.as_posix() == CLAUDE_MCP:
+                continue   # the Claude files are the other projection
+            dest = target / rel
+            dest.parent.mkdir(parents=True, exist_ok=True)
+            shutil.copy2(f, dest)
+        emitted["agent-plugins"] = str(target.relative_to(dist))
+        portable_note = f"emitted; qualified on {', '.join(portable_qualified)}"
+    elif (repo_dir / PORTABLE_MANIFEST).is_file():
+        portable_note = "conformant to Agent Plugins " + AGENT_PLUGINS_VERSION + " and not qualified on any runtime that consumes it; not emitted"
+    else:
+        portable_note = "no portable projection"
+    release = {
+        "capability": name, "version": version, "release_lock": adv["release_lock"] if adv else None,
+        "agent_plugins_spec": AGENT_PLUGINS_VERSION,
+        "runtimes": {r: {"status": e["status"], "qualification": runtime_verdict(e), "record_date": e["record_date"],
+                         "blockers": e["blockers"]} for r, e in runtimes.items()},
+        "projections": emitted, "agent_plugins_projection": portable_note,
+        "files": len(files),
+    }
+    (dist / "release.json").write_text(dump_json(release), encoding="utf-8")
+    if adv:
+        (dist / "RUNTIMES.md").write_text(render_runtimes_block(adv), encoding="utf-8")
+    print(f"{name} {version}: {len(files)} files; claude projection {emitted['claude']}; agent-plugins projection: {portable_note}")
+    for r, e in runtimes.items():
+        print(f"  {e['title']}: {runtime_verdict(e)}")
+    print(f"wrote {dist / 'release.json'}")
+    return 0
+
+
 def command_validate(args: argparse.Namespace) -> int:
     dirs = resolve_dirs(args)
     if not dirs:
@@ -1180,6 +1433,13 @@ def parser() -> argparse.ArgumentParser:
     lk.add_argument("--report", action="store_true", help="print a stale lock without failing")
     pc = sub.add_parser("plugin-check")
     pc.add_argument("repos", nargs="*")
+    ad = sub.add_parser("advertise")
+    ad.add_argument("repos", nargs="*")
+    ad.add_argument("--check", action="store_true", help="fail on a support claim with no qualified record for this release, or a stale README block")
+    ad.add_argument("--into", help="write the runtime block between osp-runtimes markers in this file of each repository (README.md)")
+    pb = sub.add_parser("publish")
+    pb.add_argument("repo", nargs="?", default=".")
+    pb.add_argument("--out", help="the dist directory (default: <repo>/dist)")
     tm = sub.add_parser("teams")
     tm.add_argument("--member", default="PaulMRamirez", help="the interim member added to every team ('' for none)")
     return p
@@ -1187,7 +1447,7 @@ def parser() -> argparse.ArgumentParser:
 
 COMMANDS = {"validate": command_validate, "topics": command_topics, "sphere-view": command_sphere_view,
             "teams": command_teams, "render": command_render, "lock": command_lock,
-            "plugin-check": command_plugin_check}
+            "plugin-check": command_plugin_check, "advertise": command_advertise, "publish": command_publish}
 
 
 def main() -> int:
