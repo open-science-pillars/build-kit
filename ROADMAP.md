@@ -347,7 +347,7 @@ Pillar means sphere; canonical .osp metadata drives organization and runtime pro
 | `m2-badges-consolidation`: Retire ecco-budget-badge; the workflow and badge writer move beside the canonical attester | `nasa-daac-knowledge` | accepted | done | needs-context | not seeded |
 | `m2-evals-consolidation`: Rename ecco-agent-evals to agent-evals, the one benchmark repository, with the ECCO cases in a product subtree | `marketplace` | accepted | done | needs-context | not seeded |
 | `m3-governance-teams`: Create sphere, provider steward and runtime maintainer teams and rewrite CODEOWNERS to teams | `.github` | accepted | done | owner-only | not seeded |
-| `m4-documentation-alignment`: Align the profile, marketplace README, specification, glossary, guides and tutorials to spheres and runtime projections | `marketplace` | draft | proposed | needs-context | not seeded |
+| `m4-documentation-alignment`: Align the profile, marketplace README, specification, glossary, guides and tutorials to spheres and runtime projections | `marketplace` | accepted | done | needs-context | not seeded |
 | `m5-planned-repositories`: Instantiate the eleven planned repositories under the planned convention | `.github` | draft | proposed | owner-only | not seeded |
 | `r1-runtime-renderer`: Render the Claude and Agent Plugins projections from canonical source and detect drift | `build-kit` | draft | proposed | needs-context | not seeded |
 | `r2-core-reference`: Qualify core as the reference capability on Claude Code, Cowork and Codex from one SKILL.md | `core` | draft | proposed | needs-context | not seeded |
@@ -422,6 +422,7 @@ Pillar means sphere; canonical .osp metadata drives organization and runtime pro
 - [ ] The specification states where the measurement, applications and planetary rows of its repository table go under a sphere taxonomy.
 - [ ] Runtime documentation distinguishes development environment, qualified runtime, package conformance and compatibility testing; contributor docs explain KNOW, ACT, PROVE and REACH and state that portable behavior must have a skill representation.
 - Depends on: `m1-canonical-metadata`, `m3-governance-teams`
+- Evidence: `Org profile: the five spheres as the primary figure, the block rendered by osp.py sphere-view --into from every repository.yaml and checked for drift in the organization audit; no three-pillars wording remains anywhere`, `Specification 0.6.15: section 0 opens with the organization, capability and runtime model (0.6 Pillar means sphere and the four planes, 0.7 canonical metadata and projections, 0.8 the four runtime words), the packaging matrix records status per runtime, and 1.1 places the measurement, applications and planetary rows`, `Marketplace: README positioning, runtime and planned tables, GLOSSARY (sphere, discipline, capability, provider bundle, composite, planned, the four planes, runtime), CONTRIBUTING (skill representation rule, where a contribution goes), steward playbook (runtime independence, spheres, team handoff), the runtime testing guide, docs/runtime-distribution.md and docs/package-authoring-guide.md, ARCHITECTURE 9.10; READMEs of core, ocean-science, hydrology, nasa-daac-knowledge, evals, archive-observatory and the tutorials index state sphere identity and runtime status`
 
 **`m5-planned-repositories`**
 

@@ -183,6 +183,18 @@ class OspTests(unittest.TestCase):
         for sphere in osp.SPHERES:
             self.assertIn(f"{sphere}-maintainers", teams)
 
+    def test_profile_block_is_spliced_between_markers(self):
+        capability(self.root)
+        repos = [(p.name, osp.read_repository(p)) for p in osp.workspace_repos(self.root)]
+        page = "# Profile\n\nintro\n\n<!-- osp-sphere-view:start -->\nold\n<!-- osp-sphere-view:end -->\n\nfooter\n"
+        out = osp.splice(page, osp.render_profile_block(repos))
+        self.assertIn("**Hydrosphere**", out)
+        self.assertIn("[ocean-science](https://github.com/open-science-pillars/ocean-science) *(available)*: Ocean Physics", out)
+        self.assertNotIn("old", out)
+        self.assertTrue(out.startswith("# Profile\n\nintro\n") and out.endswith("footer\n"))
+        with self.assertRaises(osp.OspError):
+            osp.splice("no markers", "x")
+
     def test_build_kit_own_metadata_validates(self):
         errors, _ = osp.validate_repo(osp.BUILD_KIT)
         self.assertEqual([], errors, errors)
