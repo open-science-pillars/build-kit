@@ -342,6 +342,18 @@ the release qualification guide in the marketplace repository.
 installs the candidate from it, so the Claude Code leg runs on a
 maintainer's machine against what the release will ship.
 
+`scripts/release.py` runs a release end to end the same way every
+time: `candidate` (a branch, the version set in `package.yaml` and
+`CITATION.cff`, render, lock, the README table, the gate's checks
+locally, one signed release commit with the notes and the commit
+subjects since the previous tag, and with `--pr` the pull request that
+is the candidate), `tag` (after the merge, the annotated tag through
+`claude plugin tag`, refused unless the lock is current and every
+advertising rule holds), `catalog` (the marketplace entry's ref moved
+to the tag on its own pull request) and `publish` (below). The
+procedure for maintainers is the release candidate guide in the
+marketplace repository.
+
 `osp.py publish` emits `dist/` for one release, refusing while the
 metadata, the projections, the lock, the portable package or a support
 claim is not clean: `claude/<name>-<version>.zip`, the Claude package
