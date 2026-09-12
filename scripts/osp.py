@@ -47,6 +47,12 @@ repository, docs/decisions):
                                       portable package against the pinned
                                       specification version
 
+  qualify.py (beside this tool)      runtime qualification of one capability:
+                                      the headless Claude Code run, the
+                                      checklist for a runtime run by hand, and
+                                      the record per runtime under
+                                      .osp/qualification/
+
 Every GitHub mutation is dry-run unless both --apply and the exact
 --confirm-org value are supplied. Exit 1 on any validation error or
 drift; warnings never fail.

@@ -268,6 +268,37 @@ with a package file must be present; a catalog `ref` that is not
 `{name}--v{version}` is a warning, because the catalog lags a release
 until its entry moves.
 
+## Qualification records
+
+`scripts/qualify.py` runs the qualification matrix a capability's
+`surfaces.yaml` requires and writes one record per runtime under
+`.osp/qualification/<runtime>.json`: capability, version, release lock,
+runtime with projection and version, models, date, source, and each
+test's status (pass, fail, skip with the reason, blocked with the
+reason) and evidence. A capability is qualified on a runtime when every
+required test is pass or skip; the record lists the blockers otherwise.
+
+Claude Code is driven headlessly: install from the marketplace (or a
+local marketplace path whose catalog names a release candidate), the
+dependency check from the installer's record, skill discovery from the
+runtime's inventory against the canonical `skills/`, the conversational
+tests (skill invocation in slash and conversational form, knowledge
+resolution, the side-effect gate) with their transcripts kept under
+`--evidence`, connector health from the runtime, the verification
+scripts on the installed tree, and the release-lock match (the installed
+tree carries a lock at the installed version and digests to it). A
+runtime the tool cannot drive gets a checklist (`--checklist FILE`) with
+the same prompts verbatim and the pass criteria; the filled checklist
+becomes the record (`--from-checklist FILE`), refused while any status
+or evidence is empty. `--status` prints the state per runtime.
+
+`surfaces.yaml` may carry a `probes` block naming the reference skill
+and the prompts the conversational tests use (verbatim on every runtime)
+and, once an attester exists, the `prove` command and receipt path;
+defaults apply otherwise. A record never edits `surfaces.yaml`;
+advertising a runtime is the release step's decision, taken on the
+record (the release-blocking qualification deliverable).
+
 ## Where it runs
 
 Each plugin, template and bundle gate checks out build-kit beside the

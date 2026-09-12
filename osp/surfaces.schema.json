@@ -4,42 +4,124 @@
   "title": "Open Science Pillars runtime surfaces (.osp/surfaces.yaml)",
   "description": "Runtime support policy for a repository that exposes runtime capabilities. `required` is the release qualification policy (a required surface must pass qualification before a release advertises it); `status` is the evidence today. A planned repository must not carry this file.",
   "type": "object",
-  "required": ["schema_version", "surfaces", "qualification"],
+  "required": [
+    "schema_version",
+    "surfaces",
+    "qualification"
+  ],
   "properties": {
-    "schema_version": {"const": 1},
+    "schema_version": {
+      "const": 1
+    },
     "surfaces": {
       "type": "object",
       "minProperties": 1,
-      "propertyNames": {"enum": ["claude-code", "claude-cowork", "claude-science", "openai-codex", "gemini-cli", "goose"]},
+      "propertyNames": {
+        "enum": [
+          "claude-code",
+          "claude-cowork",
+          "claude-science",
+          "openai-codex",
+          "gemini-cli",
+          "goose"
+        ]
+      },
       "additionalProperties": {
         "type": "object",
-        "required": ["role", "required", "status"],
+        "required": [
+          "role",
+          "required",
+          "status"
+        ],
         "properties": {
           "role": {
             "anyOf": [
-              {"enum": ["development", "runtime", "future-runtime", "compatibility"]},
-              {"type": "array", "minItems": 1, "uniqueItems": true, "items": {"enum": ["development", "runtime", "future-runtime", "compatibility"]}}
+              {
+                "enum": [
+                  "development",
+                  "runtime",
+                  "future-runtime",
+                  "compatibility"
+                ]
+              },
+              {
+                "type": "array",
+                "minItems": 1,
+                "uniqueItems": true,
+                "items": {
+                  "enum": [
+                    "development",
+                    "runtime",
+                    "future-runtime",
+                    "compatibility"
+                  ]
+                }
+              }
             ]
           },
-          "required": {"type": "boolean"},
-          "status": {"enum": ["supported", "tested", "planned", "limited-release", "not-qualified"]},
-          "evidence": {"type": "string", "minLength": 1}
+          "required": {
+            "type": "boolean"
+          },
+          "status": {
+            "enum": [
+              "supported",
+              "tested",
+              "planned",
+              "limited-release",
+              "not-qualified"
+            ]
+          },
+          "evidence": {
+            "type": "string",
+            "minLength": 1
+          }
         },
         "additionalProperties": false
       }
     },
     "qualification": {
       "type": "object",
-      "required": ["require"],
+      "required": [
+        "require"
+      ],
       "properties": {
         "require": {
           "type": "array",
           "minItems": 1,
           "uniqueItems": true,
-          "items": {"enum": ["install", "skill-discovery", "skill-invocation", "knowledge-resolution", "dependency-resolution", "connector-invocation", "golden-computation", "prove", "receipt", "side-effect-confirmation", "release-lock"]}
+          "items": {
+            "enum": [
+              "install",
+              "skill-discovery",
+              "skill-invocation",
+              "knowledge-resolution",
+              "dependency-resolution",
+              "connector-invocation",
+              "golden-computation",
+              "prove",
+              "receipt",
+              "side-effect-confirmation",
+              "release-lock"
+            ]
+          }
         }
       },
       "additionalProperties": false
+    },
+    "probes": {
+      "type": "object",
+      "description": "What the qualification harness (scripts/qualify.py) asks the runtime, verbatim on every runtime, where the capability states it: skill-invocation (skill, prompt, expect regexes, criteria), knowledge-resolution and side-effect-confirmation (prompt, expect, criteria), prove (command with ${PLUGIN_ROOT}, receipt path). Defaults apply where absent.",
+      "propertyNames": {
+        "enum": [
+          "skill-invocation",
+          "knowledge-resolution",
+          "side-effect-confirmation",
+          "prove"
+        ]
+      },
+      "additionalProperties": {
+        "type": "object"
+      }
     }
   },
   "additionalProperties": false
