@@ -360,7 +360,7 @@ Pillar means sphere; canonical .osp metadata drives organization and runtime pro
 | `r4-shared-prove`: Feed Cowork and Codex results through the same deterministic attester | `nasa-daac-knowledge` | accepted | done | needs-context | not seeded |
 | `r5-cross-runtime-evals`: Record capability, release lock, runtime and model on every eval result | `evals` | accepted | done | ready | not seeded |
 | `r6-compat-probes`: Add non-blocking compatibility probes for Gemini CLI and Goose | `build-kit` | draft | proposed | ready | not seeded |
-| `r7-release-qualification`: Advertise a runtime as supported only when the qualification harness passes | `build-kit` | draft | proposed | owner-only | not seeded |
+| `r7-release-qualification`: Advertise a runtime as supported only when the qualification harness passes | `build-kit` | accepted | done | owner-only | not seeded |
 
 #### Acceptance details
 
@@ -483,4 +483,6 @@ Pillar means sphere; canonical .osp metadata drives organization and runtime pro
 
 - [ ] osp qualify runs the required matrix per surface and osp publish emits only qualified projections with honest catalog status.
 - [ ] A release whose runtime fails qualification stays valid and does not advertise that runtime.
-- Depends on: `r3-dependency-reference`, `r4-shared-prove`, `r5-cross-runtime-evals`
+- Depends on: `r2-core-reference`, `r4-shared-prove`, `r5-cross-runtime-evals`
+- Gate: The rule is enforced in every package gate and by publish; its first enforcement on a release tag is the next core release. Dependency resolution across runtimes (r3) feeds the same records when its legs run and is not a precondition of the rule.
+- Evidence: `build-kit osp.py advertise: a surface may say supported only on a qualified record for this exact version and release lock (the development environment is supported by construction, a future or compatibility runtime is outside the required matrix); --check fails a claim without one and warns on a stale record or an unadvertised qualified runtime; --into README.md renders the runtime table between markers and --check --into fails when it is out of date; every package gate runs it`, `build-kit osp.py publish: refuses while the metadata, projections, lock, portable package or a support claim is not clean; emits dist/ with the Claude package zip, the Agent Plugins directory only when a runtime that consumes it is qualified (otherwise release.json says conformant and not emitted), and release.json and RUNTIMES.md with the honest status per runtime; on core today: Claude Code qualified, Cowork and Codex not qualified, the portable projection conformant and withheld`, `core, ocean-science, hydrology and plugin-template READMEs carry the rendered runtime table; the runtime distribution note states the rule; seven tests`

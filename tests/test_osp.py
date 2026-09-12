@@ -433,3 +433,105 @@ class PluginCheckTests(unittest.TestCase):
         planned = capability(self.root, name="land-ice", status="planned")
         errors, _ = osp.plugin_check(planned)
         self.assertTrue(any("no .osp/package.yaml" in e for e in errors), errors)
+
+
+class AdvertiseTests(unittest.TestCase):
+    def setUp(self):
+        self.tmp = tempfile.TemporaryDirectory()
+        self.root = Path(self.tmp.name)
+        self.repo = packaged(self.root)
+        osp.write_projections(self.repo, osp.projections(self.repo))
+        (self.repo / ".osp" / "release-lock.json").write_text(json.dumps(osp.render_lock(self.repo)))
+        write(self.repo / ".osp" / "surfaces.yaml", {
+            "schema_version": 1,
+            "surfaces": {
+                "claude-code": {"role": ["development", "runtime"], "required": True, "status": "supported"},
+                "claude-cowork": {"role": "runtime", "required": True, "status": "tested"},
+                "openai-codex": {"role": "runtime", "required": True, "status": "planned"},
+            },
+            "qualification": {"require": ["install", "skill-discovery"]},
+        })
+
+    def tearDown(self):
+        self.tmp.cleanup()
+
+    def record(self, runtime, qualified=True, version="0.8.2", lock=None, blockers=()):
+        lock = lock or osp.value_digest(json.loads((self.repo / ".osp" / "release-lock.json").read_text()))
+        write(self.repo / ".osp" / "qualification" / f"{runtime}.json", {
+            "schema_version": 1, "capability": "ocean-science", "version": version, "release_lock": lock,
+            "runtime": {"name": runtime}, "date": "2026-09-12", "source": "test", "qualified": qualified,
+            "blockers": list(blockers), "tests": {}})
+
+    def test_development_environment_is_supported_by_construction_and_others_need_a_record(self):
+        adv = osp.advertisement(self.repo)
+        self.assertEqual([], adv["errors"])
+        self.assertEqual("Supported (development environment)", osp.runtime_verdict(adv["runtimes"]["claude-code"]))
+        self.assertEqual("Not qualified", osp.runtime_verdict(adv["runtimes"]["claude-cowork"]))
+
+    def test_a_support_claim_without_a_qualified_record_fails(self):
+        surfaces = yaml.safe_load((self.repo / ".osp" / "surfaces.yaml").read_text())
+        surfaces["surfaces"]["claude-cowork"]["status"] = "supported"
+        write(self.repo / ".osp" / "surfaces.yaml", surfaces)
+        adv = osp.advertisement(self.repo)
+        self.assertTrue(any("advertises claude-cowork as supported without a qualified record" in e for e in adv["errors"]), adv["errors"])
+        self.record("claude-cowork", qualified=False, blockers=["prove: blocked"])
+        adv = osp.advertisement(self.repo)
+        self.assertTrue(adv["errors"])
+        self.record("claude-cowork", qualified=True)
+        adv = osp.advertisement(self.repo)
+        self.assertEqual([], adv["errors"])
+        self.assertEqual("Qualified", osp.runtime_verdict(adv["runtimes"]["claude-cowork"]))
+
+    def test_a_record_for_another_release_is_stale(self):
+        self.record("openai-codex", qualified=True, version="0.8.1")
+        adv = osp.advertisement(self.repo)
+        self.assertTrue(adv["runtimes"]["openai-codex"]["stale_record"])
+        self.assertFalse(adv["runtimes"]["openai-codex"]["qualified"])
+        self.assertTrue(any("not this release" in w for w in adv["warnings"]), adv["warnings"])
+        self.record("openai-codex", qualified=True, lock="sha256:" + "0" * 64)
+        self.assertTrue(osp.advertisement(self.repo)["runtimes"]["openai-codex"]["stale_record"])
+
+    def test_qualified_but_not_advertised_is_a_warning(self):
+        self.record("claude-cowork", qualified=True)
+        adv = osp.advertisement(self.repo)
+        self.assertTrue(any("may be advertised as supported" in w for w in adv["warnings"]), adv["warnings"])
+
+    def test_runtime_block_renders_and_splices(self):
+        self.record("claude-cowork", qualified=False, blockers=["prove: blocked"])
+        block = osp.render_runtimes_block(osp.advertisement(self.repo))
+        self.assertIn("| Claude Cowork | runtime, required | tested | Not qualified (prove: blocked) |", block)
+        self.assertIn("Supported (development environment)", block)
+        page = "# R\n\n<!-- osp-runtimes:start -->\nold\n<!-- osp-runtimes:end -->\n\nend\n"
+        out = osp.splice_runtimes(page, block)
+        self.assertNotIn("old", out)
+        self.assertTrue(out.startswith("# R\n") and out.endswith("end\n"))
+
+    def test_publish_withholds_the_portable_projection_until_a_runtime_is_qualified(self):
+        import zipfile
+        args = type("A", (), {"repo": str(self.repo), "out": None})()
+        osp.command_publish(args)
+        dist = self.repo / "dist"
+        release = json.loads((dist / "release.json").read_text())
+        self.assertEqual("ocean-science", release["capability"])
+        self.assertNotIn("agent-plugins", release["projections"])
+        self.assertIn("not emitted", release["agent_plugins_projection"])
+        names = zipfile.ZipFile(dist / "claude" / "ocean-science-0.8.2.zip").namelist()
+        self.assertIn("ocean-science/.claude-plugin/plugin.json", names)
+        self.assertIn("ocean-science/skills/load-ecco/SKILL.md", names)
+        self.assertNotIn("ocean-science/plugin.json", names)
+        self.assertNotIn("ocean-science/dist/release.json", names)
+        self.record("openai-codex", qualified=True)
+        osp.command_publish(args)
+        release = json.loads((dist / "release.json").read_text())
+        self.assertEqual("agent-plugin/ocean-science-0.8.2", release["projections"]["agent-plugins"])
+        self.assertTrue((dist / "agent-plugin" / "ocean-science-0.8.2" / "plugin.json").is_file())
+        self.assertFalse((dist / "agent-plugin" / "ocean-science-0.8.2" / ".claude-plugin").exists())
+        self.assertEqual("Qualified", release["runtimes"]["openai-codex"]["qualification"])
+
+    def test_publish_refuses_an_unsupported_claim(self):
+        surfaces = yaml.safe_load((self.repo / ".osp" / "surfaces.yaml").read_text())
+        surfaces["surfaces"]["openai-codex"]["status"] = "supported"
+        write(self.repo / ".osp" / "surfaces.yaml", surfaces)
+        args = type("A", (), {"repo": str(self.repo), "out": None})()
+        with self.assertRaises(osp.OspError):
+            osp.command_publish(args)

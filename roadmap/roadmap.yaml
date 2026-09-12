@@ -1012,15 +1012,18 @@ initiatives:
       - id: r7-release-qualification
         title: Advertise a runtime as supported only when the qualification harness passes
         repo: build-kit
-        proposal_state: draft
-        status: proposed
+        proposal_state: accepted
+        status: done
         priority: P1
-        depends_on: [r3-dependency-reference, r4-shared-prove, r5-cross-runtime-evals]
-        gate: null
+        depends_on: [r2-core-reference, r4-shared-prove, r5-cross-runtime-evals]
+        gate: "The rule is enforced in every package gate and by publish; its first enforcement on a release tag is the next core release. Dependency resolution across runtimes (r3) feeds the same records when its legs run and is not a precondition of the rule."
         acceptance:
           - "osp qualify runs the required matrix per surface and osp publish emits only qualified projections with honest catalog status."
           - "A release whose runtime fails qualification stays valid and does not advertise that runtime."
-        evidence: []
+        evidence:
+          - "build-kit osp.py advertise: a surface may say supported only on a qualified record for this exact version and release lock (the development environment is supported by construction, a future or compatibility runtime is outside the required matrix); --check fails a claim without one and warns on a stale record or an unadvertised qualified runtime; --into README.md renders the runtime table between markers and --check --into fails when it is out of date; every package gate runs it"
+          - "build-kit osp.py publish: refuses while the metadata, projections, lock, portable package or a support claim is not clean; emits dist/ with the Claude package zip, the Agent Plugins directory only when a runtime that consumes it is qualified (otherwise release.json says conformant and not emitted), and release.json and RUNTIMES.md with the honest status per runtime; on core today: Claude Code qualified, Cowork and Codex not qualified, the portable projection conformant and withheld"
+          - "core, ocean-science, hydrology and plugin-template READMEs carry the rendered runtime table; the runtime distribution note states the rule; seven tests"
         contributor:
           readiness: owner-only
           champion: PaulMRamirez

@@ -308,12 +308,40 @@ and the runtime. Defaults apply otherwise. A record never edits `surfaces.yaml`;
 advertising a runtime is the release step's decision, taken on the
 record (the release-blocking qualification deliverable).
 
+## Advertising a runtime, and publishing
+
+`osp.py advertise` states what a release may say per runtime, from
+`surfaces.yaml` and the qualification records: a surface may carry
+`status: supported` only on a qualified record for this exact version
+and release lock; the development environment (a surface whose role
+includes `development`) is supported by construction and its record is
+evidence when present; a future or compatibility runtime is outside the
+required matrix. `advertise --check` fails a support claim with no such
+record, warns when a qualified runtime is not yet advertised, and warns
+when a record is for another release. `advertise --into README.md`
+writes the runtime table between `osp-runtimes` markers in each
+package's README (the design's release block: which runtimes are
+qualified and which are not), and `--check --into README.md` fails
+when the table is out of date. A release stays valid when a runtime is
+not qualified; that runtime is simply not advertised.
+
+`osp.py publish` emits `dist/` for one release, refusing while the
+metadata, the projections, the lock, the portable package or a support
+claim is not clean: `claude/<name>-<version>.zip`, the Claude package
+(what the package ships, by its ignore files, without the portable
+files) for organization Cowork distribution; `agent-plugin/<name>-<version>/`,
+the Agent Plugins package, only when a runtime that consumes it is
+qualified, and otherwise a line in `release.json` saying it is
+conformant and not emitted; `release.json` and `RUNTIMES.md` with the
+honest status per runtime. `dist/` is never committed.
+
 ## Where it runs
 
 Each plugin, template and bundle gate checks out build-kit beside the
 repository and runs `osp.py validate . --standalone`, `osp.py render .
---check`, `osp.py plugin-check .` and, reported on a pull request and
-enforced on a release tag, `osp.py lock . --check`. Build-kit's own
+--check`, `osp.py plugin-check .`, `osp.py advertise . --check --into
+README.md` and, reported on a pull request and enforced on a release
+tag, `osp.py lock . --check`. Build-kit's own
 workflow validates its metadata and runs the tool's tests. The
 scheduled organization audit validates every repository against the
 catalog and checks the sphere view for drift.
