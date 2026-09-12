@@ -339,9 +339,10 @@ why, the surface is not advertised for that release, and the release
 proceeds. A waiver is for one version. `scripts/release_tickets.py
 sync`, run by a package's release-qualification workflow with the
 workflow's own token, opens one issue per required surface with no
-decision, carrying the checklist and the commands, closes it when the
-record or waiver lands on the branch, and keeps one comment on the pull
-request with the state per surface; the procedure for maintainers is
+decision, carrying the checklist and the commands, refreshes the ticket
+when the branch moves (a grown require list, a changed prompt), closes
+it when the record or waiver lands on the branch, and keeps one comment
+on the pull request with the state per surface; the procedure for maintainers is
 the release qualification guide in the marketplace repository.
 `qualify.py --candidate` builds a local catalog from the checkout and
 installs the candidate from it, so the Claude Code leg runs on a
