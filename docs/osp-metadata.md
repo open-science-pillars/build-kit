@@ -109,10 +109,14 @@ uv run build-kit/scripts/osp.py sphere-view         # write build-kit/SPHERE-VIE
 uv run build-kit/scripts/osp.py sphere-view --check # drift check
 ```
 
-Topics are `osp`, `osp-sphere-<sphere>` for each sphere, `osp-kind-<kind>`
-and `osp-status-<status>`. `topics --apply` replaces only the `osp`
-and `osp-*` topics and keeps any others a repository carries. Every
-GitHub mutation is dry-run without `--apply --confirm-org`.
+Topics are `osp`, which finds every Open Science Pillars repository in
+one search, and each sphere as the plain word people search for
+(`hydrosphere`, `cryosphere`). Kind and status are not topics: nobody
+searches for them, they live in `repository.yaml` and the sphere view,
+and a topic would be one more place for them to go stale. `topics
+--apply` replaces only the generated topics and keeps the hand-curated
+ones (the science, the tools) a repository carries. Every GitHub
+mutation is dry-run without `--apply --confirm-org`.
 
 The catalog cross-check (skipped with `--standalone`) reads
 `marketplace/.claude-plugin/marketplace.json` from the workspace: a

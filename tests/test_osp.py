@@ -142,8 +142,7 @@ class OspTests(unittest.TestCase):
         meta = {"repository": {"name": "hydrology", "kind": "capability", "status": "developing"},
                 "classification": {"spheres": ["hydrosphere", "cryosphere"], "primary_sphere": "hydrosphere",
                                    "discipline": "Terrestrial Hydrology"}}
-        self.assertEqual(["osp", "osp-sphere-cryosphere", "osp-sphere-hydrosphere",
-                          "osp-kind-capability", "osp-status-developing"], osp.topics_for(meta))
+        self.assertEqual(["osp", "cryosphere", "hydrosphere"], osp.topics_for(meta))
 
     def test_sphere_view_renders_every_sphere_and_is_deterministic(self):
         capability(self.root)
