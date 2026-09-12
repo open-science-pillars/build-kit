@@ -197,8 +197,11 @@ def catalog_entries(workspace: Path) -> dict[str, dict[str, Any]] | None:
     return {p["name"]: p for p in data.get("plugins", []) if isinstance(p, dict) and "name" in p}
 
 
-def validate_repo(repo_dir: Path, workspace: Path | None = None) -> tuple[list[str], list[str]]:
-    """(errors, warnings) for one repository's .osp/ directory."""
+def validate_repo(repo_dir: Path, workspace: Path | None = None, projections_agree: bool = True) -> tuple[list[str], list[str]]:
+    """(errors, warnings) for one repository's .osp/ directory. With
+    projections_agree=False the Claude manifest is not compared with the
+    package file: that is the state just before `render` rewrites it after
+    a version bump, and render is what fixes it."""
     errors: list[str] = []
     warnings: list[str] = []
     name = repo_dir.name
@@ -273,7 +276,7 @@ def validate_repo(repo_dir: Path, workspace: Path | None = None) -> tuple[list[s
                 for key, rel in (package.get("content") or {}).items():
                     if not (repo_dir / rel).exists():
                         errors.append(f"{name}: package.yaml content.{key} points at {rel}, which does not exist")
-                if manifest is not None:
+                if manifest is not None and projections_agree:
                     if manifest.get("version") != pkg["version"]:
                         errors.append(f"{name}: package.yaml version {pkg['version']} but the Claude manifest "
                                       f"says {manifest.get('version')!r}; the manifest is a projection and must agree")
@@ -1003,7 +1006,9 @@ def package_dirs(args: argparse.Namespace) -> list[Path]:
 def command_render(args: argparse.Namespace) -> int:
     drift_total = 0
     for repo_dir in package_dirs(args):
-        errors, _ = validate_repo(repo_dir, None)
+        # A write renders the projections from the package file; that the
+        # old ones disagree with it is the reason to render, not an error.
+        errors, _ = validate_repo(repo_dir, None, projections_agree=bool(args.check))
         if errors:
             raise OspError("cannot render from invalid metadata:\n" + "\n".join(errors))
         expected = projections(repo_dir) or {}

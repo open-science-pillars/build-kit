@@ -304,6 +304,20 @@ class RenderTests(unittest.TestCase):
         claude.write_text(json.dumps(data))
         self.assertTrue(any(".claude-plugin/plugin.json differs" in d for d in osp.projection_drift(repo, expected)))
 
+    def test_render_writes_after_a_version_bump(self):
+        repo = packaged(self.root)
+        osp.write_projections(repo, osp.projections(repo))
+        pkg = yaml.safe_load((repo / ".osp" / "package.yaml").read_text())
+        pkg["package"]["version"] = "0.8.3"
+        write(repo / ".osp" / "package.yaml", pkg)
+        errors, _ = osp.validate_repo(repo)
+        self.assertTrue(any("must agree" in e for e in errors), errors)
+        errors, _ = osp.validate_repo(repo, projections_agree=False)
+        self.assertEqual([], errors, errors)
+        osp.write_projections(repo, osp.projections(repo))
+        self.assertEqual([], osp.validate_repo(repo)[0])
+        self.assertEqual("0.8.3", json.loads((repo / "plugin.json").read_text())["version"])
+
     def test_render_needs_a_description(self):
         repo = capability(self.root)
         with self.assertRaises(osp.OspError):
