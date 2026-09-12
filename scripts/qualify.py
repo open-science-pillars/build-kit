@@ -139,9 +139,10 @@ def probes_for(cap: dict[str, Any]) -> dict[str, dict[str, Any]]:
                         "required behaviors are all present.",
         },
         "knowledge-resolution": {
-            "prompt": "Following the consult-knowledge convention, name one concept from an installed knowledge "
-                      "bundle by its bundle path (knowledge/<bundle>/<type>/<concept>.md) and state its status. "
-                      "Do not load any data.",
+            "prompt": "Consult the installed knowledge bundles the way the installed consult-knowledge skill sets "
+                      "out (the installer's record names each bundle's root; the current directory is not one). "
+                      "Name one concept by its bundle path (knowledge/<bundle>/<type>/<concept>.md) and state its "
+                      "status. Do not load any data.",
             "expect": [KNOWLEDGE_PATH.pattern, CONCEPT_STATUS.pattern],
             "criteria": "A concept is cited by bundle path and its status (stable, draft or deprecated) is stated.",
         },
@@ -328,6 +329,12 @@ def qualify_claude_code(cap: dict[str, Any], marketplace: str, model: str | None
     probes = probes_for(cap)
     tests: dict[str, dict[str, Any]] = {}
     models: set[str] = set()
+    # Every conversational call is launched from the work directory: a
+    # neutral place with no project instructions or memory of its own, so a
+    # trial reads only what the installed package gives it, and the one
+    # place the runtime may write.
+    work = evidence if evidence is not None else Path(tempfile.mkdtemp(prefix="osp-qualify-"))
+    work.mkdir(parents=True, exist_ok=True)
 
     def record(test: str, status: str, evidence_text: str, **extra: Any) -> None:
         tests[test] = {"status": status, "evidence": evidence_text, **extra}
@@ -397,7 +404,7 @@ def qualify_claude_code(cap: dict[str, Any], marketplace: str, model: str | None
     else:
         results = []
         for form, prompt in (("slash", f"/{name}:{p['skill']}"), ("conversational", p["prompt"])):
-            reply = headless(prompt, DEFAULT_TOOLS, max_turns, model, timeout)
+            reply = headless(prompt, DEFAULT_TOOLS, max_turns, model, timeout, cwd=work)
             if reply["model"]:
                 models.add(reply["model"])
             path = keep(evidence, f"skill-invocation-{form}", reply)
@@ -412,7 +419,7 @@ def qualify_claude_code(cap: dict[str, Any], marketplace: str, model: str | None
 
     # knowledge-resolution: a concept cited by bundle path with its status
     p = probes["knowledge-resolution"]
-    reply = headless(p["prompt"], DEFAULT_TOOLS, max_turns, model, timeout)
+    reply = headless(p["prompt"], DEFAULT_TOOLS, max_turns, model, timeout, cwd=work)
     if reply["model"]:
         models.add(reply["model"])
     path = keep(evidence, "knowledge-resolution", reply)
@@ -465,8 +472,6 @@ def qualify_claude_code(cap: dict[str, Any], marketplace: str, model: str | None
         for test in ("prove", "receipt"):
             record(test, "fail", "nothing installed to run the executor from")
     else:
-        work = evidence if evidence is not None else Path(tempfile.mkdtemp(prefix="osp-qualify-"))
-        work.mkdir(parents=True, exist_ok=True)
         subs = {"${PLUGIN_ROOT}": str(install_path), "${WORK}": str(work), "${RUNTIME}": "claude-code"}
 
         def fill(value: str, work_as: str = str(work)) -> str:
@@ -510,7 +515,7 @@ def qualify_claude_code(cap: dict[str, Any], marketplace: str, model: str | None
 
     # side-effect-confirmation: the download gate appears conversationally
     p = probes["side-effect-confirmation"]
-    reply = headless(p["prompt"], GATE_TOOLS, max_turns, model, timeout)
+    reply = headless(p["prompt"], GATE_TOOLS, max_turns, model, timeout, cwd=work)
     if reply["model"]:
         models.add(reply["model"])
     path = keep(evidence, "side-effect-confirmation", reply)
