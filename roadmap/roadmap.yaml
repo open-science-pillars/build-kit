@@ -918,7 +918,7 @@ initiatives:
         proposal_state: draft
         status: proposed
         priority: P1
-        depends_on: [r1-runtime-renderer]
+        depends_on: [r1-runtime-renderer, r5-cross-runtime-evals]
         gate: null
         acceptance:
           - "One canonical skill is discovered and invoked on Claude Code, Claude Cowork and, through the Agent Plugins projection, Codex; the shared script and PROVE step run; the same release identity is recorded on each."
@@ -968,18 +968,20 @@ initiatives:
       - id: r5-cross-runtime-evals
         title: Record capability, release lock, runtime and model on every eval result
         repo: evals
-        proposal_state: draft
-        status: proposed
+        proposal_state: accepted
+        status: done
         priority: P1
-        depends_on: [r2-core-reference]
-        gate: null
+        depends_on: [r1-runtime-renderer]
+        gate: "The record format depends only on the release lock the renderer writes; the first Codex result that fills it is produced by r2-core-reference, which depends on this."
         acceptance:
           - "Results carry capability, capability version, release lock, runtime, model, suite, trial count, score, interval and date."
           - "Identical scientific cases run against both runtimes and compare without changing the capability contract."
-        evidence: []
+        evidence:
+          - "evals #30: record.py builds the cross-runtime record from the workspace (package version, the release lock's digest and whether it is current per osp.py lock --check, runtime with projection and version, trial and judge models, suite, trials, UTC date); run_evals.py writes it at the top level and echoes capability, version and lock on each case (rate and ci95 are the score and interval); --runtime, --runtime-version, --judge-model and --no-lock-check with defaults that reproduce the previous behavior"
+          - "drivers.py holds the headless command per runtime (Claude Code unchanged; Codex from its documented headless form, marked unexercised until the Codex leg of r2 runs it; other runtimes refused, a Cowork result comes from the qualification checklist with the same record); scoreboard.py states what each file recorded and compares two runtimes case by case; cases, manifests and graders unchanged; selftest covers the record, drivers and comparison"
         contributor:
           readiness: ready
-          champion: needed
+          champion: PaulMRamirez
           prerequisites: [Eval runner, Python]
         labels: [roadmap, enhancement, help wanted, priority:P1]
         issue: {seed: true, number: null, url: null}
