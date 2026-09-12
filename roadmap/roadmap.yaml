@@ -16,6 +16,17 @@ repositories:
   - .github
   - archive-observatory
   - agent-evals
+  - precipitation
+  - land-ice
+  - sea-ice
+  - solid-earth
+  - land-surface
+  - atmospheric-composition
+  - atmospheric-physics
+  - land-ecosystems
+  - ocean-biology
+  - composites
+  - partner-knowledge
 
 labels:
   roadmap:
@@ -862,15 +873,18 @@ initiatives:
       - id: m5-planned-repositories
         title: Instantiate the eleven planned repositories under the planned convention
         repo: .github
-        proposal_state: draft
-        status: proposed
+        proposal_state: accepted
+        status: done
         priority: P2
         depends_on: [m3-governance-teams, m4-documentation-alignment]
         gate: "Creation is administrative; promotion out of planned is governed work under its own dated pre-registration entry."
         acceptance:
           - "partner-knowledge, precipitation, land-ice, sea-ice, solid-earth, land-surface, atmospheric-composition, atmospheric-physics, land-ecosystems, ocean-biology and composites exist with honest banners, repository and governance metadata, team CODEOWNERS and generated topics."
           - "None carries a package or runtime manifest, a catalog entry, a release or a CITATION.cff; none appears installable; the roadmap reports no active domain deliverable in any of them."
-        evidence: []
+        evidence:
+          - "The eleven repositories were created on 2026-09-12 and each opened with the planned scaffold as its first commit: the planned banner README stating sphere, discipline, scope, candidate stewards and what promotion takes, LICENSE, .osp/repository.yaml with status planned, .osp/governance.yaml naming its sphere team (composites-maintainers for composites, provider-stewards for partner-knowledge), CODEOWNERS by that team, and a gate that runs osp.py validate and the wording rules; every gate passed on that commit"
+          - "osp.py validate refuses a package, a surfaces file, a runtime manifest, a skills tree or a CITATION.cff wherever status is planned, and refuses a planned repository that appears in the marketplace catalog; SPHERE-VIEW.md, the organization profile block, bootstrap.sh and this roadmap's repository list include the eleven as planned; no deliverable is filed against any of them"
+          - "Topics (osp plus the plain sphere words) are repository administration the automation cannot write; each repository carries issue 1 with its description and topic set, cross-linked from build-kit issue 17"
         contributor:
           readiness: owner-only
           champion: PaulMRamirez

@@ -348,7 +348,7 @@ Pillar means sphere; canonical .osp metadata drives organization and runtime pro
 | `m2-evals-consolidation`: Rename ecco-agent-evals to agent-evals, the one benchmark repository, with the ECCO cases in a product subtree | `marketplace` | accepted | done | needs-context | not seeded |
 | `m3-governance-teams`: Create sphere, provider steward and runtime maintainer teams and rewrite CODEOWNERS to teams | `.github` | accepted | done | owner-only | not seeded |
 | `m4-documentation-alignment`: Align the profile, marketplace README, specification, glossary, guides and tutorials to spheres and runtime projections | `marketplace` | accepted | done | needs-context | not seeded |
-| `m5-planned-repositories`: Instantiate the eleven planned repositories under the planned convention | `.github` | draft | proposed | owner-only | not seeded |
+| `m5-planned-repositories`: Instantiate the eleven planned repositories under the planned convention | `.github` | accepted | done | owner-only | not seeded |
 | `r1-runtime-renderer`: Render the Claude and Agent Plugins projections from canonical source and detect drift | `build-kit` | draft | proposed | needs-context | not seeded |
 | `r2-core-reference`: Qualify core as the reference capability on Claude Code, Cowork and Codex from one SKILL.md | `core` | draft | proposed | needs-context | not seeded |
 | `r3-dependency-reference`: Validate dependency realization on ocean-science across runtimes | `ocean-science` | draft | proposed | needs-context | not seeded |
@@ -430,6 +430,7 @@ Pillar means sphere; canonical .osp metadata drives organization and runtime pro
 - [ ] None carries a package or runtime manifest, a catalog entry, a release or a CITATION.cff; none appears installable; the roadmap reports no active domain deliverable in any of them.
 - Depends on: `m3-governance-teams`, `m4-documentation-alignment`
 - Gate: Creation is administrative; promotion out of planned is governed work under its own dated pre-registration entry.
+- Evidence: `The eleven repositories were created on 2026-09-12 and each opened with the planned scaffold as its first commit: the planned banner README stating sphere, discipline, scope, candidate stewards and what promotion takes, LICENSE, .osp/repository.yaml with status planned, .osp/governance.yaml naming its sphere team (composites-maintainers for composites, provider-stewards for partner-knowledge), CODEOWNERS by that team, and a gate that runs osp.py validate and the wording rules; every gate passed on that commit`, `osp.py validate refuses a package, a surfaces file, a runtime manifest, a skills tree or a CITATION.cff wherever status is planned, and refuses a planned repository that appears in the marketplace catalog; SPHERE-VIEW.md, the organization profile block, bootstrap.sh and this roadmap's repository list include the eleven as planned; no deliverable is filed against any of them`, `Topics (osp plus the plain sphere words) are repository administration the automation cannot write; each repository carries issue 1 with its description and topic set, cross-linked from build-kit issue 17`
 
 **`r1-runtime-renderer`**
 
