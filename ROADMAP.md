@@ -358,7 +358,7 @@ Pillar means sphere; canonical .osp metadata drives organization and runtime pro
 | `r2-core-reference`: Qualify core as the reference capability on Claude Code, Cowork and Codex from one SKILL.md | `core` | draft | proposed | needs-context | not seeded |
 | `r3-dependency-reference`: Validate dependency realization on ocean-science across runtimes | `ocean-science` | draft | proposed | needs-context | not seeded |
 | `r4-shared-prove`: Feed Cowork and Codex results through the same deterministic attester | `nasa-daac-knowledge` | draft | proposed | needs-context | not seeded |
-| `r5-cross-runtime-evals`: Record capability, release lock, runtime and model on every eval result | `evals` | draft | proposed | ready | not seeded |
+| `r5-cross-runtime-evals`: Record capability, release lock, runtime and model on every eval result | `evals` | accepted | done | ready | not seeded |
 | `r6-compat-probes`: Add non-blocking compatibility probes for Gemini CLI and Goose | `build-kit` | draft | proposed | ready | not seeded |
 | `r7-release-qualification`: Advertise a runtime as supported only when the qualification harness passes | `build-kit` | draft | proposed | owner-only | not seeded |
 
@@ -448,7 +448,7 @@ Pillar means sphere; canonical .osp metadata drives organization and runtime pro
 
 - [ ] One canonical skill is discovered and invoked on Claude Code, Claude Cowork and, through the Agent Plugins projection, Codex; the shared script and PROVE step run; the same release identity is recorded on each.
 - [ ] Claude Code installs the capability through one normal install after marketplace setup; Cowork presents the capability rather than its internal KNOW and PROVE dependencies.
-- Depends on: `r1-runtime-renderer`
+- Depends on: `r1-runtime-renderer`, `r5-cross-runtime-evals`
 
 **`r3-dependency-reference`**
 
@@ -465,7 +465,9 @@ Pillar means sphere; canonical .osp metadata drives organization and runtime pro
 
 - [ ] Results carry capability, capability version, release lock, runtime, model, suite, trial count, score, interval and date.
 - [ ] Identical scientific cases run against both runtimes and compare without changing the capability contract.
-- Depends on: `r2-core-reference`
+- Depends on: `r1-runtime-renderer`
+- Gate: The record format depends only on the release lock the renderer writes; the first Codex result that fills it is produced by r2-core-reference, which depends on this.
+- Evidence: `evals #30: record.py builds the cross-runtime record from the workspace (package version, the release lock's digest and whether it is current per osp.py lock --check, runtime with projection and version, trial and judge models, suite, trials, UTC date); run_evals.py writes it at the top level and echoes capability, version and lock on each case (rate and ci95 are the score and interval); --runtime, --runtime-version, --judge-model and --no-lock-check with defaults that reproduce the previous behavior`, `drivers.py holds the headless command per runtime (Claude Code unchanged; Codex from its documented headless form, marked unexercised until the Codex leg of r2 runs it; other runtimes refused, a Cowork result comes from the qualification checklist with the same record); scoreboard.py states what each file recorded and compares two runtimes case by case; cases, manifests and graders unchanged; selftest covers the record, drivers and comparison`
 
 **`r6-compat-probes`**
 
