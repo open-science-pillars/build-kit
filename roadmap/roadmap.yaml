@@ -1030,3 +1030,41 @@ initiatives:
           prerequisites: [Release administration]
         labels: [roadmap, priority:P1]
         issue: {seed: true, number: null, url: null}
+      - id: r8-maintainer-run-qualification
+        title: Qualify a release candidate through tickets the maintainers close, with waivers, and no secret in the automation
+        repo: build-kit
+        proposal_state: accepted
+        status: done
+        priority: P1
+        depends_on: [r7-release-qualification]
+        gate: null
+        acceptance:
+          - "A pull request that changes a package version opens one ticket per required surface with no decision for that version, carrying the checklist and the commands; the ticket closes when the record or a waiver lands on the branch; the merge is gated on every required surface having a decision."
+          - "A maintainer can release without a surface by recording a waiver naming who, why and when; the surface is not advertised and the release proceeds."
+        evidence:
+          - "build-kit: osp.py advertise --release requires a record or a waiver for every required surface at the candidate's version and blocks an unqualified, unwaived surface; qualify.py --waive writes the waiver and --candidate builds a local catalog from the checkout so the Claude Code leg runs on a maintainer's machine against what the release ships; release_tickets.py sync opens, updates and closes the tickets and keeps one comment on the pull request with the workflow's own token; sixteen tests"
+          - "core, ocean-science, hydrology and plugin-template carry the release-qualification workflow (a version change or the release label makes a pull request a candidate); the marketplace repository carries docs/release-qualification-guide.md, the maintainers' procedure; the runtime maintainer teams from governance.yaml own each ticket"
+        contributor:
+          readiness: needs-context
+          champion: PaulMRamirez
+          prerequisites: [Release administration]
+        labels: [roadmap, priority:P1]
+        issue: {seed: false, number: null, url: null}
+      - id: r9-headless-ci-qualification
+        title: Run the headless qualification legs in the organization's CI on a release candidate
+        repo: build-kit
+        proposal_state: draft
+        status: proposed
+        priority: P2
+        depends_on: [r8-maintainer-run-qualification]
+        gate: "Needs a decision to hold a runtime credential in CI, at which scope and who may trigger it, and the first Codex checklist run to confirm how the portable package installs there (build-kit issue 32)."
+        acceptance:
+          - "A release-candidate workflow runs the Claude Code leg headlessly, uploads the transcripts and commits the record to the release branch; the Codex leg follows once wired into qualify.py."
+          - "Cowork stays by checklist; a single failed conversational test is a re-run before a fail, with the transcript kept."
+        evidence: []
+        contributor:
+          readiness: owner-only
+          champion: PaulMRamirez
+          prerequisites: [Runtime credential decision, Codex install path]
+        labels: [roadmap, priority:P2]
+        issue: {seed: false, number: 32, url: "https://github.com/open-science-pillars/build-kit/issues/32"}

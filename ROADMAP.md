@@ -361,6 +361,8 @@ Pillar means sphere; canonical .osp metadata drives organization and runtime pro
 | `r5-cross-runtime-evals`: Record capability, release lock, runtime and model on every eval result | `evals` | accepted | done | ready | not seeded |
 | `r6-compat-probes`: Add non-blocking compatibility probes for Gemini CLI and Goose | `build-kit` | draft | proposed | ready | not seeded |
 | `r7-release-qualification`: Advertise a runtime as supported only when the qualification harness passes | `build-kit` | accepted | done | owner-only | not seeded |
+| `r8-maintainer-run-qualification`: Qualify a release candidate through tickets the maintainers close, with waivers, and no secret in the automation | `build-kit` | accepted | done | needs-context | not seeded |
+| `r9-headless-ci-qualification`: Run the headless qualification legs in the organization's CI on a release candidate | `build-kit` | draft | proposed | owner-only | [#32](https://github.com/open-science-pillars/build-kit/issues/32) |
 
 #### Acceptance details
 
@@ -486,3 +488,17 @@ Pillar means sphere; canonical .osp metadata drives organization and runtime pro
 - Depends on: `r2-core-reference`, `r4-shared-prove`, `r5-cross-runtime-evals`
 - Gate: The rule is enforced in every package gate and by publish; its first enforcement on a release tag is the next core release. Dependency resolution across runtimes (r3) feeds the same records when its legs run and is not a precondition of the rule.
 - Evidence: `build-kit osp.py advertise: a surface may say supported only on a qualified record for this exact version and release lock (the development environment is supported by construction, a future or compatibility runtime is outside the required matrix); --check fails a claim without one and warns on a stale record or an unadvertised qualified runtime; --into README.md renders the runtime table between markers and --check --into fails when it is out of date; every package gate runs it`, `build-kit osp.py publish: refuses while the metadata, projections, lock, portable package or a support claim is not clean; emits dist/ with the Claude package zip, the Agent Plugins directory only when a runtime that consumes it is qualified (otherwise release.json says conformant and not emitted), and release.json and RUNTIMES.md with the honest status per runtime; on core today: Claude Code qualified, Cowork and Codex not qualified, the portable projection conformant and withheld`, `core, ocean-science, hydrology and plugin-template READMEs carry the rendered runtime table; the runtime distribution note states the rule; seven tests`
+
+**`r8-maintainer-run-qualification`**
+
+- [ ] A pull request that changes a package version opens one ticket per required surface with no decision for that version, carrying the checklist and the commands; the ticket closes when the record or a waiver lands on the branch; the merge is gated on every required surface having a decision.
+- [ ] A maintainer can release without a surface by recording a waiver naming who, why and when; the surface is not advertised and the release proceeds.
+- Depends on: `r7-release-qualification`
+- Evidence: `build-kit: osp.py advertise --release requires a record or a waiver for every required surface at the candidate's version and blocks an unqualified, unwaived surface; qualify.py --waive writes the waiver and --candidate builds a local catalog from the checkout so the Claude Code leg runs on a maintainer's machine against what the release ships; release_tickets.py sync opens, updates and closes the tickets and keeps one comment on the pull request with the workflow's own token; sixteen tests`, `core, ocean-science, hydrology and plugin-template carry the release-qualification workflow (a version change or the release label makes a pull request a candidate); the marketplace repository carries docs/release-qualification-guide.md, the maintainers' procedure; the runtime maintainer teams from governance.yaml own each ticket`
+
+**`r9-headless-ci-qualification`**
+
+- [ ] A release-candidate workflow runs the Claude Code leg headlessly, uploads the transcripts and commits the record to the release branch; the Codex leg follows once wired into qualify.py.
+- [ ] Cowork stays by checklist; a single failed conversational test is a re-run before a fail, with the transcript kept.
+- Depends on: `r8-maintainer-run-qualification`
+- Gate: Needs a decision to hold a runtime credential in CI, at which scope and who may trigger it, and the first Codex checklist run to confirm how the portable package installs there (build-kit issue 32).
