@@ -47,11 +47,10 @@ None yet.
 | Repository | Kind | Status | Spheres | Notes |
 |---|---|---|---|---|
 | `.github` | foundation | available | all | Organization profile, issue and pull request templates, governance |
+| `agent-evals` | tooling | available | all | The organization's one benchmark repository; each product's cases, fixtures and results under its own directory (ecco/ first), governed by one charter |
 | `archive-observatory` | tooling | available | all | Data engineers and archive operators: metadata compliance instruments, classified on their own terms rather than by sphere |
 | `build-kit` | tooling | available | all | Maintainers: the development harness, the roadmap and the metadata tooling |
 | `core` | foundation | available | all | The foundation capability every domain capability depends on |
-| `ecco-agent-evals` | tooling | available | all | The benchmark; renamed agent-evals with the ECCO cases in a product subtree, decided 2026-09-12 (ADR A) |
-| `ecco-budget-badge` | tooling | available | all | Retirement decided 2026-09-12 (ADR A): archived once its workflow and badge writer move beside the canonical attester |
 | `evals` | tooling | available | all | Eval runner, graders, suite manifests and the scoreboard |
 | `knowledge-template` | foundation | available | all | Template: a copy renames repository.name before it validates |
 | `marketplace` | foundation | available | all | The plugin catalog and the canonical documentation |
