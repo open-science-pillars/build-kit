@@ -142,10 +142,12 @@ not repeat under different casing. Skills are discovered as a client
 discovers them (each immediate child of `skills/` with a regular
 `SKILL.md`) and each follows the Agent Skills rules: `name` equals the
 directory and is lowercase words joined by single hyphens, at most 64
-characters; `description` is 1 to 1024 characters; `compatibility` and
-`metadata` have their shapes. Frontmatter fields outside the Agent
-Skills specification (Claude's `user-invocable`) are reported as a
-warning, because a portable client ignores them. The manifest and
+characters; `description` is 1 to 1024 characters; `compatibility`,
+`metadata`, `license` and `allowed-tools` have their shapes. Frontmatter
+fields outside the Agent Skills specification (Claude's
+`user-invocable`) are reported as a warning, because a portable client
+ignores them, and so is a `SKILL.md` over 500 lines, the length the
+specification recommends staying under. The manifest and
 `mcp.json` must also equal what `package.yaml` renders, so the check
 subsumes drift for the portable files.
 

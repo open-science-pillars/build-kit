@@ -407,6 +407,15 @@ class PluginCheckTests(unittest.TestCase):
         self.assertTrue(any("description is missing" in e for e in errors), errors)
         self.assertTrue(any("skills/notes/" in w for w in warnings), warnings)
 
+    def test_optional_field_types_and_the_length_recommendation(self):
+        skills = self.repo / "skills"
+        (skills / "load-ecco" / "SKILL.md").write_text(
+            "---\nname: load-ecco\ndescription: x\nlicense: [MIT]\nallowed-tools:\n  - Read\n---\n" + "line\n" * 600)
+        errors, warnings = osp.plugin_check(self.repo)
+        self.assertTrue(any("license is a string" in e for e in errors), errors)
+        self.assertTrue(any("allowed-tools is a string" in e for e in errors), errors)
+        self.assertTrue(any("over 500 lines" in w for w in warnings), warnings)
+
     def test_planned_and_packageless_repositories_have_no_portable_package(self):
         planned = capability(self.root, name="land-ice", status="planned")
         errors, _ = osp.plugin_check(planned)
