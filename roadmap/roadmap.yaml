@@ -777,15 +777,16 @@ initiatives:
       - id: m2-badges-consolidation
         title: Retire ecco-budget-badge; the workflow and badge writer move beside the canonical attester
         repo: nasa-daac-knowledge
-        proposal_state: draft
-        status: proposed
+        proposal_state: accepted
+        status: done
         priority: P1
         depends_on: [m1-canonical-metadata]
         gate: null
         acceptance:
           - "The adopter workflow and badge writer live beside the ECCO heat budget attester in the provider bundle's tools, pinned by that repository's release tag; an adopter's badge still resolves from the attester's verdict and cannot be hand-set."
           - "ecco-budget-badge is archived with a pointer; the specification's repository table and the org profile reflect it."
-        evidence: []
+        evidence:
+          - "ecco-budget-badge archived by the owner 2026-09-12; nasa-daac-knowledge tools/ecco_budget_badge.py runs the attester in place and tools/templates/ecco-budget-badge-workflow.yml pins that repository by release tag; the specification's repository table (0.6.14), the org profile and the ocean-science README reflect it"
         contributor:
           readiness: needs-context
           champion: PaulMRamirez
@@ -795,8 +796,8 @@ initiatives:
       - id: m2-evals-consolidation
         title: Rename ecco-agent-evals to agent-evals, the one benchmark repository, with the ECCO cases in a product subtree
         repo: marketplace
-        proposal_state: draft
-        status: proposed
+        proposal_state: accepted
+        status: done
         priority: P1
         depends_on: [m1-canonical-metadata]
         gate: null
@@ -804,7 +805,8 @@ initiatives:
           - "The repository is renamed agent-evals; the charter is kept; the ECCO cases, fixtures, scoring and results sit under a product subtree so later products join under the same charter; evals stays the runner, graders and scoreboard."
           - "Cases keep concept_basis, expected behavior and deterministic checks; a re-run against the last published tagged set produces identical results; the core linter's ocean coverage rule and the ocean-science README read cases from the new name."
           - "Historical links redirect or clearly resolve; the specification's repository table and the org profile name the new repository."
-        evidence: []
+        evidence:
+          - "Renamed to agent-evals by the owner 2026-09-12; the ECCO cases, fixtures and results sit under ecco/ with the charter kept and scoring shared; every published results entry scores identically after the move; the core knowledge-linter, the evals ocean manifest, ocean-science's README and index, and the specification name the new home"
         contributor:
           readiness: needs-context
           champion: needed

@@ -14,7 +14,7 @@ WORKSPACE="${1:-$(pwd)/osp-workspace}"
 # they are created (e.g. remote-sensing in Phase 3).
 REPOS=(.github marketplace core ocean-science hydrology tutorials \
        plugin-template knowledge-template nasa-daac-knowledge evals build-kit \
-       archive-observatory ecco-agent-evals ecco-budget-badge)
+       archive-observatory agent-evals)
 
 echo "Workspace: $WORKSPACE"
 mkdir -p "$WORKSPACE"
