@@ -339,11 +339,11 @@ Pillar means sphere; canonical .osp metadata drives organization and runtime pro
 
 | Deliverable | Repository | Proposal | Status | Contributor | Issue |
 |---|---|---|---|---|---|
-| `m0-decision-records`: Record the sphere alignment and multi-runtime packaging decisions | `marketplace` | accepted | active | owner-only | not seeded |
-| `m0-prereg-amendment`: Append the dated Phase-2 pre-registration reading of the architecture work | `marketplace` | accepted | active | owner-only | not seeded |
-| `m1-canonical-metadata`: Add the canonical .osp metadata schemas and apply them to every non-archived repository | `build-kit` | draft | proposed | needs-context | not seeded |
-| `m1-concept-spheres`: Require sphere tags on scientific concepts | `nasa-daac-knowledge` | draft | proposed | needs-context | not seeded |
-| `m1-templates`: Teach the templates the canonical metadata and the sphere examples | `plugin-template` | draft | proposed | ready | not seeded |
+| `m0-decision-records`: Record the sphere alignment and multi-runtime packaging decisions | `marketplace` | accepted | done | owner-only | not seeded |
+| `m0-prereg-amendment`: Append the dated Phase-2 pre-registration reading of the architecture work | `marketplace` | accepted | done | owner-only | not seeded |
+| `m1-canonical-metadata`: Add the canonical .osp metadata schemas and apply them to every non-archived repository | `build-kit` | accepted | done | needs-context | not seeded |
+| `m1-concept-spheres`: Require sphere tags on scientific concepts | `nasa-daac-knowledge` | accepted | done | needs-context | not seeded |
+| `m1-templates`: Teach the templates the canonical metadata and the sphere examples | `plugin-template` | accepted | done | ready | not seeded |
 | `m2-badges-consolidation`: Retire ecco-budget-badge; the workflow and badge writer move beside the canonical attester | `nasa-daac-knowledge` | draft | proposed | needs-context | not seeded |
 | `m2-evals-consolidation`: Rename ecco-agent-evals to agent-evals, the one benchmark repository, with the ECCO cases in a product subtree | `marketplace` | draft | proposed | needs-context | not seeded |
 | `m3-governance-teams`: Create sphere, provider steward and runtime maintainer teams and rewrite CODEOWNERS to teams | `.github` | draft | proposed | owner-only | not seeded |
@@ -364,10 +364,12 @@ Pillar means sphere; canonical .osp metadata drives organization and runtime pro
 - [ ] ADR A (pillar means sphere) is merged under docs/decisions.
 - [ ] ADR B (multi-runtime capability packaging) is merged under docs/decisions.
 - [ ] The design document the records cite is merged with consistent numbering and passes the wording gate.
+- Evidence: `marketplace PR #81: docs/decisions/adr-a-pillar-means-sphere.md, adr-b-multi-runtime-capability-packaging.md, design-sphere-alignment-multi-runtime.md`
 
 **`m0-prereg-amendment`**
 
 - [ ] A dated entry states that sphere metadata, provider-neutral .osp metadata, runtime packaging scaffolding and planned repositories are organizational work that neither triggers nor pre-empts the Phase-2 domain gate.
+- Evidence: `marketplace PR #81: the 2026-09-11 entry in docs/phase2-preregistration.md`
 
 **`m1-canonical-metadata`**
 
@@ -375,17 +377,20 @@ Pillar means sphere; canonical .osp metadata drives organization and runtime pro
 - [ ] Every existing non-archived repository carries repository.yaml; the sphere view renders from data; expected GitHub topics are computed from it and compared in CI.
 - [ ] No Claude manifest is required as a source of sphere truth.
 - Depends on: `m0-decision-records`, `m0-prereg-amendment`
+- Evidence: `build-kit: osp/repository.schema.json, package.schema.json, surfaces.schema.json; roadmap/governance-schema.json at version 2; scripts/osp.py validate, topics, sphere-view; tests/test_osp.py; docs/osp-metadata.md; SPHERE-VIEW.md rendered from data`, `Every non-archived repository carries .osp/repository.yaml and governance.yaml at version 2; core, ocean-science, hydrology and nasa-daac-knowledge carry package.yaml; the plugin, template and bundle gates run osp.py validate so the Claude manifest is checked against the canonical file`
 
 **`m1-concept-spheres`**
 
 - [ ] Concept frontmatter accepts spheres (required for scientific concepts) and gcmd (optional).
 - [ ] The linter rejects a scientific concept with no sphere; every existing concept is tagged and re-signed where the steward requires it.
 - Depends on: `m0-decision-records`
+- Evidence: `nasa-daac-knowledge tools/check_okf_v02.py E10 and E11; tools/signature_check.py leaves spheres and gcmd outside the signed text; 104 podaac, 36 hydrology, 5 ocean-science and 9 core concepts tagged, the core bundle declared cross-cutting`
 
 **`m1-templates`**
 
 - [ ] plugin-template and knowledge-template carry .osp metadata examples and sphere and status placeholders that fail validation until replaced.
 - Depends on: `m1-canonical-metadata`
+- Evidence: `plugin-template .osp/ with repository, package, surfaces and governance files and a README section; knowledge-template .osp/ and the spheres key on every example concept; a copied template fails osp.py validate until renamed`
 
 **`m2-badges-consolidation`**
 

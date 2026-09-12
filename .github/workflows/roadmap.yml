@@ -66,6 +66,12 @@ jobs:
         env:
           GH_TOKEN: ${{ github.token }}
         run: uv run build-kit/scripts/roadmap.py audit --output roadmap-audit.md
+      - name: Every repository's canonical metadata validates
+        working-directory: ${{ runner.temp }}/osp-workspace
+        run: uv run build-kit/scripts/osp.py validate
+      - name: The sphere view is current
+        working-directory: ${{ runner.temp }}/osp-workspace
+        run: uv run build-kit/scripts/osp.py sphere-view --check
       - name: Upload audit report even when findings fail the audit
         if: always()
         uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02 # v4.6.2

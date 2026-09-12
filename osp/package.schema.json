@@ -1,0 +1,54 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://github.com/open-science-pillars/build-kit/osp/package.schema.json",
+  "title": "Open Science Pillars package (.osp/package.yaml)",
+  "description": "Present only in a repository that publishes an installable OSP package. Owns package identity, version, content locations and the capability and knowledge dependencies; the Claude plugin manifest and the Agent Plugins manifest are projections of it and are checked against it.",
+  "type": "object",
+  "required": ["schema_version", "package", "content", "dependencies"],
+  "properties": {
+    "schema_version": {"const": 1},
+    "package": {
+      "type": "object",
+      "required": ["name", "version", "type"],
+      "properties": {
+        "name": {"type": "string", "pattern": "^[A-Za-z0-9._-]+$"},
+        "version": {"type": "string", "pattern": "^[0-9]+(\\.[0-9]+)+$"},
+        "type": {"enum": ["capability", "foundation", "knowledge"]}
+      },
+      "additionalProperties": false
+    },
+    "content": {
+      "type": "object",
+      "properties": {
+        "skills": {"type": "string"},
+        "agents": {"type": "string"},
+        "knowledge": {"type": "string"},
+        "verification": {"type": "string"},
+        "connectors": {"type": "string"},
+        "evals": {"type": "string"}
+      },
+      "additionalProperties": false
+    },
+    "dependencies": {
+      "type": "object",
+      "required": ["capabilities", "knowledge"],
+      "properties": {
+        "capabilities": {"type": "array", "items": {"$ref": "#/$defs/dependency"}},
+        "knowledge": {"type": "array", "items": {"$ref": "#/$defs/dependency"}}
+      },
+      "additionalProperties": false
+    }
+  },
+  "additionalProperties": false,
+  "$defs": {
+    "dependency": {
+      "type": "object",
+      "required": ["name"],
+      "properties": {
+        "name": {"type": "string", "pattern": "^[A-Za-z0-9._-]+$"},
+        "version": {"type": "string", "pattern": "^(>=|>|==|<=|<|~=)?[0-9]+(\\.[0-9]+)+$"}
+      },
+      "additionalProperties": false
+    }
+  }
+}

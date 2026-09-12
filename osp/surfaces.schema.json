@@ -1,0 +1,46 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://github.com/open-science-pillars/build-kit/osp/surfaces.schema.json",
+  "title": "Open Science Pillars runtime surfaces (.osp/surfaces.yaml)",
+  "description": "Runtime support policy for a repository that exposes runtime capabilities. `required` is the release qualification policy (a required surface must pass qualification before a release advertises it); `status` is the evidence today. A planned repository must not carry this file.",
+  "type": "object",
+  "required": ["schema_version", "surfaces", "qualification"],
+  "properties": {
+    "schema_version": {"const": 1},
+    "surfaces": {
+      "type": "object",
+      "minProperties": 1,
+      "propertyNames": {"enum": ["claude-code", "claude-cowork", "claude-science", "openai-codex", "gemini-cli", "goose"]},
+      "additionalProperties": {
+        "type": "object",
+        "required": ["role", "required", "status"],
+        "properties": {
+          "role": {
+            "anyOf": [
+              {"enum": ["development", "runtime", "future-runtime", "compatibility"]},
+              {"type": "array", "minItems": 1, "uniqueItems": true, "items": {"enum": ["development", "runtime", "future-runtime", "compatibility"]}}
+            ]
+          },
+          "required": {"type": "boolean"},
+          "status": {"enum": ["supported", "tested", "planned", "limited-release", "not-qualified"]},
+          "evidence": {"type": "string", "minLength": 1}
+        },
+        "additionalProperties": false
+      }
+    },
+    "qualification": {
+      "type": "object",
+      "required": ["require"],
+      "properties": {
+        "require": {
+          "type": "array",
+          "minItems": 1,
+          "uniqueItems": true,
+          "items": {"enum": ["install", "skill-discovery", "skill-invocation", "knowledge-resolution", "dependency-resolution", "connector-invocation", "golden-computation", "prove", "receipt", "side-effect-confirmation", "release-lock"]}
+        }
+      },
+      "additionalProperties": false
+    }
+  },
+  "additionalProperties": false
+}

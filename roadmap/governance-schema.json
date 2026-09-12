@@ -2,18 +2,17 @@
   "$schema": "https://json-schema.org/draft/2020-12/schema",
   "$id": "https://github.com/open-science-pillars/build-kit/roadmap/governance-schema.json",
   "title": "Open Science Pillars repository governance",
+  "description": "Schema version 2 adds runtime maintainers (who owns a repository's runtime projections) and the runtime-adapter review policy; version 1 files remain valid until every repository has moved.",
   "type": "object",
   "required": ["schema_version", "repository", "maintainers", "roadmap", "reviews"],
   "properties": {
-    "schema_version": {"const": 1},
+    "schema_version": {"enum": [1, 2]},
     "repository": {"type": "string", "minLength": 1},
-    "maintainers": {
-      "type": "object", "required": ["users", "teams", "status"],
-      "properties": {
-        "users": {"type": "array", "items": {"type": "string"}, "uniqueItems": true},
-        "teams": {"type": "array", "items": {"type": "string"}, "uniqueItems": true},
-        "status": {"enum": ["interim", "team"]}
-      }, "additionalProperties": false
+    "maintainers": {"$ref": "#/$defs/maintainers"},
+    "runtime_maintainers": {
+      "type": "object",
+      "propertyNames": {"enum": ["claude-code", "claude-cowork", "claude-science", "openai-codex", "agent-plugins"]},
+      "additionalProperties": {"$ref": "#/$defs/maintainers"}
     },
     "roadmap": {
       "type": "object", "required": ["proposals", "authority"],
@@ -24,9 +23,20 @@
       "type": "object", "required": ["ordinary", "cross_repository", "knowledge"],
       "properties": {
         "ordinary": {"type": "integer", "minimum": 1},
-        "cross_repository": {"const": "org-policy"}, "knowledge": {"const": "org-knowledge-policy"}
+        "cross_repository": {"const": "org-policy"}, "knowledge": {"const": "org-knowledge-policy"},
+        "runtime_adapter": {"const": "org-runtime-policy"}
       }, "additionalProperties": false
     }
   },
-  "additionalProperties": false
+  "additionalProperties": false,
+  "$defs": {
+    "maintainers": {
+      "type": "object", "required": ["users", "teams", "status"],
+      "properties": {
+        "users": {"type": "array", "items": {"type": "string"}, "uniqueItems": true},
+        "teams": {"type": "array", "items": {"type": "string"}, "uniqueItems": true},
+        "status": {"enum": ["interim", "team"]}
+      }, "additionalProperties": false
+    }
+  }
 }
