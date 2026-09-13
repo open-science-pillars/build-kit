@@ -1082,7 +1082,7 @@ initiatives:
       - id: sea-level-budget-closure
         title: Close the global sea level budget as an attested computation
         repo: ocean-science
-        status: proposed
+        status: active
         priority: P1
         depends_on: [landice-grace-knowledge]
         gate: ""
@@ -1103,6 +1103,9 @@ initiatives:
           champion: PaulMRamirez
           prerequisites: [nasa-ssh, Argo, GRACE-FO, the attested computation pattern in core]
         labels: [roadmap, priority:P1]
+        issue:
+          number: 45
+          url: https://github.com/open-science-pillars/ocean-science/issues/45
       - id: landice-promotion
         title: Promote land-ice out of planned with its first skill and release
         repo: land-ice
