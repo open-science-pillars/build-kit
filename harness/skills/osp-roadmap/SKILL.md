@@ -1,23 +1,21 @@
 ---
 name: osp-roadmap
-description: Audit, render, explain, and safely reconcile the federated Open Science Pillars roadmap across repositories and GitHub issues.
+description: Validate, render, audit, and explain the Open Science Pillars roadmap, the single YAML that says what is proposed, active, blocked, done and declined.
 ---
 
 # OSP Roadmap
 
-Use `build-kit/roadmap/roadmap.yaml` as the organization portfolio and each
-repository's accepted issue as that repository team's execution record. Never
-treat generated `build-kit/ROADMAP.md` or historical
+Use `build-kit/roadmap/roadmap.yaml` as the single source of truth for
+organization work. Never treat generated `build-kit/ROADMAP.md` or historical
 `osp-next-steps-codex.md` as editable sources.
 
 ## Choose the operation
 
-- For status, next work, or a named deliverable, validate and run `brief`.
+- For status, next work, or a named deliverable, validate and run `brief`;
+  the summary on top of `ROADMAP.md` says what is now, blocked, next and later.
 - After YAML edits, validate, render, and run the offline audit.
 - For repository drift, run the online audit and report findings before edits.
-- For labels, proposal issues, publishing, or reconciliation, always run the
-  dry-run first and show it to the human.
-- Do not accept a proposal on behalf of a repository team.
+- For labels, run the dry-run first and show it to the human.
 
 ## Commands
 
@@ -35,28 +33,28 @@ These commands query GitHub but do not mutate it by default:
 ```bash
 uv run build-kit/scripts/roadmap.py audit
 uv run build-kit/scripts/roadmap.py labels
-uv run build-kit/scripts/roadmap.py seed
-uv run build-kit/scripts/roadmap.py publish
-uv run build-kit/scripts/roadmap.py reconcile
 ```
 
-GitHub writes require both `--apply` and
+`labels` is the only GitHub write, and it requires both `--apply` and
 `--confirm-org open-science-pillars`. Pause and obtain explicit human approval
-after the matching dry-run before adding those flags. Treat label creation,
-issue creation or editing, and reconciliation writes as separate approvals.
+after the matching dry-run before adding those flags. The tool never opens,
+edits, or closes issues.
 
-## Edit the portfolio
+## Edit the roadmap
 
-1. Read `build-kit/docs/roadmap-harness-plan.md` for authority boundaries.
+1. Read `build-kit/docs/roadmap-harness-plan.md` for the status model.
 2. Edit only `build-kit/roadmap/roadmap.yaml`.
 3. Preserve stable IDs; add a replacement item instead of repurposing one.
-4. Use `draft` for unreviewed proposals. Only repository maintainers may move
-   a proposal to `accepted`, `deferred`, or `rejected`.
-5. Require evidence before `done`; require a gate or dependency for `blocked`.
+4. New work is `proposed`. It becomes `active` when work starts and an issue
+   exists in its repository; record the issue number and URL then, never
+   invent one.
+5. Require evidence before `done`; require a gate or dependency for `blocked`;
+   require a reason in `gate` for `declined`.
 6. Render and audit. Include the generated Markdown in the same change.
 
 ## Report
 
 Separate errors from actionable drift and warnings. State which repository owns
-each proposed action. When an issue is accepted, do not overwrite its managed
-body; repository maintainers own its execution and completion evidence.
+each proposed action. A done or declined deliverable whose issue is still open
+needs the issue closed; an active deliverable with no issue number needs one
+opened and recorded.

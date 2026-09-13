@@ -37,7 +37,9 @@ and comes back here only for the roadmap and release steps.
   one qualification ticket per required runtime on a release candidate.
   Documented in [docs/osp-metadata.md](docs/osp-metadata.md).
 - [scripts/roadmap.py](scripts/roadmap.py): validates, renders, audits and
-  briefs the organization roadmap. Documented in
+  briefs the organization roadmap (`roadmap/roadmap.yaml`, one status per
+  deliverable, an issue per active one); its only GitHub write is `labels`,
+  dry-run by default. Documented in
   [docs/roadmap-harness-plan.md](docs/roadmap-harness-plan.md) and
   [roadmap/README.md](roadmap/README.md).
 - [scripts/fanout_pr.sh](scripts/fanout_pr.sh): the same change as a pull
@@ -58,8 +60,8 @@ repository's `.osp/repository.yaml`. Edit the sources and re-render.
 - [docs/maintenance.md](docs/maintenance.md): the maintenance cadence.
 - [docs/osp-metadata.md](docs/osp-metadata.md): the `.osp/` files, the
   projections, qualification, advertising and publishing.
-- [docs/roadmap-harness-plan.md](docs/roadmap-harness-plan.md): the federated
-  roadmap and who decides what.
+- [docs/roadmap-harness-plan.md](docs/roadmap-harness-plan.md): the roadmap,
+  its status model, and who decides what.
 
 **The harness.** [harness/skills/](harness/skills/) holds the runnable
 `osp-roadmap`, `osp-session` and `osp-close` skills for Claude Code and Codex;

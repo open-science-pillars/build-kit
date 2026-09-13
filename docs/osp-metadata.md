@@ -317,8 +317,14 @@ on a release candidate: a qualification record, qualified or not, or a
 waiver (`qualify.py --surface <runtime> --waive --reason TEXT --by NAME`,
 good for one version). `scripts/release_tickets.py sync` opens one issue
 per required runtime with no decision and closes it when the record or
-waiver lands; `scripts/release.py` runs the release itself (`candidate`,
-`tag`, `catalog`, `publish`).
+waiver lands; on its first run for a candidate it also creates the
+release milestone `<capability> <version>` and sets it on every ticket
+and on the release pull request, so the release's issues are one list
+(`release.py candidate` leaves that to the sync run, which runs on the
+pull request's first CI with the workflow token). `scripts/release.py`
+runs the release itself (`candidate`, `tag`, `catalog`, `publish`);
+`release.py tag` does not close the milestone, a milestone closes when
+its issues are done and that is the maintainer's call.
 
 `osp.py publish` emits `dist/` for one release, refusing while the
 metadata, the projections, the lock, the portable package or a support
