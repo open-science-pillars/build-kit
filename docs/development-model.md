@@ -37,11 +37,11 @@ available was the linear session frame. Name that shape and use it deliberately.
 
 | Development type | Rhythm | Where the process lives |
 |---|---|---|
-| Knowledge management (ingest loop) | Standing (event-driven) | `knowledge-authoring-guide.md`, `knowledge-template`, the seeder + linter agents, `steward-playbook.md`, `sync_check.py` |
+| Knowledge management (ingest loop) | Standing (event-driven) | `contributing-knowledge.md`, `knowledge-template`, the seeder + linter agents, `steward-playbook.md` |
 | Governance / steward review | Standing (PR-driven) | `.github/GOVERNANCE.md`, `steward-playbook.md`, CODEOWNERS |
-| Maintenance (staleness, re-verification, drift) | Standing (cadence) | `build-kit/docs/maintenance.md` (this pass adds it), the linter's staleness checks, `sync_check.py` |
-| Skill development | Initiative (new) + standing (refactor) | `skill-authoring-guide.md`, `plugin-template`, `design-knowledge-coupling.md`, the coupling review/migrate workflows, linter checks 10 to 13 |
-| Evaluation | Initiative (the ablation) + standing (runner/CI) | `eval-authoring-guide.md`, the `evals` runner, per-plugin `evals/`, `phase2-preregistration.md`, rule 9 |
+| Maintenance (staleness, re-verification, drift) | Standing (cadence) | `build-kit/docs/maintenance.md`, the linter's staleness checks |
+| Skill development | Initiative (new) + standing (refactor) | `contributing-a-skill.md`, `plugin-template`, `knowledge-vs-skills.md`, the coupling review/migrate workflows, the linter's knowledge-coupling checks |
+| Evaluation | Initiative (the ablation) + standing (runner/CI) | `testing.md`, the `evals` runner, the `agent-evals` case sets, `phase2-preregistration.md`, the workspace law's eval-case rule |
 | New domain / new plugin | Initiative (gated + spec-driven) | `plugin-template`, `knowledge-template`, `marketplace.json`, the specification's repository-layout and hydrology sections, DEVELOPING "Opening the next domain" |
 
 Two of these were weak because the project never left the build frame:
@@ -58,8 +58,8 @@ from repository teams.
 1. **Propose it.** Add a stable deliverable ID to
    `build-kit/roadmap/roadmap.yaml`, render `ROADMAP.md`, and seed a proposal
    issue after human review. The repository maintainers decide acceptance.
-2. **Gate it.** If the initiative crosses a phase boundary (a new domain, a new
-   phase), confirm the gate in `phase2-preregistration.md` first. A gate that
+2. **Gate it.** If the initiative opens a new domain, confirm the
+   domain-expansion gate in `phase2-preregistration.md` first. A gate that
    is not clear stops the initiative; that is the point of pre-registration.
 3. **Do the work,** citing the specification's rules by name, capturing knowledge as you go
    (the ingest loop never defers), and honoring the workspace law
@@ -95,14 +95,14 @@ a goal with an end and a gate, it is an initiative.
 
 ## What is blocked, and what comes next
 
-Phase 3 (new domains) is authorized only if the pre-registered Phase-2 ablation
+New domains are authorized only if the pre-registered knowledge-bundle ablation
 clears (`phase2-preregistration.md`). That ablation has not run at power: only
 underpowered pilots exist, and the migration to the knowledge-coupling model
 revealed two refinements the powered run must adopt (choose non-obvious,
 dataset-specific probe cases, and use the rubric judge, not programmatic-only
 grading, which is fooled by "consult the concept" pointers; see
 `build-kit/build-record/knowledge-coupling-migration.md` and
-`marketplace/docs/design-knowledge-coupling.md`).
+`marketplace/docs/knowledge-vs-skills.md`).
 
 So the first post-build initiative is not a new domain. It is **run the powered
 ablation with the refined design.** Until it clears, new-domain work is gated by

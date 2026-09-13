@@ -454,7 +454,7 @@ def collect_audit(data: dict[str, Any], online: bool, check_files: bool = True) 
     if old_plan.exists() and "Source assessment, not an executable roadmap" not in old_plan.read_text():
         add("actionable", "old-plan-active", "osp-next-steps-codex.md lacks superseded banner")
 
-    progress = (BUILD_KIT / "PROGRESS.md").read_text()
+    progress = (BUILD_KIT / "build-record" / "PROGRESS.md").read_text()
     if "AI-for-Science submitted" in progress and "declined" not in progress.lower():
         add("actionable", "ai4s-pending", "PROGRESS.md still presents AI-for-Science as pending")
 

@@ -1,5 +1,8 @@
 # Federated roadmap implementation guide
 
+> **Historical record.** The R0 to R8 sequence that built the roadmap harness; R0 to R5 landed, R6 to R8 continue as ordinary roadmap work.
+> Current guidance: DEVELOPING.md and docs/roadmap-harness-plan.md.
+
 This guide is the copy-ready Claude Code sequence for implementing and
 operating the federated roadmap harness. Run from a flat workspace created by
 `build-kit/bootstrap.sh`. Stop before every commit, push, merge, issue write,

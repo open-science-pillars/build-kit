@@ -1,7 +1,7 @@
 # Developing Open Science Pillars
 
 How to continue building this project with an AI assistant, using the same
-harness that produced Phases 1 and 2. Read this once before your first session,
+harness that produced the initial build. Read this once before your first session,
 alongside `build-kit/docs/development-model.md`, which is the operating model:
 now that the initial build is complete, work is spec-anchored and splits into
 bounded **roadmap deliverables** and **standing processes** (the ingest loop,
@@ -23,8 +23,8 @@ concept, re-verifying a dataset, reviewing a PR) is a standing process and does
 not take a session number. See `docs/development-model.md` for which is which.
 
 Nothing is "done" without its evidence: a workflow skill needs a green golden
-notebook, a high-severity gotcha needs an eval case, a completed PROGRESS item
-needs its checkpoint proof. A truthful yellow beats a false green.
+notebook, a high-severity gotcha needs an eval case, a done roadmap deliverable
+needs its evidence lines. A truthful yellow beats a false green.
 
 ## Setup
 
@@ -42,12 +42,12 @@ Codex, and writes a workspace `CLAUDE.md` that
 imports the law with `@build-kit/CLAUDE.template.md`. It is idempotent; re-run
 it to update.
 
-**Python environment (once).** The green-golden checkpoints run real code, so
-before your first session set up the scientific environment described in the
-"Environment setup" block of `build-kit/IMPLEMENTATION-GUIDE.md`
-(conda/mamba with xarray, marimo, earthaccess and the domain libraries, Quarto
-for the tutorials, and an Earthdata Login in `~/.netrc` for NASA data). Without
-it, sessions boot but stall at the first golden notebook.
+**Python environment (once).** The golden notebooks run real code, so before
+your first session create the scientific environment from `environment.yml`
+at the root of this repository (`conda env create -f build-kit/environment.yml`
+or the mamba equivalent: xarray, marimo, earthaccess and the domain libraries),
+install Quarto for the tutorials, and put an Earthdata Login in `~/.netrc` for
+NASA data. Without it, sessions boot but stall at the first golden notebook.
 
 ## Proposing a roadmap deliverable
 
@@ -79,36 +79,39 @@ label. The pattern the build settled on:
 Default a new-domain session to **Supervised checkpoints**; escalate to
 **Tight** for one-way doors and for the highest-stakes correctness work.
 
-## The phase gates
+## The domain-expansion gate
 
 Some work is gated on evidence, not just planned. The live gate:
 `marketplace/docs/phase2-preregistration.md` pre-registers the success/stop
 conditions for the knowledge-layer effectiveness experiment (the bundle
-ablation). **Phase-3 domain expansion is authorized only if that experiment
+ablation). **New-domain expansion is authorized only if that experiment
 clears its go conditions**; if it comes back null, the pre-registration says
 to diagnose why before shipping a new domain. Re-read the pre-registration at
 the start of any session it governs, and log any deviation as a dated
 amendment there. This is the same epistemics the science demands: decide the
 exit test before you see the result.
 
-## PROGRESS, PARKING, and the ingest loop
+## Status, proposals, and the ingest loop
 
-- **PROGRESS.md** is the honest status tracker and per-session log.
-  `/osp-close` updates it; never mark an item green without checkpoint
-  evidence.
-- **PARKING.md** is where discovered gaps and new ideas go during a frozen
-  build arc, one line each, triaged into the next spec revision at the
-  scheduled window. The build writes the next spec; forethought does not.
+- **The roadmap is the status tracker.** `roadmap/roadmap.yaml` carries every
+  deliverable's state and evidence, `ROADMAP.md` is rendered from it, and the
+  owning repository's issue is the execution record. `/osp-close` reconciles
+  them; never mark a deliverable done without its evidence.
+- **New ideas and discovered gaps are roadmap proposals.** Add a draft
+  deliverable to `roadmap/roadmap.yaml` (see "Proposing a roadmap
+  deliverable" above); the repository's maintainers accept, defer or reject
+  it. The historical parking lot and progress tracker live in `build-record/`
+  and are not updated. `docs/development-model.md` is the operating model.
 - **The ingest loop** is never deferred: when a dataset peculiarity surfaces
   during any work, draft the knowledge concept immediately (correct type,
   frontmatter, evidence links), queue it for steward approval, and log it. See
-  `marketplace/docs/knowledge-authoring-guide.md`.
+  `marketplace/docs/contributing-knowledge.md`.
 
 ## How skills, knowledge, and agents divide the work
 
 The layers have clean, non-overlapping jobs, so the knowledge bundle can grow
-and improve behavior without rewriting code (the design and its measured
-proof are in `marketplace/docs/design-knowledge-coupling.md`):
+and improve behavior without rewriting code (the rule is
+`marketplace/docs/knowledge-vs-skills.md`):
 
 - **Skills are deterministic procedures plus hard refusals.** A skill carries
   the *how* (ordered steps, invariant method) and only the safety guards that
@@ -138,8 +141,8 @@ caught mechanically.
 
 ## Opening the next domain
 
-1. Confirm the phase gate against `phase2-preregistration.md`: the go
-   conditions are met AND the ablation is not null or reversed (stop
+1. Confirm the domain-expansion gate against `phase2-preregistration.md`: the
+   go conditions are met AND the ablation is not null or reversed (stop
    condition 1 blocks new domains on a null ablation). If the gate isn't
    clear, diagnosing the ablation is the work, not a new domain.
 2. Write the spec detail for the new domain into `SPECIFICATION.md` (structure,

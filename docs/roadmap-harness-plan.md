@@ -31,7 +31,7 @@ The federated model separates authority:
 | Repository ownership and proposal policy | each repo's `.osp/governance.yaml` |
 | Repository execution | the accepted issue and repository PRs |
 | Scientific requirements | `marketplace/docs/SPECIFICATION.md` |
-| Historical Sessions 0b-19 | `build-kit/IMPLEMENTATION-GUIDE.md` |
+| Historical build sessions | `build-kit/build-record/IMPLEMENTATION-GUIDE.md` and `build-kit/build-record/PROGRESS.md` |
 | Roadmap source assessment | `build-kit/build-record/osp-next-steps-codex.md` |
 
 `build-kit/build-record/osp-next-steps-codex.md` is the archived source
@@ -126,8 +126,9 @@ actionable drift. It has no write permission.
 Future work starts by deliverable ID. Numeric `/osp-session` invocations remain
 available only for the historical build record.
 
-## Phase gate
+## Domain-expansion gate
 
-Phase 3 remains blocked on the powered knowledge-bundle ablation. A null or
-reversed result triggers the pre-registered pivot. The roadmap may retain
-Phase-3 context, but it does not seed Phase-3 issues until the gate clears.
+New domains remain blocked on the powered knowledge-bundle ablation
+(`marketplace/docs/phase2-preregistration.md`). A null or reversed result
+triggers the pre-registered pivot. The roadmap may hold new-domain proposals,
+but it does not seed their issues until the gate clears.

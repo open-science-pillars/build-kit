@@ -14,6 +14,14 @@ Reusable Claude Code workflow scripts for maintaining Open Science Pillars.
   and emits a per-file migration plan. Pass `{root, files: [...]}` as args
   (actual JSON, not a string). Re-run to catch drift.
 
+- **knowledge-coupling-migrate.js** applies the plan the review produced:
+  one agent per file, editing distinct files, slims each skill or agent to
+  its procedure plus hard refusals, moves dataset-specific knowledge into
+  draft concepts, and adds the dynamic consult step. Pass `{root, files:
+  [...]}` and optionally `protected` (a comma-separated list of concept
+  names that must not change) as args. The rule it applies is the
+  marketplace's `docs/knowledge-vs-skills.md`.
+
 Run from a workspace created by `../bootstrap.sh`; the script reads the repos
 read-only. It takes an optional `{root: "<workspace path>"}` argument if your
 repos are not at the default location.

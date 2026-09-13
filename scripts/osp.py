@@ -403,23 +403,31 @@ def render_sphere_view(repos: list[tuple[str, dict[str, Any]]]) -> str:
             lines.append(f"| `{n}` | {m['classification']['discipline']} | {m['repository']['status']} | {also} |")
         lines.append("")
     groups = [
-        ("Provider knowledge", {"provider"}),
-        ("Composites", {"composite"}),
-        ("Foundation and tooling", {"foundation", "tooling"}),
+        ("Provider knowledge", {"provider"}, False),
+        ("Composites", {"composite"}, False),
+        ("Foundation and tooling", {"foundation", "tooling"}, True),
     ]
-    for title, kinds in groups:
+    for title, kinds, collapsed in groups:
         rows = sorted(n for n, m in repos if m["repository"]["kind"] in kinds)
-        lines += [f"## {title}", ""]
+        # The tooling group is collapsed: GitHub renders <details> in Markdown,
+        # and the blank lines after <summary> and before </details> are what
+        # let the table inside render as Markdown.
+        if collapsed:
+            lines += [f"<details><summary>{title} (serve every sphere)</summary>", ""]
+        else:
+            lines += [f"## {title}", ""]
         if not rows:
             lines += ["None yet.", ""]
-            continue
-        lines += ["| Repository | Kind | Status | Spheres | Notes |", "|---|---|---|---|---|"]
-        for n in rows:
-            m = by_name[n]
-            spheres = ", ".join(SPHERE_TITLES[s] for s in m["classification"]["spheres"]) or "all"
-            notes = m["repository"].get("audience") or m["repository"].get("notes") or ""
-            lines.append(f"| `{n}` | {m['repository']['kind']} | {m['repository']['status']} | {spheres} | {notes} |")
-        lines.append("")
+        else:
+            lines += ["| Repository | Kind | Status | Spheres | Notes |", "|---|---|---|---|---|"]
+            for n in rows:
+                m = by_name[n]
+                spheres = ", ".join(SPHERE_TITLES[s] for s in m["classification"]["spheres"]) or "all"
+                notes = m["repository"].get("audience") or m["repository"].get("notes") or ""
+                lines.append(f"| `{n}` | {m['repository']['kind']} | {m['repository']['status']} | {spheres} | {notes} |")
+            lines.append("")
+        if collapsed:
+            lines += ["</details>", ""]
     return "\n".join(lines).rstrip() + "\n"
 
 
@@ -458,20 +466,25 @@ def render_profile_block(repos: list[tuple[str, dict[str, Any]]]) -> str:
             extra = f"; also {', '.join(also)}" if also else ""
             lines.append(f"- [{n}]({org_url}/{n}) *({m['repository']['status']})*: {m['classification']['discipline']}{extra}")
         lines.append("")
-    for title, kinds in (("**Provider knowledge** (signed by its stewards; cuts across spheres)", {"provider"}),
-                         ("**Composites** (cross-sphere)", {"composite"}),
-                         ("**Foundation and tooling** (serve every sphere)", {"foundation", "tooling"})):
+    for title, kinds, collapsed in (("**Provider knowledge** (signed by its stewards; cuts across spheres)", {"provider"}, False),
+                                    ("**Composites** (cross-sphere)", {"composite"}, False),
+                                    ("Foundation and tooling (serve every sphere)", {"foundation", "tooling"}, True)):
         rows = sorted(n for n, m in repos if m["repository"]["kind"] in kinds)
-        lines.append(title)
+        # Spheres, provider knowledge and composites open; the tooling that
+        # serves every sphere collapsed. The blank line after <summary> and
+        # before </details> lets GitHub render the list inside as Markdown.
+        lines.append(f"<details><summary>{title}</summary>" if collapsed else title)
         lines.append("")
         if not rows:
             lines += ["- none yet", ""]
-            continue
-        for n in rows:
-            m = by_name[n]
-            note = m["repository"].get("audience") or m["repository"].get("notes") or ""
-            lines.append(f"- [{n}]({org_url}/{n}) *({m['repository']['status']})*: {note}")
-        lines.append("")
+        else:
+            for n in rows:
+                m = by_name[n]
+                note = m["repository"].get("audience") or m["repository"].get("notes") or ""
+                lines.append(f"- [{n}]({org_url}/{n}) *({m['repository']['status']})*: {note}")
+            lines.append("")
+        if collapsed:
+            lines += ["</details>", ""]
     return "\n".join(lines).rstrip() + "\n"
 
 

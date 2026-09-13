@@ -204,7 +204,7 @@ qualification:
             dependency-resolution, golden-computation, prove, receipt, release-lock]
 ```
 
-`required` is policy: a required surface must pass the listed
+`required` is policy: a required runtime must pass the listed
 qualification before a release advertises it (the release-blocking
 qualification deliverable of the architecture alignment initiative
 enforces this). `status` is the evidence today; an `evidence` string
@@ -253,6 +253,10 @@ uv run build-kit/scripts/osp.py render . --check    # drift gate inside a reposi
 uv run build-kit/scripts/osp.py plugin-check .      # Agent Plugins 1.0.0 conformance of the portable package
 uv run build-kit/scripts/osp.py lock .              # write .osp/release-lock.json
 uv run build-kit/scripts/osp.py lock . --check      # enforced on a release tag; --report on a pull request
+uv run build-kit/scripts/osp.py advertise . --check # every support claim has a qualified record
+uv run build-kit/scripts/osp.py advertise . --check --into README.md   # and the README runtime table is current
+uv run build-kit/scripts/osp.py advertise . --check --release          # on a release candidate: a decision per required runtime
+uv run build-kit/scripts/osp.py publish .           # emit dist/ for one release (refused while anything is not clean)
 ```
 
 Topics are `osp`, which finds every Open Science Pillars repository in
@@ -275,100 +279,60 @@ until its entry moves.
 
 `scripts/qualify.py` runs the qualification matrix a capability's
 `surfaces.yaml` requires and writes one record per runtime under
-`.osp/qualification/<runtime>.json`: capability, version, release lock,
-runtime with projection and version, models, date, source, and each
-test's status (pass, fail, skip with the reason, blocked with the
-reason) and evidence. A capability is qualified on a runtime when every
-required test is pass or skip; the record lists the blockers otherwise.
-
-Claude Code is driven headlessly: install from the marketplace (or a
-local marketplace path whose catalog names a release candidate), the
-dependency check from the installer's record, skill discovery from the
-runtime's inventory against the canonical `skills/`, the conversational
-tests (skill invocation in slash and conversational form, knowledge
-resolution, the side-effect gate) with their transcripts kept under
-`--evidence`, connector health from the runtime, the verification
-scripts on the installed tree, and the release-lock match (the installed
-tree carries a lock at the installed version and digests to it). A
-runtime the tool cannot drive gets a checklist (`--checklist FILE`) with
-the same prompts verbatim and the pass criteria; the filled checklist
-becomes the record (`--from-checklist FILE`), refused while any status
-or evidence is empty. `--status` prints the state per runtime. `--only
-TEST[,TEST]` re-runs the named tests and merges them into the existing
-record for the same version, the rest of the record untouched. The
-side-effect gate counts only tool calls the runtime executed; a call the
-runtime denied or that errored is listed as an attempt and is not a
-write.
-
-`surfaces.yaml` may carry a `probes` block naming the reference skill
-and the prompts the conversational tests use (verbatim on every runtime),
-the golden scripts to run (else every script at the top of the
-verification tree that the prove probe does not name), and the `prove`
-probe: the prompt that has the runtime run the shared executor and write
-the receipt, the attester command and the attestation path, with
-`${PLUGIN_ROOT}`, `${WORK}` and `${RUNTIME}` substituted. The prove test
-passes when the attester passes on the receipt the runtime wrote; the
-receipt test when the attestation says PASS naming the installed version
-and the runtime. Defaults apply otherwise. A record never edits `surfaces.yaml`;
-advertising a runtime is the release step's decision, taken on the
-record (the release-blocking qualification deliverable).
+`.osp/qualification/<runtime>.json`. The record carries the capability,
+its version and release lock, the runtime with its projection and
+version, the models, the date, the source, and each test's status
+(`pass`, `fail`, `skip` with the reason, `blocked` with the reason) with
+its evidence. The verdict rule: a capability is qualified on a runtime
+when every required test is `pass` or `skip`; otherwise the record lists
+the blockers. The eleven tests are `install`, `skill-discovery`,
+`skill-invocation`, `knowledge-resolution`, `dependency-resolution`,
+`connector-invocation`, `golden-computation`, `prove`, `receipt`,
+`side-effect-confirmation` and `release-lock`; `surfaces.yaml` names the
+ones a release requires, and may carry a `probes` block (the reference
+skill, the prompts, the golden scripts, the `prove` probe) the tests use
+verbatim on every runtime. Claude Code is driven headlessly; a runtime the
+tool cannot drive gets a checklist (`--checklist FILE`) whose filled copy
+becomes the record (`--from-checklist FILE`). A record never edits
+`surfaces.yaml`: advertising a runtime is the release step's decision,
+taken on the record. The procedure, and the hands-on walkthrough per
+runtime, are in the marketplace's
+[release qualification guide](https://github.com/open-science-pillars/marketplace/blob/main/docs/release-qualification-guide.md).
 
 ## Advertising a runtime, and publishing
 
 `osp.py advertise` states what a release may say per runtime, from
-`surfaces.yaml` and the qualification records: a surface may carry
-`status: supported` only on a qualified record for this exact version
-and release lock; the development environment (a surface whose role
-includes `development`) is supported by construction and its record is
-evidence when present; a future or compatibility runtime is outside the
-required matrix. `advertise --check` fails a support claim with no such
-record, warns when a qualified runtime is not yet advertised, and warns
-when a record is for another release. `advertise --into README.md`
-writes the runtime table between `osp-runtimes` markers in each
-package's README (the design's release block: which runtimes are
-qualified and which are not), and `--check --into README.md` fails
-when the table is out of date. A release stays valid when a runtime is
-not qualified; that runtime is simply not advertised.
-
-On a release candidate (`advertise --check --release`) every required
-surface needs a decision for that version: a qualification record,
-qualified or not, or a waiver. An unqualified surface with no waiver
-blocks the release; a waiver (`qualify.py --surface <runtime> --waive
---reason TEXT --by NAME`) records who released without the surface and
-why, the surface is not advertised for that release, and the release
-proceeds. A waiver is for one version. `scripts/release_tickets.py
-sync`, run by a package's release-qualification workflow with the
-workflow's own token, opens one issue per required surface with no
-decision, carrying the checklist and the commands, refreshes the ticket
-when the branch moves (a grown require list, a changed prompt), closes
-it when the record or waiver lands on the branch, and keeps one comment
-on the pull request with the state per surface; the procedure for maintainers is
-the release qualification guide in the marketplace repository.
-`qualify.py --candidate` builds a local catalog from the checkout and
-installs the candidate from it, so the Claude Code leg runs on a
-maintainer's machine against what the release will ship.
-
-`scripts/release.py` runs a release end to end the same way every
-time: `candidate` (a branch, the version set in `package.yaml` and
-`CITATION.cff`, render, lock, the README table, the gate's checks
-locally, one signed release commit with the notes and the commit
-subjects since the previous tag, and with `--pr` the pull request that
-is the candidate), `tag` (after the merge, the annotated tag through
-`claude plugin tag`, refused unless the lock is current and every
-advertising rule holds), `catalog` (the marketplace entry's ref moved
-to the tag on its own pull request) and `publish` (below). The
-procedure for maintainers is the release candidate guide in the
-marketplace repository.
+`surfaces.yaml` and the qualification records. The rules: a runtime may
+carry `status: supported` only on a qualified record for this exact
+version and release lock; the development environment (a runtime whose
+role includes `development`) is supported by construction, and its
+record is evidence when present; a future or compatibility runtime is
+outside the required matrix; a release stays valid when a runtime is not
+qualified, that runtime is simply not advertised. `advertise --check`
+fails a support claim with no record behind it, `--into README.md`
+writes the runtime table between the `osp-runtimes` markers of each
+package's README (and `--check --into` fails when it is out of date),
+and `--check --release` requires a decision for every required runtime
+on a release candidate: a qualification record, qualified or not, or a
+waiver (`qualify.py --surface <runtime> --waive --reason TEXT --by NAME`,
+good for one version). `scripts/release_tickets.py sync` opens one issue
+per required runtime with no decision and closes it when the record or
+waiver lands; `scripts/release.py` runs the release itself (`candidate`,
+`tag`, `catalog`, `publish`).
 
 `osp.py publish` emits `dist/` for one release, refusing while the
 metadata, the projections, the lock, the portable package or a support
 claim is not clean: `claude/<name>-<version>.zip`, the Claude package
-(what the package ships, by its ignore files, without the portable
-files) for organization Cowork distribution; `agent-plugin/<name>-<version>/`,
+for organization Cowork distribution; `agent-plugin/<name>-<version>/`,
 the Agent Plugins package, only when a runtime that consumes it is
-qualified, and otherwise a line in `release.json` saying it is
-conformant and not emitted; `release.json` and `RUNTIMES.md` with the
-honest status per runtime. `dist/` is never committed.
+qualified (otherwise `release.json` says it is conformant and not
+emitted); and `release.json` and `RUNTIMES.md` with the honest status per
+runtime. `dist/` is never committed.
+
+The release procedure for maintainers is the marketplace's
+[release candidate guide](https://github.com/open-science-pillars/marketplace/blob/main/docs/release-candidate-guide.md);
+the qualification procedure and per-runtime walkthrough are in the
+[release qualification guide](https://github.com/open-science-pillars/marketplace/blob/main/docs/release-qualification-guide.md).
 
 ## Where it runs
 

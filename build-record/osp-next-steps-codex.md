@@ -1,5 +1,7 @@
 # Open Science Pillars: Recommended Next Steps
 
+> **Historical record.** The live equivalent is the federated roadmap: `roadmap/roadmap.yaml`, rendered to `ROADMAP.md`.
+
 > **Status:** Source assessment, not an executable roadmap. Its accepted
 > recommendations are being migrated into the federated roadmap maintained in
 > `build-kit/ROADMAP.md`. Execute work from that roadmap and from repository

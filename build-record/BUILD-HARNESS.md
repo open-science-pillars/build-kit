@@ -1,5 +1,7 @@
 # Open Science Pillars: Claude Code Build Harness
 
+> **Historical record.** The design rationale of the original build harness, kept as a record. The live equivalents are `harness/skills/`, `bootstrap.sh`, `CLAUDE.template.md` and `DEVELOPING.md` in the build-kit repository.
+
 > **The runnable harness now lives in the [build-kit](https://github.com/open-science-pillars/build-kit) repo.**
 > That repo now holds the canonical `osp-roadmap`, `osp-session`, and
 > `osp-close` skills, the workspace-law template, a `bootstrap.sh`, and the

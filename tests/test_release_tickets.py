@@ -126,7 +126,9 @@ class ReleaseTicketTests(unittest.TestCase):
         rt.sync("o/r", 99, self.cap, dry_run=False)
         self.assertEqual(3, len(self.gh.issues))
         self.assertIn("- test: release-lock\n  required: true", self.gh.issues[1]["body"])
-        self.assertIn("release-candidate-walkthrough.md", self.gh.issues[1]["body"])
+        self.assertIn("The procedure and the hands-on walkthrough per runtime are in [release-qualification-guide.md]", self.gh.issues[1]["body"])
+        self.assertNotIn("release-candidate-walkthrough", self.gh.issues[1]["body"])
+        self.assertEqual(1, self.gh.issues[1]["body"].count("release-qualification-guide.md]("))
         refreshed = [w for w in self.gh.writes[writes_before:] if w[0] == "PATCH" and w[1].startswith("repos/o/r/issues/") and "/comments/" not in w[1] and "body" in (w[2] or {})]
         self.assertEqual(3, len(refreshed))
         # a record and a waiver close their tickets; the third stays open

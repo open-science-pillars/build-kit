@@ -40,7 +40,6 @@ import qualify  # noqa: E402
 
 LABEL = "qualification"
 GUIDE = "https://github.com/open-science-pillars/marketplace/blob/main/docs/release-qualification-guide.md"
-WALKTHROUGH = "https://github.com/open-science-pillars/marketplace/blob/main/docs/release-candidate-walkthrough.md"
 
 
 def gh(args: list[str], dry_run: bool = False, payload: dict | None = None) -> object:
@@ -96,7 +95,7 @@ def ticket_body(cap: dict, runtime: str, pr: int, checklist_text: str, team: str
                f"fields, then record it:\n\n"
                f"```sh\nuv run build-kit/scripts/qualify.py --capability {name} --surface {runtime} --from-checklist {runtime}-checklist.yaml\n```\n\n"
                f"and commit `.osp/qualification/{runtime}.json` to the release branch (pull request #{pr}).")
-    return f"""Release candidate **{name} {version}** (pull request #{pr}) needs a decision for **{title}** before it can merge: a qualification record, or a waiver. Owner: {who}. The procedure is [{GUIDE.rsplit('/', 1)[-1]}]({GUIDE}); the hands-on walkthrough (where to install the candidate from on {title}, the prompts, what a pass looks like) is [{WALKTHROUGH.rsplit('/', 1)[-1]}]({WALKTHROUGH}).
+    return f"""Release candidate **{name} {version}** (pull request #{pr}) needs a decision for **{title}** before it can merge: a qualification record, or a waiver. Owner: {who}. The procedure and the hands-on walkthrough per runtime are in [{GUIDE.rsplit('/', 1)[-1]}]({GUIDE}).
 
 ## Record a run
 

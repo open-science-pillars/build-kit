@@ -1,5 +1,7 @@
 # Knowledge-coupling migration: the goal and the backlog
 
+> **Historical record; the migration closed 2026-07-06.** The live rule is marketplace docs/knowledge-vs-skills.md.
+
 **Goal (dedicated pass, steward-directed 2026-07-05):** migrate EVERYTHING and
 push it; every skill and agent across all repos conforms to the
 knowledge-coupling model (design-knowledge-coupling.md): skills are
