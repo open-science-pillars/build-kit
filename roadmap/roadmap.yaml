@@ -1103,7 +1103,8 @@ initiatives:
         evidence:
           - "nasa-daac-knowledge PR #125: the executor, attester, computation concept, recipe and run skill; proven on a synthetic fixture with a known closure (no real-data run yet, and the steric term is read from a data root, not from the observations connector)"
           - "ocean-science PR #46: the golden and the prove probe on the fixture"
-          - "nasa-daac-knowledge PR #126: the computation and recipe stable and signed by the maintainer, the deep-steric term cited to Purkey and Johnson 2010 as the 2018 budget carries it. Outstanding: the real-data run with Argo through the observations connector"
+          - "nasa-daac-knowledge PR #126: the computation and recipe stable and signed by the maintainer, the deep-steric term cited to Purkey and Johnson 2010 as the 2018 budget carries it"
+          - "nasa-daac-knowledge PR #127: the first real-data run on a stamped data root (NASA-SSH, Roemmich and Gilson gridded Argo, the JPL mascon grid), 2005 through 2016, residual +0.279 mm per year within a bar of 0.663, attested and rerun by the check routine. The steric term comes from the gridded Argo product rather than profiles through the observations connector, which the recipe reserves for regional budgets"
         contributor:
           readiness: needs-context
           champion: PaulMRamirez
