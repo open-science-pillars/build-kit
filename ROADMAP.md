@@ -16,7 +16,6 @@
 - `roadmap-harness-v1`: Build the federated roadmap harness (`build-kit`)
 - `landice-grace-knowledge`: GRACE-FO mass change knowledge for land ice, reviewed and offered for confirmation (`nasa-daac-knowledge`)
 - `r2-core-reference`: Qualify core as the reference capability on Claude Code, Cowork and Codex from one SKILL.md (`core`)
-- `sea-level-budget-closure`: Close the global sea level budget as an attested computation (`ocean-science`)
 - `landice-nsidc-knowledge`: ICESat-2 height change and ice velocity knowledge in a new NSIDC bundle (`nasa-daac-knowledge`)
 - `seed-argo-gridded-steric`: Roemmich and Gilson gridded Argo knowledge, seeded and reviewed (`ocean-science`)
 - `seed-grace-basin-tws`: GRACE terrestrial water storage for basins, seeded and reviewed (`hydrology`)
@@ -55,10 +54,10 @@ Proposed, waiting on a dependency, in priority order.
 - P1 `r3-dependency-reference`: Validate dependency realization on ocean-science across runtimes (`ocean-science`)
 - P1 `tutorial-nonauthor-validation`: Complete non-author Tutorial 2 validation (`tutorials`)
 
-### Done (21)
+### Done (22)
 
 <details>
-<summary>21 done deliverables</summary>
+<summary>22 done deliverables</summary>
 
 - `hydro-usgs-waterdata-migration`: Migrate the USGS connector to the Water Data APIs and release it
 - `hydro-basin-unit`: Add basin delineation as the unit of analysis
@@ -81,6 +80,7 @@ Proposed, waiting on a dependency, in priority order.
 - `r5-cross-runtime-evals`: Record capability, release lock, runtime and model on every eval result
 - `r7-release-qualification`: Advertise a runtime as supported only when the qualification harness passes
 - `r8-maintainer-run-qualification`: Qualify a release candidate through tickets the maintainers close, with waivers, and no secret in the automation
+- `sea-level-budget-closure`: Close the global sea level budget as an attested computation
 
 </details>
 
@@ -617,7 +617,7 @@ land-ice is an installable capability whose first attested computation closes th
 | Deliverable | Repository | Status | Priority | Contributor | Issue |
 |---|---|---|---|---|---|
 | `landice-grace-knowledge`: GRACE-FO mass change knowledge for land ice, reviewed and offered for confirmation | `nasa-daac-knowledge` | active | P1 | ready | [#123](https://github.com/open-science-pillars/nasa-daac-knowledge/issues/123) |
-| `sea-level-budget-closure`: Close the global sea level budget as an attested computation | `ocean-science` | active | P1 | needs-context | [#45](https://github.com/open-science-pillars/ocean-science/issues/45) |
+| `sea-level-budget-closure`: Close the global sea level budget as an attested computation | `ocean-science` | done | P1 | needs-context | [#45](https://github.com/open-science-pillars/ocean-science/issues/45) |
 | `landice-promotion`: Promote land-ice out of planned with its first skill and release | `land-ice` | blocked | P1 | owner-only | none |
 | `landice-nsidc-knowledge`: ICESat-2 height change and ice velocity knowledge in a new NSIDC bundle | `nasa-daac-knowledge` | active | P2 | needs-context | [#131](https://github.com/open-science-pillars/nasa-daac-knowledge/issues/131) |
 | `landice-nsidc-elevation`: Reconcile mass change and elevation change for one ice sheet, in the land-ice capability | `land-ice` | blocked | P2 | needs-context | none |
@@ -637,7 +637,7 @@ land-ice is an installable capability whose first attested computation closes th
 - [ ] An attester verifies the receipt (recompute, plausibility, provenance) and passes on the golden fixture; a refusal case exists for a period the gap between missions makes unclosable.
 - [ ] The computation concept is drafted with its sources and reaches stable on a human review; the recipe names where each term's trap is.
 - Depends on: `landice-grace-knowledge`
-- Evidence: `nasa-daac-knowledge PR #125: the executor, attester, computation concept, recipe and run skill; proven on a synthetic fixture with a known closure (no real-data run yet, and the steric term is read from a data root, not from the observations connector)`, `ocean-science PR #46: the golden and the prove probe on the fixture`, `nasa-daac-knowledge PR #126: the computation and recipe stable and signed by the maintainer, the deep-steric term cited to Purkey and Johnson 2010 as the 2018 budget carries it`, `nasa-daac-knowledge PR #127: the first real-data run on a stamped data root (NASA-SSH, Roemmich and Gilson gridded Argo, the JPL mascon grid), 2005 through 2016, residual +0.279 mm per year within a bar of 0.663, attested and rerun by the check routine. The steric term comes from the gridded Argo product rather than profiles through the observations connector, which the recipe reserves for regional budgets`
+- Evidence: `nasa-daac-knowledge PR #125: the executor, attester, computation concept, recipe and run skill; proven on a synthetic fixture with a known closure (no real-data run yet, and the steric term is read from a data root, not from the observations connector)`, `ocean-science PR #46: the golden and the prove probe on the fixture`, `nasa-daac-knowledge PR #126: the computation and recipe stable and signed by the maintainer, the deep-steric term cited to Purkey and Johnson 2010 as the 2018 budget carries it`, `nasa-daac-knowledge PR #127: the first real-data run on a stamped data root (NASA-SSH, Roemmich and Gilson gridded Argo, the JPL mascon grid), 2005 through 2016, residual +0.279 mm per year within a bar of 0.663, attested and rerun by the check routine. The steric term comes from the gridded Argo product rather than profiles through the observations connector, which the recipe reserves for regional budgets`, `nasa-daac-knowledge PR #127 merged 2026-09-13 on the maintainer's review; the computation and the two recipes stable and signed; ocean-science issue 45 closed`
 
 **`landice-promotion`**
 
