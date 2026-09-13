@@ -20,7 +20,7 @@
 
 - `landice-promotion`: Promote land-ice out of planned with its first skill and release (`land-ice`): Do not start until the powered-ablation decision authorizes new domains and a dated entry exists in the pre-registration; the planned gate refuses package, surfaces and runtime metadata until then.
 - `hydro-deferred-connectors`: Model context, the PeakFQ fixture, ECOSTRESS, and the SWOT hydrology move (`hydrology`): depends on `hydro-w2-w5-workflows`, `hydro-stewards-and-releases`
-- `landice-nsidc-elevation`: Add ice-sheet elevation and velocity with an NSIDC steward (`land-ice`): Do not start until an NSIDC steward has agreed to sign the ICESat-2 and MEaSUREs velocity concepts.
+- `landice-nsidc-elevation`: Add ice-sheet elevation and velocity, with NSIDC invited to confirm (`land-ice`): Start when the ICESat-2 and MEaSUREs velocity concepts can be drafted with sources; invite an NSIDC contact to confirm them, and say in the concepts whether anyone has.
 - `phase3-flood-slice`: Build the baseline-first remote-sensing flood slice (`marketplace`): Do not start until the powered-ablation decision authorizes Phase 3.
 
 ### Next
@@ -28,7 +28,8 @@
 Proposed, every dependency done, in priority order.
 
 - P1 `hydro-investigation-tutorial`: Write the hydrology investigation tutorial and run it with a non-author reader (`tutorials`)
-- P1 `landice-grace-knowledge`: GRACE-FO mass change knowledge for land ice, signed by its steward (`nasa-daac-knowledge`)
+- P1 `landice-grace-knowledge`: GRACE-FO mass change knowledge for land ice, reviewed and offered for confirmation (`nasa-daac-knowledge`)
+- P1 `provider-confirmed-voicing`: Voice the provider-confirmed tier when citing a concept (`core`): gate: Lands in the release after 0.5.1; a release candidate never edits a skill.
 - P2 `hydro-coastal-water`: Coastal composites where hydrology meets ocean science (`ocean-science`)
 - P2 `r6-compat-probes`: Add non-blocking compatibility probes for Gemini CLI and Goose (`build-kit`)
 - P2 `r9-headless-ci-qualification`: Run the headless qualification legs in the organization's CI on a release candidate (`build-kit`): gate: Needs a decision to hold a runtime credential in CI, at which scope and who may trigger it, and the first Codex checklist run to confirm how the portable package installs there (build-kit issue 32).
@@ -99,6 +100,7 @@ Proposed, waiting on a dependency, in priority order.
 - **One governed capability, projected to runtimes (ADR B)** (`multi-runtime-packaging`): proposed. KNOW, ACT, PROVE and REACH are authored once; build-kit renders a Claude projection and an Agent Plugins 1.0 projection; Claude Code, Cowork and Codex are qualification targets; no per-client adapters. Record: marketplace docs/decisions/adr-b-multi-runtime-capability-packaging.md; accepted when it merges.
 - **One state model for the roadmap** (`one-state-roadmap`): accepted. The proposal-state axis, the seeded proposal issues, the decision labels and the reconcile step were built for a federation of maintainer teams the organization does not yet have. roadmap.yaml stays the single source of truth with one status per deliverable (proposed, active, blocked, done, declined); an active deliverable has an issue in its repository, opened when work starts and closed by the pull request that finishes it; the tool never writes issues. Revisit trigger: adopt GitHub Projects as a rendered view when a second maintainer team declines to edit the YAML or a partner asks for a board; render it from the YAML, one way.
 - **Land-ice is the first new sphere, entered through the sea level budget** (`first-new-sphere-land-ice`): accepted. The first sphere opened after the founding domains is land-ice, entered through GRACE-FO mass change and the sea level budget rather than through ice-sheet altimetry. Reasons: GRACE-FO is a PO.DAAC product, so the first non-founding capability carries knowledge signed by the center that produces it; the budget composes what exists (altimetry in the provider bundle, Argo through the core connector, the GRACE-FO mascon concept) into one deterministic computation with a receipt, the first true composite; its traps (glacial isostatic adjustment, leakage, the 2017 to 2018 gap between missions, degree-1 and C20 replacements, mascon versus spherical-harmonic solutions) are the kind the project exists to prevent; and the data is small. Sea-ice follows when an NSIDC steward engages; precipitation stays a hydrology slice until it carries workflows hydrology does not. Promotion out of planned still waits on the pre-registered domain-expansion gate (the powered ablation) and on a dated pre-registration entry; the provider-bundle knowledge can be captured before that, as the ingest loop allows.
+- **Provider confirmation is a badge and a ladder, never a gate** (`provenance-ladder`): accepted. A steward signature was doing two jobs: the honesty marker (a person who knows the product confirmed the claim) and the gate (nothing stable, released, promoted or composite without it). The first stays; the second blocked the organization on a role nobody at a data center holds yet, and people in these domains are only getting accustomed to AI. From now on a verified event carries a role (maintainer, provider, community); stable needs one human review of any role; high severity needs two, provider preferred and invited, not required; provider confirmation is a tier the runtime voices. A provider person can start by answering one confirm-this-concept issue, with the maintainer recording the event on their behalf; a bundle digest shows them what is claimed about their products. Promotion out of planned needs a maintainer, sources, evals and an invited provider contact; a composite needs a maintainer and a reviewer per sphere. The maintainer who holds a bundle is its steward; interim and handoff language is retired. Unchanged: human review before merge (the security control), evidence per claim, and the signature debt on edits after a signature.
 
 ## Initiatives
 
@@ -451,6 +453,7 @@ Pillar means sphere; canonical .osp metadata drives organization and runtime pro
 | `r7-release-qualification`: Advertise a runtime as supported only when the qualification harness passes | `build-kit` | done | P1 | owner-only | none |
 | `r8-maintainer-run-qualification`: Qualify a release candidate through tickets the maintainers close, with waivers, and no secret in the automation | `build-kit` | done | P1 | needs-context | none |
 | `r9-headless-ci-qualification`: Run the headless qualification legs in the organization's CI on a release candidate | `build-kit` | proposed | P2 | owner-only | [#32](https://github.com/open-science-pillars/build-kit/issues/32) |
+| `provider-confirmed-voicing`: Voice the provider-confirmed tier when citing a concept | `core` | proposed | P1 | ready | none |
 
 #### Acceptance details
 
@@ -591,28 +594,34 @@ Pillar means sphere; canonical .osp metadata drives organization and runtime pro
 - Depends on: `r8-maintainer-run-qualification`
 - Gate: Needs a decision to hold a runtime credential in CI, at which scope and who may trigger it, and the first Codex checklist run to confirm how the portable package installs there (build-kit issue 32).
 
+**`provider-confirmed-voicing`**
+
+- [ ] The consult-knowledge skill voices four tiers when it cites a high-severity claim (unverified, machine-confirmed, human-reviewed, provider-confirmed), deriving provider-confirmed from a human verified event with role provider.
+- [ ] A behavior prompt and an eval case cover a provider-confirmed citation and a maintainer-reviewed one, voiced differently.
+- Gate: Lands in the release after 0.5.1; a release candidate never edits a skill.
+
 ### Open the Cryosphere through land-ice and the sea level budget
 
 **ID:** `cryosphere-land-ice`  
 **Status:** blocked  
 **Priority:** P1
 
-land-ice is an installable capability whose first attested computation closes the sea level budget from altimetry, Argo steric change and GRACE-FO mass change, with the GRACE-FO knowledge signed by its PO.DAAC steward.
+land-ice is an installable capability whose first attested computation closes the sea level budget from altimetry, Argo steric change and GRACE-FO mass change, with the GRACE-FO knowledge reviewed and offered to PO.DAAC for confirmation.
 
 > **Gate:** Promotion out of planned waits on the pre-registered domain-expansion gate (the powered ablation) and a dated pre-registration entry; the knowledge and the budget computation may be built before it.
 
 | Deliverable | Repository | Status | Priority | Contributor | Issue |
 |---|---|---|---|---|---|
-| `landice-grace-knowledge`: GRACE-FO mass change knowledge for land ice, signed by its steward | `nasa-daac-knowledge` | proposed | P1 | ready | none |
+| `landice-grace-knowledge`: GRACE-FO mass change knowledge for land ice, reviewed and offered for confirmation | `nasa-daac-knowledge` | proposed | P1 | ready | none |
 | `sea-level-budget-closure`: Close the global sea level budget as an attested computation | `ocean-science` | proposed | P1 | needs-context | none |
 | `landice-promotion`: Promote land-ice out of planned with its first skill and release | `land-ice` | blocked | P1 | owner-only | none |
-| `landice-nsidc-elevation`: Add ice-sheet elevation and velocity with an NSIDC steward | `land-ice` | blocked | P2 | needs-context | none |
+| `landice-nsidc-elevation`: Add ice-sheet elevation and velocity, with NSIDC invited to confirm | `land-ice` | blocked | P2 | needs-context | none |
 
 #### Acceptance details
 
 **`landice-grace-knowledge`**
 
-- [ ] The grace-fo-mascons dataset concept states the land-ice use, the solution version, the units and the reference period, and is signed by a PO.DAAC steward with a verified event.
+- [ ] The grace-fo-mascons dataset concept states the land-ice use, the solution version, the units and the reference period, is reviewed to stable, and a PO.DAAC contact has been invited to confirm it (provider confirmation is voiced when recorded, never required).
 - [ ] Gotchas exist, each with evidence and a matching eval case where the severity is high, for glacial isostatic adjustment, coastal leakage, the 2017 to 2018 gap between GRACE and GRACE-FO, and the degree-1 and C20 replacements.
 - [ ] A recipe converts a regional mass change to a sea level equivalent with its uncertainty, citing the concepts it uses.
 
@@ -620,7 +629,7 @@ land-ice is an installable capability whose first attested computation closes th
 
 - [ ] A deterministic executor computes altimetric sea level change (nasa-ssh), steric change from Argo through the core observations connector, and ocean mass change from GRACE-FO over one stated period, and reports the residual against the combined uncertainty in a receipt naming the release and the runtime.
 - [ ] An attester verifies the receipt (recompute, plausibility, provenance) and passes on the golden fixture; a refusal case exists for a period the gap between missions makes unclosable.
-- [ ] The computation concept is drafted with its sources and reaches stable on a steward's signature; the recipe names where each term's trap is.
+- [ ] The computation concept is drafted with its sources and reaches stable on a human review; the recipe names where each term's trap is.
 - Depends on: `landice-grace-knowledge`
 
 **`landice-promotion`**
@@ -633,7 +642,7 @@ land-ice is an installable capability whose first attested computation closes th
 
 **`landice-nsidc-elevation`**
 
-- [ ] ICESat-2 elevation change and MEaSUREs ice velocity concepts are signed by an NSIDC steward, with their gotchas and eval cases.
+- [ ] ICESat-2 elevation change and MEaSUREs ice velocity concepts are reviewed to stable with their gotchas and eval cases, and an NSIDC contact has been invited to confirm them.
 - [ ] A workflow skill reconciles the mass-change and the elevation-change estimates for one ice sheet and states the disagreement honestly.
 - Depends on: `landice-promotion`
-- Gate: Do not start until an NSIDC steward has agreed to sign the ICESat-2 and MEaSUREs velocity concepts.
+- Gate: Start when the ICESat-2 and MEaSUREs velocity concepts can be drafted with sources; invite an NSIDC contact to confirm them, and say in the concepts whether anyone has.

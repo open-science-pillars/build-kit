@@ -84,6 +84,26 @@ decisions:
       pre-registration entry; the provider-bundle knowledge can be captured before
       that, as the ingest loop allows.'
 
+  - id: provenance-ladder
+    title: Provider confirmation is a badge and a ladder, never a gate
+    status: accepted
+    decided: 2026-09-13
+    rationale: 'A steward signature was doing two jobs: the honesty marker (a person
+      who knows the product confirmed the claim) and the gate (nothing stable, released,
+      promoted or composite without it). The first stays; the second blocked the
+      organization on a role nobody at a data center holds yet, and people in these
+      domains are only getting accustomed to AI. From now on a verified event carries a
+      role (maintainer, provider, community); stable needs one human review of any role;
+      high severity needs two, provider preferred and invited, not required; provider
+      confirmation is a tier the runtime voices. A provider person can start by
+      answering one confirm-this-concept issue, with the maintainer recording the event
+      on their behalf; a bundle digest shows them what is claimed about their products.
+      Promotion out of planned needs a maintainer, sources, evals and an invited provider
+      contact; a composite needs a maintainer and a reviewer per sphere. The maintainer
+      who holds a bundle is its steward; interim and handoff language is retired.
+      Unchanged: human review before merge (the security control), evidence per claim,
+      and the signature debt on edits after a signature.'
+
 initiatives:
   - id: truth-reconciliation
     title: Federated roadmap and truth reconciliation
@@ -999,12 +1019,32 @@ initiatives:
           prerequisites: [Runtime credential decision, Codex install path]
         labels: [roadmap, priority:P2]
         issue: {number: 32, url: "https://github.com/open-science-pillars/build-kit/issues/32"}
+      - id: provider-confirmed-voicing
+        title: Voice the provider-confirmed tier when citing a concept
+        repo: core
+        status: proposed
+        priority: P1
+        depends_on: []
+        gate: Lands in the release after 0.5.1; a release candidate never edits a skill.
+        acceptance:
+          - The consult-knowledge skill voices four tiers when it cites a high-severity
+            claim (unverified, machine-confirmed, human-reviewed, provider-confirmed),
+            deriving provider-confirmed from a human verified event with role provider.
+          - A behavior prompt and an eval case cover a provider-confirmed citation and a
+            maintainer-reviewed one, voiced differently.
+        evidence: []
+        contributor:
+          readiness: ready
+          champion: PaulMRamirez
+          prerequisites: [The consult-knowledge skill, the provenance ladder decision]
+        labels: [roadmap, priority:P1]
 
   - id: cryosphere-land-ice
     title: Open the Cryosphere through land-ice and the sea level budget
     outcome: land-ice is an installable capability whose first attested computation
       closes the sea level budget from altimetry, Argo steric change and GRACE-FO
-      mass change, with the GRACE-FO knowledge signed by its PO.DAAC steward.
+      mass change, with the GRACE-FO knowledge reviewed and offered to PO.DAAC for
+      confirmation.
     status: blocked
     priority: P1
     depends_on: [powered-ablation]
@@ -1013,7 +1053,7 @@ initiatives:
       and the budget computation may be built before it.
     deliverables:
       - id: landice-grace-knowledge
-        title: GRACE-FO mass change knowledge for land ice, signed by its steward
+        title: GRACE-FO mass change knowledge for land ice, reviewed and offered for confirmation
         repo: nasa-daac-knowledge
         status: proposed
         priority: P1
@@ -1021,8 +1061,9 @@ initiatives:
         gate: ""
         acceptance:
           - The grace-fo-mascons dataset concept states the land-ice use, the solution
-            version, the units and the reference period, and is signed by a PO.DAAC
-            steward with a verified event.
+            version, the units and the reference period, is reviewed to stable, and a
+            PO.DAAC contact has been invited to confirm it (provider confirmation is
+            voiced when recorded, never required).
           - Gotchas exist, each with evidence and a matching eval case where the
             severity is high, for glacial isostatic adjustment, coastal leakage, the
             2017 to 2018 gap between GRACE and GRACE-FO, and the degree-1 and C20
@@ -1052,7 +1093,7 @@ initiatives:
             passes on the golden fixture; a refusal case exists for a period the gap
             between missions makes unclosable.
           - The computation concept is drafted with its sources and reaches stable on
-            a steward's signature; the recipe names where each term's trap is.
+            a human review; the recipe names where each term's trap is.
         evidence: []
         contributor:
           readiness: needs-context
@@ -1080,24 +1121,26 @@ initiatives:
         contributor:
           readiness: owner-only
           champion: PaulMRamirez
-          prerequisites: [The domain-expansion decision, a PO.DAAC steward signature]
+          prerequisites: [The domain-expansion decision, an invited PO.DAAC contact]
         labels: [roadmap, priority:P1]
       - id: landice-nsidc-elevation
-        title: Add ice-sheet elevation and velocity with an NSIDC steward
+        title: Add ice-sheet elevation and velocity, with NSIDC invited to confirm
         repo: land-ice
         status: blocked
         priority: P2
         depends_on: [landice-promotion]
-        gate: Do not start until an NSIDC steward has agreed to sign the ICESat-2 and
-          MEaSUREs velocity concepts.
+        gate: Start when the ICESat-2 and MEaSUREs velocity concepts can be drafted
+          with sources; invite an NSIDC contact to confirm them, and say in the
+          concepts whether anyone has.
         acceptance:
-          - ICESat-2 elevation change and MEaSUREs ice velocity concepts are signed by
-            an NSIDC steward, with their gotchas and eval cases.
+          - ICESat-2 elevation change and MEaSUREs ice velocity concepts are reviewed to
+            stable with their gotchas and eval cases, and an NSIDC contact has been
+            invited to confirm them.
           - A workflow skill reconciles the mass-change and the elevation-change
             estimates for one ice sheet and states the disagreement honestly.
         evidence: []
         contributor:
           readiness: needs-context
           champion: needed
-          prerequisites: [An NSIDC steward, ICESat-2 ATL products, MEaSUREs velocity]
+          prerequisites: [ICESat-2 ATL products, MEaSUREs velocity, an NSIDC contact to invite]
         labels: [roadmap, priority:P2]
