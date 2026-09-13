@@ -25,6 +25,8 @@ class FakeGitHub:
         self.issues: list[dict] = []
         self.comments: list[dict] = []
         self.labels = [{"name": "bug"}]
+        self.milestones: list[dict] = []
+        self.pull = {"number": 99, "milestone": None}
         self.writes: list[tuple] = []
 
     def __call__(self, args, dry_run=False, payload=None):
@@ -34,6 +36,10 @@ class FakeGitHub:
                 return self.labels
             if path.startswith("repos/o/r/issues?"):
                 return [i for i in self.issues if i["state"] == "open"]
+            if path == "repos/o/r/milestones?state=all&per_page=100":
+                return self.milestones
+            if path == "repos/o/r/issues/99":
+                return self.pull
             if "/comments" in path:
                 return self.comments
             raise AssertionError(path)
@@ -42,8 +48,13 @@ class FakeGitHub:
         self.writes.append((args[1], path, payload))
         if path == "repos/o/r/labels":
             self.labels.append({"name": payload["name"]})
+        elif path == "repos/o/r/milestones":
+            milestone = {"number": len(self.milestones) + 1, "title": payload["title"], "state": "open"}
+            self.milestones.append(milestone)
+            return milestone
         elif path == "repos/o/r/issues":
-            issue = {"number": len(self.issues) + 1, "title": payload["title"], "body": payload["body"], "state": "open"}
+            issue = {"number": len(self.issues) + 1, "title": payload["title"], "body": payload["body"], "state": "open",
+                     "milestone": {"number": payload["milestone"]} if payload.get("milestone") else None}
             self.issues.append(issue)
             return issue
         elif path.startswith("repos/o/r/issues/comments/"):
@@ -57,10 +68,13 @@ class FakeGitHub:
                 self.comments.append({"id": len(self.comments) + 1, "body": payload["body"]})
         elif args[1] == "PATCH" and path.startswith("repos/o/r/issues/"):
             number = int(path.rsplit("/", 1)[1])
+            target = self.pull if number == 99 else self.issues[number - 1]
             if "state" in payload:
-                self.issues[number - 1]["state"] = payload["state"]
+                target["state"] = payload["state"]
             if "body" in payload:
-                self.issues[number - 1]["body"] = payload["body"]
+                target["body"] = payload["body"]
+            if "milestone" in payload:
+                target["milestone"] = {"number": payload["milestone"]}
         return None
 
 
@@ -113,10 +127,26 @@ class ReleaseTicketTests(unittest.TestCase):
         self.assertIn("--candidate", self.gh.issues[0]["body"])
         self.assertEqual(1, len(self.gh.comments))
         self.assertIn("Waiting on: claude-code, claude-cowork, openai-codex", self.gh.comments[0]["body"])
+        # the release milestone: created once, on every ticket and on the pull request
+        self.assertEqual([{"number": 1, "title": "ocean-science 0.8.2", "state": "open"}], self.gh.milestones)
+        self.assertEqual([1, 1, 1], [i["milestone"]["number"] for i in self.gh.issues])
+        self.assertEqual({"number": 1}, self.gh.pull["milestone"])
+        milestone_writes = lambda: [w for w in self.gh.writes if w[1] == "repos/o/r/milestones" or "milestone" in (w[2] or {})]  # noqa: E731
+        self.assertEqual(5, len(milestone_writes()))
         # a second run is idempotent
         rt.sync("o/r", 99, self.cap, dry_run=False)
         self.assertEqual(3, len(self.gh.issues))
         self.assertEqual(1, len(self.gh.comments))
+        self.assertEqual(1, len(self.gh.milestones))
+        self.assertEqual(5, len(milestone_writes()))
+        # a ticket or the pull request that lost the milestone gets it back
+        self.gh.issues[0]["milestone"] = None
+        self.gh.pull["milestone"] = None
+        rt.sync("o/r", 99, self.cap, dry_run=False)
+        self.assertEqual(1, len(self.gh.milestones))
+        self.assertEqual({"number": 1}, self.gh.issues[0]["milestone"])
+        self.assertEqual({"number": 1}, self.gh.pull["milestone"])
+        self.assertEqual(7, len(milestone_writes()))
         # the branch moves (the require list grows): the open tickets follow it
         surfaces = rt.osp.load_yaml(self.cap["dir"] / ".osp" / "surfaces.yaml")
         surfaces["qualification"]["require"].append("release-lock")
@@ -146,4 +176,5 @@ class ReleaseTicketTests(unittest.TestCase):
     def test_dry_run_writes_nothing(self):
         rt.sync("o/r", 99, self.cap, dry_run=True)
         self.assertEqual([], self.gh.issues)
+        self.assertEqual([], self.gh.milestones)
         self.assertEqual([], self.gh.writes)

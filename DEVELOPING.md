@@ -5,15 +5,17 @@ harness that produced the initial build. Read this once before your first sessio
 alongside `build-kit/docs/development-model.md`, which is the operating model:
 now that the initial build is complete, work is spec-anchored and splits into
 bounded **roadmap deliverables** and **standing processes** (the ingest loop,
-`docs/maintenance.md`, and governance). This guide is how to run accepted work.
+`docs/maintenance.md`, and governance). This guide is how to run roadmap work.
 
 ## The idea
 
-Future work is a stable deliverable ID in `roadmap/roadmap.yaml`. The
-organization can propose work, but the named repository's maintainers accept,
-defer, or reject it. An accepted repository issue owns implementation and
-completion; the YAML owns the cross-repository portfolio. Work starts with
-`/osp-session <roadmap-id>` and ends with `/osp-close`. Historical numeric
+Future work is a stable deliverable ID in `roadmap/roadmap.yaml`, the single
+source of truth: one status per deliverable (proposed, active, blocked, done,
+declined), its dependencies, gate, acceptance criteria and evidence. An active
+deliverable has an issue in its owning repository, opened when the work starts
+and closed by the pull request that finishes it; the YAML records the issue
+number once it exists. Work starts with `/osp-session <roadmap-id>` and ends
+with `/osp-close`. Historical numeric
 sessions remain readable but no new numbered sessions are created. The law the assistant
 works under is the workspace `CLAUDE.md`, which is a thin file that imports
 the single tracked law here with `@build-kit/CLAUDE.template.md` (so it never
@@ -51,9 +53,9 @@ NASA data. Without it, sessions boot but stall at the first golden notebook.
 
 ## Proposing a roadmap deliverable
 
-Add proposed work to `roadmap/roadmap.yaml` with a stable lowercase ID. Include
-the owning repository, proposal and execution state, priority, dependencies,
-gate, acceptance criteria, contributor readiness, and issue seed policy. Run:
+Add proposed work to `roadmap/roadmap.yaml` with a stable lowercase ID and
+`status: proposed`. Include the owning repository, priority, dependencies,
+gate, acceptance criteria, and contributor readiness. Run:
 
 ```bash
 uv run build-kit/scripts/roadmap.py validate
@@ -61,9 +63,10 @@ uv run build-kit/scripts/roadmap.py render
 uv run build-kit/scripts/roadmap.py audit --offline
 ```
 
-Seed a proposal issue only after its dry-run is human-reviewed. The repository
-team records its decision with exactly one roadmap decision label. Work cannot
-be `ready`, `active`, or `done` until accepted, and `done` requires evidence.
+Open the change as a pull request to build-kit; the rendered `ROADMAP.md`
+travels with it. No issue exists yet: one is opened in the owning repository
+when the work starts, and its number goes into the YAML then. `done` requires
+evidence, `blocked` a gate or dependency, `declined` a reason.
 
 ## The autonomy dial
 
@@ -94,14 +97,16 @@ exit test before you see the result.
 ## Status, proposals, and the ingest loop
 
 - **The roadmap is the status tracker.** `roadmap/roadmap.yaml` carries every
-  deliverable's state and evidence, `ROADMAP.md` is rendered from it, and the
-  owning repository's issue is the execution record. `/osp-close` reconciles
-  them; never mark a deliverable done without its evidence.
-- **New ideas and discovered gaps are roadmap proposals.** Add a draft
+  deliverable's status and evidence, `ROADMAP.md` is rendered from it (the
+  summary on top says what is now, blocked, next and later), and the owning
+  repository's issue is the execution record of an active deliverable.
+  `/osp-close` records the evidence and the status; never mark a deliverable
+  done without its evidence.
+- **New ideas and discovered gaps are roadmap proposals.** Add a `proposed`
   deliverable to `roadmap/roadmap.yaml` (see "Proposing a roadmap
-  deliverable" above); the repository's maintainers accept, defer or reject
-  it. The historical parking lot and progress tracker live in `build-record/`
-  and are not updated. `docs/development-model.md` is the operating model.
+  deliverable" above) in a pull request to build-kit. The historical parking
+  lot and progress tracker live in `build-record/` and are not updated.
+  `docs/development-model.md` is the operating model.
 - **The ingest loop** is never deferred: when a dataset peculiarity surfaces
   during any work, draft the knowledge concept immediately (correct type,
   frontmatter, evidence links), queue it for steward approval, and log it. See
@@ -148,11 +153,11 @@ caught mechanically.
 2. Write the spec detail for the new domain into `SPECIFICATION.md` (structure,
    skills, knowledge requirements, acceptance criteria), following the
    hydrology section as the model, at the scheduled spec-revision window.
-3. Add roadmap proposals with acceptance criteria and contributor readiness;
-   do not mark them accepted on behalf of their future repository team.
+3. Add proposed deliverables with acceptance criteria and contributor
+   readiness; leave them proposed or blocked until the gate clears.
 4. After the organization and repository owners approve creation, register the
    repository in the roadmap and `bootstrap.sh`, scaffold from the templates,
-   and run `/osp-session <roadmap-id>` only after repository acceptance.
+   and run `/osp-session <roadmap-id>` once the gate and dependencies are clear.
 
 ## Verifying the docs stay healthy
 

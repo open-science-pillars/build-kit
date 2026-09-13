@@ -52,21 +52,27 @@ below.
 
 ## How to run an initiative
 
-The federated roadmap harness coordinates initiatives without taking authority
-from repository teams.
+The roadmap harness (`build-kit/docs/roadmap-harness-plan.md`) keeps one
+roadmap; repository maintainers own the work in their repository.
 
 1. **Propose it.** Add a stable deliverable ID to
-   `build-kit/roadmap/roadmap.yaml`, render `ROADMAP.md`, and seed a proposal
-   issue after human review. The repository maintainers decide acceptance.
+   `build-kit/roadmap/roadmap.yaml` as `proposed`, with its repository,
+   priority, dependencies, gate and acceptance criteria; render `ROADMAP.md`
+   and open the change as a pull request to build-kit.
 2. **Gate it.** If the initiative opens a new domain, confirm the
    domain-expansion gate in `phase2-preregistration.md` first. A gate that
    is not clear stops the initiative; that is the point of pre-registration.
-3. **Do the work,** citing the specification's rules by name, capturing knowledge as you go
+3. **Start it.** `/osp-session <roadmap-id>` briefs the deliverable and stops
+   on an unfinished dependency or gate. Open an issue in the owning repository
+   naming the roadmap id, set the deliverable `active`, and record the issue
+   number in the YAML.
+4. **Do the work,** citing the specification's rules by name, capturing knowledge as you go
    (the ingest loop never defers), and honoring the workspace law
-   (`CLAUDE.template.md`).
-4. **Close it.** Run `/osp-close`: verification evidence goes to the repository
-   issue, then the portfolio is reconciled and rendered. A truthful blocked or
-   active state beats a false completion.
+   (`CLAUDE.template.md`). The pull request that finishes the deliverable
+   closes its issue.
+5. **Close it.** Run `/osp-close`: walk the acceptance criteria, record the
+   evidence in the YAML (and on the issue), set the status, render and audit.
+   A truthful blocked or active state beats a false completion.
 
 Spec revisions are roadmap deliverables. Historical parking records remain in
 `build-kit/build-record/PARKING.md`; new proposals go to the roadmap.

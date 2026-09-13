@@ -25,8 +25,8 @@ discrepancy instead of silently choosing.
 - marketplace/docs/SPECIFICATION.md          (what to build)
 - marketplace/docs/MODEL.md                  (the model on one page)
 - marketplace/docs/decisions/                (ADR A, ADR B: why)
-- build-kit/roadmap/roadmap.yaml             (what is accepted, active, done;
-                                              rendered to build-kit/ROADMAP.md)
+- build-kit/roadmap/roadmap.yaml             (what is proposed, active, blocked,
+                                              done; rendered to build-kit/ROADMAP.md)
 - marketplace/docs/phase2-preregistration.md (go/stop conditions; a gate)
 - marketplace/GLOSSARY.md                    (the vocabulary)
 
@@ -72,9 +72,9 @@ build-kit: this harness. .github: org files.
     steward review with verified_by set).
 11. Scope discipline: the specification is the anchor, and a spec
     revision is a roadmap deliverable. New ideas and discovered gaps go to
-    build-kit/roadmap/roadmap.yaml as draft proposals with a one-line
-    rationale; the owning repository's maintainers accept, defer or
-    reject them. Do not widen accepted work silently.
+    build-kit/roadmap/roadmap.yaml as proposed deliverables with a one-line
+    rationale, in a pull request the owner reviews. Do not widen active
+    work silently.
 12. Knowledge coupling (see marketplace/docs/knowledge-vs-skills.md):
     skills are deterministic procedures plus hard refusals; they carry NO
     dataset facts, inlined numbers, gotcha rules, or named-concept lists.
@@ -129,9 +129,9 @@ availability and qualification are practical.
 
 ## Roadmap work protocol
 Start future work with `/osp-session <roadmap-id>` and end with `/osp-close`.
-Numeric sessions are historical compatibility only. Do not start an unaccepted,
-blocked, or dependency-gated deliverable. Repository maintainers own proposal
-acceptance and completion; the organization roadmap coordinates rather than
-overrides them. Do not skip the close, even on a bad day; a truthful active or
-blocked status beats a false completion. See `build-kit/DEVELOPING.md` and
+Numeric sessions are historical compatibility only. Do not start a blocked or
+dependency-gated deliverable. An active deliverable has an issue in its
+repository, opened when the work starts and closed by the pull request that
+finishes it; the YAML records the number. Do not skip the close, even on a bad
+day; a truthful active or blocked status beats a false completion. See `build-kit/DEVELOPING.md` and
 `build-kit/docs/roadmap-harness-plan.md`.

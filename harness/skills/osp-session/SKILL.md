@@ -1,6 +1,6 @@
 ---
 name: osp-session
-description: Start accepted Open Science Pillars work by stable roadmap ID, with dependency, gate, ownership, and acceptance checks.
+description: Start Open Science Pillars work by stable roadmap ID, with dependency, gate, ownership, and acceptance checks.
 disable-model-invocation: true
 ---
 
@@ -12,11 +12,13 @@ You are starting Open Science Pillars work `$ARGUMENTS`.
    `build-kit/build-record/IMPLEMENTATION-GUIDE.md` and `build-kit/build-record/PROGRESS.md`. State that
    this is compatibility mode and do not create new numbered sessions.
 2. Otherwise run `uv run build-kit/scripts/roadmap.py brief $ARGUMENTS`. If the
-   deliverable is not accepted and ready, or has an incomplete dependency or
-   gate, STOP.
+   deliverable is blocked, declined, or has an incomplete dependency or gate,
+   STOP.
 3. Read the owning repository's `.osp/governance.yaml`, the linked issue when
-   present, and the relevant specification. The repository issue is the
-   execution record after acceptance; YAML is the portfolio record.
+   present, and the relevant specification. If the deliverable is proposed,
+   starting it means: an issue in the owning repository naming the roadmap id,
+   the status set to `active`, and the issue number recorded in the YAML (with
+   human confirmation; never invent a number).
 4. Restate in one screen: outcome, owning repository, acceptance criteria,
    dependencies, gate, contributor prerequisites, and verification plan. Wait
    for confirmation before changing files.

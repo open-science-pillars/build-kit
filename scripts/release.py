@@ -14,12 +14,16 @@
       "Release X.Y.Z: summary" with the notes; --push pushes the branch and
       --pr opens the pull request with gh. The pull request is the
       candidate: the release-qualification workflow opens one ticket per
-      required runtime, and the merge waits on a record or a waiver for
-      each (the release qualification guide).
+      required runtime under the milestone "<name> X.Y.Z" (created by
+      that first sync run, set on the tickets and on the pull request),
+      and the merge waits on a record or a waiver for each (the release
+      qualification guide).
   release.py tag DIR [--push] [--dry-run]
       after the candidate merged: on the merged commit, with the lock
       current and every advertising rule satisfied, the annotated tag
       <name>--vX.Y.Z (claude plugin tag, which checks the manifest agrees).
+      The milestone is not closed here: it closes when its issues are
+      done, which is the maintainer's call.
   release.py catalog DIR --marketplace MARKETPLACE_DIR [--push] [--pr] [--dry-run]
       the catalog line: the marketplace entry's ref moved to the tag, on a
       branch with one commit "Catalog: <name> X.Y.Z"; --pr opens it.
@@ -117,7 +121,7 @@ def pr_body(name: str, version: str, notes: str) -> str:
 
 Release candidate **{name} {version}**. {notes.strip()}
 
-This pull request is the candidate: the release-qualification workflow opens one ticket per required runtime surface with no decision for {version}; each closes on a qualification record (Claude Code: `qualify.py --capability {name} --surface claude-code --candidate` on a maintainer's machine; other runtimes by checklist) or a waiver; the merge waits on every required surface having one. After the merge: `release.py tag` for the annotated tag `{name}--v{version}`, `release.py catalog` for the marketplace line, `release.py publish` for the projections to attach to the GitHub release (the release candidate guide in the marketplace repository).
+This pull request is the candidate: the release-qualification workflow opens one ticket per required runtime surface with no decision for {version} under the milestone `{name} {version}` (created on its first run and set on this pull request); each closes on a qualification record (Claude Code: `qualify.py --capability {name} --surface claude-code --candidate` on a maintainer's machine; other runtimes by checklist) or a waiver; the merge waits on every required surface having one. After the merge: `release.py tag` for the annotated tag `{name}--v{version}`, `release.py catalog` for the marketplace line, `release.py publish` for the projections to attach to the GitHub release (the release candidate guide in the marketplace repository).
 
 ## Checklist
 
@@ -227,6 +231,7 @@ def command_tag(args: argparse.Namespace) -> int:
         r = sh(cmd, cap_dir)
         print(r.stdout.strip())
     print(f"{tag}: {'pushed' if args.push else 'created locally; push with --push'}; next: release.py catalog, then release.py publish")
+    print(f"the milestone {name} {version} stays open until its issues are done; close it by hand when they are")
     return 0
 
 
