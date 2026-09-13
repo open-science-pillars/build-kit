@@ -64,6 +64,26 @@ decisions:
     decided: 2026-09-13
     rationale: "The proposal-state axis, the seeded proposal issues, the decision labels and the reconcile step were built for a federation of maintainer teams the organization does not yet have. roadmap.yaml stays the single source of truth with one status per deliverable (proposed, active, blocked, done, declined); an active deliverable has an issue in its repository, opened when work starts and closed by the pull request that finishes it; the tool never writes issues. Revisit trigger: adopt GitHub Projects as a rendered view when a second maintainer team declines to edit the YAML or a partner asks for a board; render it from the YAML, one way."
 
+  - id: first-new-sphere-land-ice
+    title: Land-ice is the first new sphere, entered through the sea level budget
+    status: accepted
+    decided: 2026-09-13
+    rationale: 'The first sphere opened after the founding domains is land-ice,
+      entered through GRACE-FO mass change and the sea level budget rather than
+      through ice-sheet altimetry. Reasons: GRACE-FO is a PO.DAAC product, so the
+      first non-founding capability carries knowledge signed by the center that
+      produces it; the budget composes what exists (altimetry in the provider bundle,
+      Argo through the core connector, the GRACE-FO mascon concept) into one
+      deterministic computation with a receipt, the first true composite; its traps
+      (glacial isostatic adjustment, leakage, the 2017 to 2018 gap between missions,
+      degree-1 and C20 replacements, mascon versus spherical-harmonic solutions) are
+      the kind the project exists to prevent; and the data is small. Sea-ice follows
+      when an NSIDC steward engages; precipitation stays a hydrology slice until it
+      carries workflows hydrology does not. Promotion out of planned still waits on
+      the pre-registered domain-expansion gate (the powered ablation) and on a dated
+      pre-registration entry; the provider-bundle knowledge can be captured before
+      that, as the ingest loop allows.'
+
 initiatives:
   - id: truth-reconciliation
     title: Federated roadmap and truth reconciliation
@@ -979,3 +999,105 @@ initiatives:
           prerequisites: [Runtime credential decision, Codex install path]
         labels: [roadmap, priority:P2]
         issue: {number: 32, url: "https://github.com/open-science-pillars/build-kit/issues/32"}
+
+  - id: cryosphere-land-ice
+    title: Open the Cryosphere through land-ice and the sea level budget
+    outcome: land-ice is an installable capability whose first attested computation
+      closes the sea level budget from altimetry, Argo steric change and GRACE-FO
+      mass change, with the GRACE-FO knowledge signed by its PO.DAAC steward.
+    status: blocked
+    priority: P1
+    depends_on: [powered-ablation]
+    gate: Promotion out of planned waits on the pre-registered domain-expansion
+      gate (the powered ablation) and a dated pre-registration entry; the knowledge
+      and the budget computation may be built before it.
+    deliverables:
+      - id: landice-grace-knowledge
+        title: GRACE-FO mass change knowledge for land ice, signed by its steward
+        repo: nasa-daac-knowledge
+        status: proposed
+        priority: P1
+        depends_on: []
+        gate: ""
+        acceptance:
+          - The grace-fo-mascons dataset concept states the land-ice use, the solution
+            version, the units and the reference period, and is signed by a PO.DAAC
+            steward with a verified event.
+          - Gotchas exist, each with evidence and a matching eval case where the
+            severity is high, for glacial isostatic adjustment, coastal leakage, the
+            2017 to 2018 gap between GRACE and GRACE-FO, and the degree-1 and C20
+            replacements.
+          - A recipe converts a regional mass change to a sea level equivalent with
+            its uncertainty, citing the concepts it uses.
+        evidence: []
+        contributor:
+          readiness: ready
+          champion: PaulMRamirez
+          prerequisites: [GRACE-FO mascon products, the OKF concept format]
+        labels: [roadmap, priority:P1]
+      - id: sea-level-budget-closure
+        title: Close the global sea level budget as an attested computation
+        repo: ocean-science
+        status: proposed
+        priority: P1
+        depends_on: [landice-grace-knowledge]
+        gate: ""
+        acceptance:
+          - A deterministic executor computes altimetric sea level change (nasa-ssh),
+            steric change from Argo through the core observations connector, and
+            ocean mass change from GRACE-FO over one stated period, and reports the
+            residual against the combined uncertainty in a receipt naming the release
+            and the runtime.
+          - An attester verifies the receipt (recompute, plausibility, provenance) and
+            passes on the golden fixture; a refusal case exists for a period the gap
+            between missions makes unclosable.
+          - The computation concept is drafted with its sources and reaches stable on
+            a steward's signature; the recipe names where each term's trap is.
+        evidence: []
+        contributor:
+          readiness: needs-context
+          champion: PaulMRamirez
+          prerequisites: [nasa-ssh, Argo, GRACE-FO, the attested computation pattern in core]
+        labels: [roadmap, priority:P1]
+      - id: landice-promotion
+        title: Promote land-ice out of planned with its first skill and release
+        repo: land-ice
+        status: blocked
+        priority: P1
+        depends_on: [landice-grace-knowledge, sea-level-budget-closure, powered-ablation-run]
+        gate: Do not start until the powered-ablation decision authorizes new domains
+          and a dated entry exists in the pre-registration; the planned gate refuses
+          package, surfaces and runtime metadata until then.
+        acceptance:
+          - The repository carries package.yaml, surfaces.yaml and governance.yaml,
+            renders both projections, and validates with status developing.
+          - One workflow skill reports ice mass change and its sea level contribution
+            for a named region, consulting the signed GRACE-FO knowledge, with a golden
+            and an eval case; the sea level budget computation is reachable from it.
+          - A first release is cut through the candidate flow and qualified on Claude
+            Code; the catalog lists it.
+        evidence: []
+        contributor:
+          readiness: owner-only
+          champion: PaulMRamirez
+          prerequisites: [The domain-expansion decision, a PO.DAAC steward signature]
+        labels: [roadmap, priority:P1]
+      - id: landice-nsidc-elevation
+        title: Add ice-sheet elevation and velocity with an NSIDC steward
+        repo: land-ice
+        status: blocked
+        priority: P2
+        depends_on: [landice-promotion]
+        gate: Do not start until an NSIDC steward has agreed to sign the ICESat-2 and
+          MEaSUREs velocity concepts.
+        acceptance:
+          - ICESat-2 elevation change and MEaSUREs ice velocity concepts are signed by
+            an NSIDC steward, with their gotchas and eval cases.
+          - A workflow skill reconciles the mass-change and the elevation-change
+            estimates for one ice sheet and states the disagreement honestly.
+        evidence: []
+        contributor:
+          readiness: needs-context
+          champion: needed
+          prerequisites: [An NSIDC steward, ICESat-2 ATL products, MEaSUREs velocity]
+        labels: [roadmap, priority:P2]

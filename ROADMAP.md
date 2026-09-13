@@ -18,7 +18,9 @@
 
 ### Blocked
 
+- `landice-promotion`: Promote land-ice out of planned with its first skill and release (`land-ice`): Do not start until the powered-ablation decision authorizes new domains and a dated entry exists in the pre-registration; the planned gate refuses package, surfaces and runtime metadata until then.
 - `hydro-deferred-connectors`: Model context, the PeakFQ fixture, ECOSTRESS, and the SWOT hydrology move (`hydrology`): depends on `hydro-w2-w5-workflows`, `hydro-stewards-and-releases`
+- `landice-nsidc-elevation`: Add ice-sheet elevation and velocity with an NSIDC steward (`land-ice`): Do not start until an NSIDC steward has agreed to sign the ICESat-2 and MEaSUREs velocity concepts.
 - `phase3-flood-slice`: Build the baseline-first remote-sensing flood slice (`marketplace`): Do not start until the powered-ablation decision authorizes Phase 3.
 
 ### Next
@@ -26,6 +28,7 @@
 Proposed, every dependency done, in priority order.
 
 - P1 `hydro-investigation-tutorial`: Write the hydrology investigation tutorial and run it with a non-author reader (`tutorials`)
+- P1 `landice-grace-knowledge`: GRACE-FO mass change knowledge for land ice, signed by its steward (`nasa-daac-knowledge`)
 - P2 `hydro-coastal-water`: Coastal composites where hydrology meets ocean science (`ocean-science`)
 - P2 `r6-compat-probes`: Add non-blocking compatibility probes for Gemini CLI and Goose (`build-kit`)
 - P2 `r9-headless-ci-qualification`: Run the headless qualification legs in the organization's CI on a release candidate (`build-kit`): gate: Needs a decision to hold a runtime credential in CI, at which scope and who may trigger it, and the first Codex checklist run to confirm how the portable package installs there (build-kit issue 32).
@@ -44,6 +47,7 @@ Proposed, waiting on a dependency, in priority order.
 - P1 `hydro-stewards-and-releases`: Steward scaffolds, CODEOWNERS scopes, and the general-availability flip (`nasa-daac-knowledge`)
 - P1 `provider-steward-handoff`: Complete or accurately reframe provider stewardship (`nasa-daac-knowledge`)
 - P1 `r3-dependency-reference`: Validate dependency realization on ocean-science across runtimes (`ocean-science`)
+- P1 `sea-level-budget-closure`: Close the global sea level budget as an attested computation (`ocean-science`)
 - P1 `tutorial-nonauthor-validation`: Complete non-author Tutorial 2 validation (`tutorials`)
 
 ### Done (21)
@@ -94,6 +98,7 @@ Proposed, waiting on a dependency, in priority order.
 - **Pillar means sphere (ADR A)** (`pillar-means-sphere`): proposed. Pillars are the five Earth science spheres; disciplines are domain capabilities inside them; provider bundles stay a separate authority axis; classification is canonical under .osp/repository.yaml. Record: marketplace docs/decisions/adr-a-pillar-means-sphere.md; accepted when it merges.
 - **One governed capability, projected to runtimes (ADR B)** (`multi-runtime-packaging`): proposed. KNOW, ACT, PROVE and REACH are authored once; build-kit renders a Claude projection and an Agent Plugins 1.0 projection; Claude Code, Cowork and Codex are qualification targets; no per-client adapters. Record: marketplace docs/decisions/adr-b-multi-runtime-capability-packaging.md; accepted when it merges.
 - **One state model for the roadmap** (`one-state-roadmap`): accepted. The proposal-state axis, the seeded proposal issues, the decision labels and the reconcile step were built for a federation of maintainer teams the organization does not yet have. roadmap.yaml stays the single source of truth with one status per deliverable (proposed, active, blocked, done, declined); an active deliverable has an issue in its repository, opened when work starts and closed by the pull request that finishes it; the tool never writes issues. Revisit trigger: adopt GitHub Projects as a rendered view when a second maintainer team declines to edit the YAML or a partner asks for a board; render it from the YAML, one way.
+- **Land-ice is the first new sphere, entered through the sea level budget** (`first-new-sphere-land-ice`): accepted. The first sphere opened after the founding domains is land-ice, entered through GRACE-FO mass change and the sea level budget rather than through ice-sheet altimetry. Reasons: GRACE-FO is a PO.DAAC product, so the first non-founding capability carries knowledge signed by the center that produces it; the budget composes what exists (altimetry in the provider bundle, Argo through the core connector, the GRACE-FO mascon concept) into one deterministic computation with a receipt, the first true composite; its traps (glacial isostatic adjustment, leakage, the 2017 to 2018 gap between missions, degree-1 and C20 replacements, mascon versus spherical-harmonic solutions) are the kind the project exists to prevent; and the data is small. Sea-ice follows when an NSIDC steward engages; precipitation stays a hydrology slice until it carries workflows hydrology does not. Promotion out of planned still waits on the pre-registered domain-expansion gate (the powered ablation) and on a dated pre-registration entry; the provider-bundle knowledge can be captured before that, as the ingest loop allows.
 
 ## Initiatives
 
@@ -585,3 +590,50 @@ Pillar means sphere; canonical .osp metadata drives organization and runtime pro
 - [ ] Cowork stays by checklist; a single failed conversational test is a re-run before a fail, with the transcript kept.
 - Depends on: `r8-maintainer-run-qualification`
 - Gate: Needs a decision to hold a runtime credential in CI, at which scope and who may trigger it, and the first Codex checklist run to confirm how the portable package installs there (build-kit issue 32).
+
+### Open the Cryosphere through land-ice and the sea level budget
+
+**ID:** `cryosphere-land-ice`  
+**Status:** blocked  
+**Priority:** P1
+
+land-ice is an installable capability whose first attested computation closes the sea level budget from altimetry, Argo steric change and GRACE-FO mass change, with the GRACE-FO knowledge signed by its PO.DAAC steward.
+
+> **Gate:** Promotion out of planned waits on the pre-registered domain-expansion gate (the powered ablation) and a dated pre-registration entry; the knowledge and the budget computation may be built before it.
+
+| Deliverable | Repository | Status | Priority | Contributor | Issue |
+|---|---|---|---|---|---|
+| `landice-grace-knowledge`: GRACE-FO mass change knowledge for land ice, signed by its steward | `nasa-daac-knowledge` | proposed | P1 | ready | none |
+| `sea-level-budget-closure`: Close the global sea level budget as an attested computation | `ocean-science` | proposed | P1 | needs-context | none |
+| `landice-promotion`: Promote land-ice out of planned with its first skill and release | `land-ice` | blocked | P1 | owner-only | none |
+| `landice-nsidc-elevation`: Add ice-sheet elevation and velocity with an NSIDC steward | `land-ice` | blocked | P2 | needs-context | none |
+
+#### Acceptance details
+
+**`landice-grace-knowledge`**
+
+- [ ] The grace-fo-mascons dataset concept states the land-ice use, the solution version, the units and the reference period, and is signed by a PO.DAAC steward with a verified event.
+- [ ] Gotchas exist, each with evidence and a matching eval case where the severity is high, for glacial isostatic adjustment, coastal leakage, the 2017 to 2018 gap between GRACE and GRACE-FO, and the degree-1 and C20 replacements.
+- [ ] A recipe converts a regional mass change to a sea level equivalent with its uncertainty, citing the concepts it uses.
+
+**`sea-level-budget-closure`**
+
+- [ ] A deterministic executor computes altimetric sea level change (nasa-ssh), steric change from Argo through the core observations connector, and ocean mass change from GRACE-FO over one stated period, and reports the residual against the combined uncertainty in a receipt naming the release and the runtime.
+- [ ] An attester verifies the receipt (recompute, plausibility, provenance) and passes on the golden fixture; a refusal case exists for a period the gap between missions makes unclosable.
+- [ ] The computation concept is drafted with its sources and reaches stable on a steward's signature; the recipe names where each term's trap is.
+- Depends on: `landice-grace-knowledge`
+
+**`landice-promotion`**
+
+- [ ] The repository carries package.yaml, surfaces.yaml and governance.yaml, renders both projections, and validates with status developing.
+- [ ] One workflow skill reports ice mass change and its sea level contribution for a named region, consulting the signed GRACE-FO knowledge, with a golden and an eval case; the sea level budget computation is reachable from it.
+- [ ] A first release is cut through the candidate flow and qualified on Claude Code; the catalog lists it.
+- Depends on: `landice-grace-knowledge`, `sea-level-budget-closure`, `powered-ablation-run`
+- Gate: Do not start until the powered-ablation decision authorizes new domains and a dated entry exists in the pre-registration; the planned gate refuses package, surfaces and runtime metadata until then.
+
+**`landice-nsidc-elevation`**
+
+- [ ] ICESat-2 elevation change and MEaSUREs ice velocity concepts are signed by an NSIDC steward, with their gotchas and eval cases.
+- [ ] A workflow skill reconciles the mass-change and the elevation-change estimates for one ice sheet and states the disagreement honestly.
+- Depends on: `landice-promotion`
+- Gate: Do not start until an NSIDC steward has agreed to sign the ICESat-2 and MEaSUREs velocity concepts.
