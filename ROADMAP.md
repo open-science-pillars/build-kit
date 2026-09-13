@@ -16,6 +16,7 @@
 - `roadmap-harness-v1`: Build the federated roadmap harness (`build-kit`)
 - `landice-grace-knowledge`: GRACE-FO mass change knowledge for land ice, reviewed and offered for confirmation (`nasa-daac-knowledge`)
 - `r2-core-reference`: Qualify core as the reference capability on Claude Code, Cowork and Codex from one SKILL.md (`core`)
+- `sea-level-budget-closure`: Close the global sea level budget as an attested computation (`ocean-science`)
 
 ### Blocked
 
@@ -48,7 +49,6 @@ Proposed, waiting on a dependency, in priority order.
 - P1 `hydro-stewards-and-releases`: Steward scaffolds, CODEOWNERS scopes, and the general-availability flip (`nasa-daac-knowledge`)
 - P1 `provider-steward-handoff`: Complete or accurately reframe provider stewardship (`nasa-daac-knowledge`)
 - P1 `r3-dependency-reference`: Validate dependency realization on ocean-science across runtimes (`ocean-science`)
-- P1 `sea-level-budget-closure`: Close the global sea level budget as an attested computation (`ocean-science`)
 - P1 `tutorial-nonauthor-validation`: Complete non-author Tutorial 2 validation (`tutorials`)
 
 ### Done (21)
@@ -613,7 +613,7 @@ land-ice is an installable capability whose first attested computation closes th
 | Deliverable | Repository | Status | Priority | Contributor | Issue |
 |---|---|---|---|---|---|
 | `landice-grace-knowledge`: GRACE-FO mass change knowledge for land ice, reviewed and offered for confirmation | `nasa-daac-knowledge` | active | P1 | ready | [#123](https://github.com/open-science-pillars/nasa-daac-knowledge/issues/123) |
-| `sea-level-budget-closure`: Close the global sea level budget as an attested computation | `ocean-science` | proposed | P1 | needs-context | none |
+| `sea-level-budget-closure`: Close the global sea level budget as an attested computation | `ocean-science` | active | P1 | needs-context | [#45](https://github.com/open-science-pillars/ocean-science/issues/45) |
 | `landice-promotion`: Promote land-ice out of planned with its first skill and release | `land-ice` | blocked | P1 | owner-only | none |
 | `landice-nsidc-elevation`: Add ice-sheet elevation and velocity, with NSIDC invited to confirm | `land-ice` | blocked | P2 | needs-context | none |
 
