@@ -48,6 +48,10 @@ teams:
     kind: stewards
     parent: provider-stewards
     scope: The ESDIS requirements bundle (nasa-daac-knowledge/knowledge/esdis)
+  nsidc-stewards:
+    kind: stewards
+    parent: provider-stewards
+    scope: The NSIDC bundle (nasa-daac-knowledge/knowledge/nsidc), the land-ice products and the plugins' use of them
   hydrosphere-methods-stewards:
     kind: stewards
     parent: provider-stewards
