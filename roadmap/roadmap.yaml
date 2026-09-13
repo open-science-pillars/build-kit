@@ -1153,6 +1153,7 @@ initiatives:
             required).
         evidence:
           - "nasa-daac-knowledge PR #129 and agent-evals PR #14: the bundle, two dataset concepts, five gotchas and the case, seeded 2026-09-13 from nsidc.org, its-live.jpl.nasa.gov, CMR and Crossref"
+          - "nasa-daac-knowledge PR #127 (with the sea level budget run): the two dataset concepts and the four medium gotchas stable and signed by the maintainer; the high-severity gotcha carries a first review and waits on a second; the NSIDC invitation is outstanding"
         contributor:
           readiness: needs-context
           champion: PaulMRamirez
@@ -1203,6 +1204,7 @@ initiatives:
           - The case is registered in the evals manifests.
         evidence:
           - "ocean-science PR #47 and agent-evals PR #12, seeded 2026-09-13 from the Scripps product page, Crossref and the ESSD budget paper"
+          - "ocean-science PR #49: the dataset concept and the two medium gotchas stable and signed by the maintainer; the high-severity gotcha carries a first review and waits on a second"
         contributor:
           readiness: needs-context
           champion: PaulMRamirez
@@ -1226,6 +1228,7 @@ initiatives:
           - The case is registered in the evals manifests.
         evidence:
           - "hydrology PR #57, seeded 2026-09-13 from the mascon release note, the month list, CMR and Crossref"
+          - "hydrology PR #59: the recipe and the two medium gotchas stable and signed by the maintainer; the high-severity gotcha carries a first review and waits on a second"
         contributor:
           readiness: needs-context
           champion: PaulMRamirez
@@ -1248,6 +1251,7 @@ initiatives:
           - The cases are registered in the evals manifests.
         evidence:
           - "nasa-daac-knowledge PR #128 and agent-evals PR #13, seeded 2026-09-13 from the PO.DAAC collection pages, the archive's documentation, CMR and Crossref"
+          - "nasa-daac-knowledge PR #127 (with the sea level budget run): the two dataset concepts and the three medium gotchas stable and signed by the maintainer; the two high-severity gotchas carry a first review and wait on a second"
         contributor:
           readiness: needs-context
           champion: PaulMRamirez
