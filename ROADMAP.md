@@ -17,12 +17,16 @@
 - `landice-grace-knowledge`: GRACE-FO mass change knowledge for land ice, reviewed and offered for confirmation (`nasa-daac-knowledge`)
 - `r2-core-reference`: Qualify core as the reference capability on Claude Code, Cowork and Codex from one SKILL.md (`core`)
 - `sea-level-budget-closure`: Close the global sea level budget as an attested computation (`ocean-science`)
+- `landice-nsidc-knowledge`: ICESat-2 height change and ice velocity knowledge in a new NSIDC bundle (`nasa-daac-knowledge`)
+- `seed-argo-gridded-steric`: Roemmich and Gilson gridded Argo knowledge, seeded and reviewed (`ocean-science`)
+- `seed-grace-basin-tws`: GRACE terrestrial water storage for basins, seeded and reviewed (`hydrology`)
+- `seed-oscar-smap-sss`: OSCAR currents and SMAP salinity knowledge, seeded and reviewed (`nasa-daac-knowledge`)
 
 ### Blocked
 
 - `landice-promotion`: Promote land-ice out of planned with its first skill and release (`land-ice`): Do not start until the powered-ablation decision authorizes new domains and a dated entry exists in the pre-registration; the planned gate refuses package, surfaces and runtime metadata until then.
 - `hydro-deferred-connectors`: Model context, the PeakFQ fixture, ECOSTRESS, and the SWOT hydrology move (`hydrology`): depends on `hydro-w2-w5-workflows`, `hydro-stewards-and-releases`
-- `landice-nsidc-elevation`: Add ice-sheet elevation and velocity, with NSIDC invited to confirm (`land-ice`): Start when the ICESat-2 and MEaSUREs velocity concepts can be drafted with sources; invite an NSIDC contact to confirm them, and say in the concepts whether anyone has.
+- `landice-nsidc-elevation`: Reconcile mass change and elevation change for one ice sheet, in the land-ice capability (`land-ice`): Start when land-ice is promoted and the NSIDC knowledge is stable; the concepts themselves are captured first in the provider bundle.
 - `phase3-flood-slice`: Build the baseline-first remote-sensing flood slice (`marketplace`): Do not start until the powered-ablation decision authorizes Phase 3.
 
 ### Next
@@ -615,7 +619,8 @@ land-ice is an installable capability whose first attested computation closes th
 | `landice-grace-knowledge`: GRACE-FO mass change knowledge for land ice, reviewed and offered for confirmation | `nasa-daac-knowledge` | active | P1 | ready | [#123](https://github.com/open-science-pillars/nasa-daac-knowledge/issues/123) |
 | `sea-level-budget-closure`: Close the global sea level budget as an attested computation | `ocean-science` | active | P1 | needs-context | [#45](https://github.com/open-science-pillars/ocean-science/issues/45) |
 | `landice-promotion`: Promote land-ice out of planned with its first skill and release | `land-ice` | blocked | P1 | owner-only | none |
-| `landice-nsidc-elevation`: Add ice-sheet elevation and velocity, with NSIDC invited to confirm | `land-ice` | blocked | P2 | needs-context | none |
+| `landice-nsidc-knowledge`: ICESat-2 height change and ice velocity knowledge in a new NSIDC bundle | `nasa-daac-knowledge` | active | P2 | needs-context | [#131](https://github.com/open-science-pillars/nasa-daac-knowledge/issues/131) |
+| `landice-nsidc-elevation`: Reconcile mass change and elevation change for one ice sheet, in the land-ice capability | `land-ice` | blocked | P2 | needs-context | none |
 
 #### Acceptance details
 
@@ -642,9 +647,48 @@ land-ice is an installable capability whose first attested computation closes th
 - Depends on: `landice-grace-knowledge`, `sea-level-budget-closure`, `powered-ablation-run`
 - Gate: Do not start until the powered-ablation decision authorizes new domains and a dated entry exists in the pre-registration; the planned gate refuses package, surfaces and runtime metadata until then.
 
+**`landice-nsidc-knowledge`**
+
+- [ ] A knowledge/nsidc provider bundle holds dataset concepts for ICESat-2 ATL15 and the ITS_LIVE velocity mosaics with their gotchas (height change is not mass change at high severity, with an eval case), drafted from sources fetched live and reviewed to stable by the maintainer.
+- [ ] The eval case is registered in the evals manifests, and an NSIDC contact has been invited to confirm the concepts (voiced when recorded, never required).
+- Evidence: `nasa-daac-knowledge PR #129 and agent-evals PR #14: the bundle, two dataset concepts, five gotchas and the case, seeded 2026-09-13 from nsidc.org, its-live.jpl.nasa.gov, CMR and Crossref`
+
 **`landice-nsidc-elevation`**
 
-- [ ] ICESat-2 elevation change and MEaSUREs ice velocity concepts are reviewed to stable with their gotchas and eval cases, and an NSIDC contact has been invited to confirm them.
-- [ ] A workflow skill reconciles the mass-change and the elevation-change estimates for one ice sheet and states the disagreement honestly.
-- Depends on: `landice-promotion`
-- Gate: Start when the ICESat-2 and MEaSUREs velocity concepts can be drafted with sources; invite an NSIDC contact to confirm them, and say in the concepts whether anyone has.
+- [ ] A workflow skill reconciles the mass-change and the elevation-change estimates for one ice sheet and states the disagreement honestly, consulting the NSIDC and PO.DAAC concepts.
+- Depends on: `landice-promotion`, `landice-nsidc-knowledge`
+- Gate: Start when land-ice is promoted and the NSIDC knowledge is stable; the concepts themselves are captured first in the provider bundle.
+
+### Grow the knowledge bundles by seeded, source-verified concepts
+
+**ID:** `knowledge-seeding`  
+**Status:** active  
+**Priority:** P2
+
+Concepts for products the bundles lack are drafted in parallel sessions from sources fetched live, each with its gotchas and eval cases, and reach stable on the maintainer's review.
+
+| Deliverable | Repository | Status | Priority | Contributor | Issue |
+|---|---|---|---|---|---|
+| `seed-argo-gridded-steric`: Roemmich and Gilson gridded Argo knowledge, seeded and reviewed | `ocean-science` | active | P2 | needs-context | [#48](https://github.com/open-science-pillars/ocean-science/issues/48) |
+| `seed-grace-basin-tws`: GRACE terrestrial water storage for basins, seeded and reviewed | `hydrology` | active | P2 | needs-context | [#58](https://github.com/open-science-pillars/hydrology/issues/58) |
+| `seed-oscar-smap-sss`: OSCAR currents and SMAP salinity knowledge, seeded and reviewed | `nasa-daac-knowledge` | active | P2 | needs-context | [#130](https://github.com/open-science-pillars/nasa-daac-knowledge/issues/130) |
+
+#### Acceptance details
+
+**`seed-argo-gridded-steric`**
+
+- [ ] The dataset concept and the gotchas (the 2000 dbar sampled floor at high severity with its eval case, the coverage limits, the fixed climatology) merge on the maintainer's review and reach stable on it.
+- [ ] The case is registered in the evals manifests.
+- Evidence: `ocean-science PR #47 and agent-evals PR #12, seeded 2026-09-13 from the Scripps product page, Crossref and the ESSD budget paper`
+
+**`seed-grace-basin-tws`**
+
+- [ ] The basin recipe and the gotchas (the resolution floor at high severity with its eval case, total storage versus its components, the scale factors once and for hydrology) merge on the maintainer's review and reach stable on it, linking the PO.DAAC GRACE concepts rather than duplicating them.
+- [ ] The case is registered in the evals manifests.
+- Evidence: `hydrology PR #57, seeded 2026-09-13 from the mascon release note, the month list, CMR and Crossref`
+
+**`seed-oscar-smap-sss`**
+
+- [ ] Dataset concepts for OSCAR version 2 and the JPL SMAP salinity product and their gotchas (two at high severity with eval cases) merge on the maintainer's review and reach stable on it.
+- [ ] The cases are registered in the evals manifests.
+- Evidence: `nasa-daac-knowledge PR #128 and agent-evals PR #13, seeded 2026-09-13 from the PO.DAAC collection pages, the archive's documentation, CMR and Crossref`
