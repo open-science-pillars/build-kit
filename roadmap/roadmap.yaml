@@ -1136,24 +1136,123 @@ initiatives:
           champion: PaulMRamirez
           prerequisites: [The domain-expansion decision, an invited PO.DAAC contact]
         labels: [roadmap, priority:P1]
+      - id: landice-nsidc-knowledge
+        title: ICESat-2 height change and ice velocity knowledge in a new NSIDC bundle
+        repo: nasa-daac-knowledge
+        status: active
+        priority: P2
+        depends_on: []
+        gate: ""
+        acceptance:
+          - A knowledge/nsidc provider bundle holds dataset concepts for ICESat-2 ATL15
+            and the ITS_LIVE velocity mosaics with their gotchas (height change is not
+            mass change at high severity, with an eval case), drafted from sources
+            fetched live and reviewed to stable by the maintainer.
+          - The eval case is registered in the evals manifests, and an NSIDC contact
+            has been invited to confirm the concepts (voiced when recorded, never
+            required).
+        evidence:
+          - "nasa-daac-knowledge PR #129 and agent-evals PR #14: the bundle, two dataset concepts, five gotchas and the case, seeded 2026-09-13 from nsidc.org, its-live.jpl.nasa.gov, CMR and Crossref"
+        contributor:
+          readiness: needs-context
+          champion: PaulMRamirez
+          prerequisites: [ICESat-2 ATL products, the ITS_LIVE mosaics, an NSIDC contact to invite]
+        labels: [roadmap, priority:P2]
+        issue:
+          number: 131
+          url: https://github.com/open-science-pillars/nasa-daac-knowledge/issues/131
       - id: landice-nsidc-elevation
-        title: Add ice-sheet elevation and velocity, with NSIDC invited to confirm
+        title: Reconcile mass change and elevation change for one ice sheet, in the land-ice capability
         repo: land-ice
         status: blocked
         priority: P2
-        depends_on: [landice-promotion]
-        gate: Start when the ICESat-2 and MEaSUREs velocity concepts can be drafted
-          with sources; invite an NSIDC contact to confirm them, and say in the
-          concepts whether anyone has.
+        depends_on: [landice-promotion, landice-nsidc-knowledge]
+        gate: Start when land-ice is promoted and the NSIDC knowledge is stable; the
+          concepts themselves are captured first in the provider bundle.
         acceptance:
-          - ICESat-2 elevation change and MEaSUREs ice velocity concepts are reviewed to
-            stable with their gotchas and eval cases, and an NSIDC contact has been
-            invited to confirm them.
           - A workflow skill reconciles the mass-change and the elevation-change
-            estimates for one ice sheet and states the disagreement honestly.
+            estimates for one ice sheet and states the disagreement honestly, consulting
+            the NSIDC and PO.DAAC concepts.
         evidence: []
         contributor:
           readiness: needs-context
           champion: needed
-          prerequisites: [ICESat-2 ATL products, MEaSUREs velocity, an NSIDC contact to invite]
+          prerequisites: [The NSIDC bundle, the promoted land-ice capability]
         labels: [roadmap, priority:P2]
+  - id: knowledge-seeding
+    title: Grow the knowledge bundles by seeded, source-verified concepts
+    outcome: Concepts for products the bundles lack are drafted in parallel sessions
+      from sources fetched live, each with its gotchas and eval cases, and reach
+      stable on the maintainer's review.
+    status: active
+    priority: P2
+    depends_on: []
+    gate: ""
+    deliverables:
+      - id: seed-argo-gridded-steric
+        title: Roemmich and Gilson gridded Argo knowledge, seeded and reviewed
+        repo: ocean-science
+        status: active
+        priority: P2
+        depends_on: []
+        gate: ""
+        acceptance:
+          - The dataset concept and the gotchas (the 2000 dbar sampled floor at high
+            severity with its eval case, the coverage limits, the fixed climatology)
+            merge on the maintainer's review and reach stable on it.
+          - The case is registered in the evals manifests.
+        evidence:
+          - "ocean-science PR #47 and agent-evals PR #12, seeded 2026-09-13 from the Scripps product page, Crossref and the ESSD budget paper"
+        contributor:
+          readiness: needs-context
+          champion: PaulMRamirez
+          prerequisites: [The Roemmich and Gilson product, the sea level budget's steric loader]
+        labels: [roadmap, priority:P2]
+        issue:
+          number: 48
+          url: https://github.com/open-science-pillars/ocean-science/issues/48
+      - id: seed-grace-basin-tws
+        title: GRACE terrestrial water storage for basins, seeded and reviewed
+        repo: hydrology
+        status: active
+        priority: P2
+        depends_on: []
+        gate: ""
+        acceptance:
+          - The basin recipe and the gotchas (the resolution floor at high severity with
+            its eval case, total storage versus its components, the scale factors once
+            and for hydrology) merge on the maintainer's review and reach stable on it,
+            linking the PO.DAAC GRACE concepts rather than duplicating them.
+          - The case is registered in the evals manifests.
+        evidence:
+          - "hydrology PR #57, seeded 2026-09-13 from the mascon release note, the month list, CMR and Crossref"
+        contributor:
+          readiness: needs-context
+          champion: PaulMRamirez
+          prerequisites: [The JPL mascon grid, the PO.DAAC GRACE concepts]
+        labels: [roadmap, priority:P2]
+        issue:
+          number: 58
+          url: https://github.com/open-science-pillars/hydrology/issues/58
+      - id: seed-oscar-smap-sss
+        title: OSCAR currents and SMAP salinity knowledge, seeded and reviewed
+        repo: nasa-daac-knowledge
+        status: active
+        priority: P2
+        depends_on: []
+        gate: ""
+        acceptance:
+          - Dataset concepts for OSCAR version 2 and the JPL SMAP salinity product and
+            their gotchas (two at high severity with eval cases) merge on the
+            maintainer's review and reach stable on it.
+          - The cases are registered in the evals manifests.
+        evidence:
+          - "nasa-daac-knowledge PR #128 and agent-evals PR #13, seeded 2026-09-13 from the PO.DAAC collection pages, the archive's documentation, CMR and Crossref"
+        contributor:
+          readiness: needs-context
+          champion: PaulMRamirez
+          prerequisites: [The PO.DAAC OSCAR and SMAP collections]
+        labels: [roadmap, priority:P2]
+        issue:
+          number: 130
+          url: https://github.com/open-science-pillars/nasa-daac-knowledge/issues/130
