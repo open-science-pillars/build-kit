@@ -38,8 +38,8 @@ Proposed, waiting on a dependency, in priority order.
 - P0 `ablation-runner-calibration`: Calibrate non-obvious probes and release-mixing grading (`evals`)
 - P0 `powered-ablation-run`: Run and publish the powered ablation (`evals`)
 - P1 `activation-eval-runner`: Build and pilot the activation-eval runner (`evals`)
-- P1 `codex-surface-policy`: Define Codex as a supported distribution and behavior surface (`marketplace`)
-- P1 `conversational-surface-validation`: Complete Cowork and Claude Science verification (`marketplace`)
+- P1 `codex-surface-policy`: Define Codex as a supported distribution and behavior runtime (`marketplace`)
+- P1 `conversational-surface-validation`: Complete Cowork qualification of a release (`marketplace`)
 - P1 `governed-release`: Cut the first governed, citable OSP release (`build-kit`)
 - P1 `hydro-stewards-and-releases`: Steward scaffolds, CODEOWNERS scopes, and the general-availability flip (`nasa-daac-knowledge`)
 - P1 `provider-steward-handoff`: Complete or accurately reframe provider stewardship (`nasa-daac-knowledge`)
@@ -110,7 +110,7 @@ The organization has a team-safe roadmap harness and public documentation that m
 | `roadmap-harness-v1`: Build the federated roadmap harness | `build-kit` | active | P0 | owner-only | none |
 | `federated-governance-baseline`: Declare repository-level roadmap authority | `.github` | active | P0 | owner-only | none |
 | `reconcile-project-record`: Reconcile specifications, progress, limitations, and counts | `marketplace` | active | P0 | needs-context | none |
-| `codex-surface-policy`: Define Codex as a supported distribution and behavior surface | `marketplace` | proposed | P1 | needs-context | none |
+| `codex-surface-policy`: Define Codex as a supported distribution and behavior runtime | `marketplace` | proposed | P1 | needs-context | [#2](https://github.com/open-science-pillars/marketplace/issues/2) |
 
 #### Acceptance details
 
@@ -205,9 +205,9 @@ The pre-registered knowledge-effectiveness gate has a reproducible published res
 
 | Deliverable | Repository | Status | Priority | Contributor | Issue |
 |---|---|---|---|---|---|
-| `ablation-protocol-amendment`: Publish the post-migration ablation amendment | `marketplace` | proposed | P0 | owner-only | none |
-| `ablation-runner-calibration`: Calibrate non-obvious probes and release-mixing grading | `evals` | proposed | P0 | needs-context | none |
-| `powered-ablation-run`: Run and publish the powered ablation | `evals` | proposed | P0 | owner-only | none |
+| `ablation-protocol-amendment`: Publish the post-migration ablation amendment | `marketplace` | proposed | P0 | owner-only | [#4](https://github.com/open-science-pillars/marketplace/issues/4) |
+| `ablation-runner-calibration`: Calibrate non-obvious probes and release-mixing grading | `evals` | proposed | P0 | needs-context | [#2](https://github.com/open-science-pillars/evals/issues/2) |
+| `powered-ablation-run`: Run and publish the powered ablation | `evals` | proposed | P0 | owner-only | [#3](https://github.com/open-science-pillars/evals/issues/3) |
 
 #### Acceptance details
 
@@ -239,7 +239,7 @@ OSP measures whether the right skill activates separately from whether the answe
 
 | Deliverable | Repository | Status | Priority | Contributor | Issue |
 |---|---|---|---|---|---|
-| `activation-eval-runner`: Build and pilot the activation-eval runner | `evals` | proposed | P1 | ready | none |
+| `activation-eval-runner`: Build and pilot the activation-eval runner | `evals` | proposed | P1 | ready | [#4](https://github.com/open-science-pillars/evals/issues/4) |
 
 #### Acceptance details
 
@@ -260,10 +260,10 @@ OSP has truthful surface evidence, external validation, governed releases, and c
 
 | Deliverable | Repository | Status | Priority | Contributor | Issue |
 |---|---|---|---|---|---|
-| `conversational-surface-validation`: Complete Cowork and Claude Science verification | `marketplace` | proposed | P1 | needs-context | none |
-| `tutorial-nonauthor-validation`: Complete non-author Tutorial 2 validation | `tutorials` | proposed | P1 | ready | none |
-| `provider-steward-handoff`: Complete or accurately reframe provider stewardship | `nasa-daac-knowledge` | proposed | P1 | needs-context | none |
-| `governed-release`: Cut the first governed, citable OSP release | `build-kit` | proposed | P1 | owner-only | none |
+| `conversational-surface-validation`: Complete Cowork qualification of a release | `marketplace` | proposed | P1 | needs-context | [#5](https://github.com/open-science-pillars/marketplace/issues/5) |
+| `tutorial-nonauthor-validation`: Complete non-author Tutorial 2 validation | `tutorials` | proposed | P1 | ready | [#2](https://github.com/open-science-pillars/tutorials/issues/2) |
+| `provider-steward-handoff`: Complete or accurately reframe provider stewardship | `nasa-daac-knowledge` | proposed | P1 | needs-context | [#2](https://github.com/open-science-pillars/nasa-daac-knowledge/issues/2) |
+| `governed-release`: Cut the first governed, citable OSP release | `build-kit` | proposed | P1 | owner-only | [#2](https://github.com/open-science-pillars/build-kit/issues/2) |
 
 #### Acceptance details
 

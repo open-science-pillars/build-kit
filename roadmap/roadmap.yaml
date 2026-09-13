@@ -127,7 +127,10 @@ initiatives:
           prerequisites: [OSP architecture, documentation review]
         labels: [roadmap, documentation, priority:P0]
       - id: codex-surface-policy
-        title: Define Codex as a supported distribution and behavior surface
+        issue:
+          number: 2
+          url: https://github.com/open-science-pillars/marketplace/issues/2
+        title: Define Codex as a supported distribution and behavior runtime
         repo: marketplace
         status: proposed
         priority: P1
@@ -240,6 +243,9 @@ initiatives:
     gate: null
     deliverables:
       - id: ablation-protocol-amendment
+        issue:
+          number: 4
+          url: https://github.com/open-science-pillars/marketplace/issues/4
         title: Publish the post-migration ablation amendment
         repo: marketplace
         status: proposed
@@ -255,6 +261,9 @@ initiatives:
           prerequisites: [Experimental design, OSP pre-registration]
         labels: [roadmap, documentation, priority:P0]
       - id: ablation-runner-calibration
+        issue:
+          number: 2
+          url: https://github.com/open-science-pillars/evals/issues/2
         title: Calibrate non-obvious probes and release-mixing grading
         repo: evals
         status: proposed
@@ -271,6 +280,9 @@ initiatives:
           prerequisites: [Evaluation design, scientific rubrics]
         labels: [roadmap, enhancement, priority:P0]
       - id: powered-ablation-run
+        issue:
+          number: 3
+          url: https://github.com/open-science-pillars/evals/issues/3
         title: Run and publish the powered ablation
         repo: evals
         status: proposed
@@ -297,6 +309,9 @@ initiatives:
     gate: null
     deliverables:
       - id: activation-eval-runner
+        issue:
+          number: 4
+          url: https://github.com/open-science-pillars/evals/issues/4
         title: Build and pilot the activation-eval runner
         repo: evals
         status: proposed
@@ -323,7 +338,10 @@ initiatives:
     gate: null
     deliverables:
       - id: conversational-surface-validation
-        title: Complete Cowork and Claude Science verification
+        issue:
+          number: 5
+          url: https://github.com/open-science-pillars/marketplace/issues/5
+        title: Complete Cowork qualification of a release
         repo: marketplace
         status: proposed
         priority: P1
@@ -338,6 +356,9 @@ initiatives:
           prerequisites: [Cowork access, Claude Science access]
         labels: [roadmap, documentation, priority:P1]
       - id: tutorial-nonauthor-validation
+        issue:
+          number: 2
+          url: https://github.com/open-science-pillars/tutorials/issues/2
         title: Complete non-author Tutorial 2 validation
         repo: tutorials
         status: proposed
@@ -353,6 +374,9 @@ initiatives:
           prerequisites: [Earthdata Login, ocean Python environment]
         labels: [roadmap, help wanted, priority:P1]
       - id: provider-steward-handoff
+        issue:
+          number: 2
+          url: https://github.com/open-science-pillars/nasa-daac-knowledge/issues/2
         title: Complete or accurately reframe provider stewardship
         repo: nasa-daac-knowledge
         status: proposed
@@ -368,6 +392,9 @@ initiatives:
           prerequisites: [PO.DAAC relationship, knowledge stewardship]
         labels: [roadmap, documentation, priority:P1]
       - id: governed-release
+        issue:
+          number: 2
+          url: https://github.com/open-science-pillars/build-kit/issues/2
         title: Cut the first governed, citable OSP release
         repo: build-kit
         status: proposed

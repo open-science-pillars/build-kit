@@ -143,7 +143,7 @@ class RoadmapTests(unittest.TestCase):
             ],
         }
         original = roadmap.gh_json
-        roadmap.gh_json = lambda endpoint: responses[endpoint]
+        roadmap.gh_json = lambda endpoint: responses.get(endpoint, [])
         try:
             findings = roadmap.collect_audit(data, online=True, check_files=False)
         finally:
