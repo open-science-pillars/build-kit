@@ -14,6 +14,7 @@
 - `federated-governance-baseline`: Declare repository-level roadmap authority (`.github`)
 - `reconcile-project-record`: Reconcile specifications, progress, limitations, and counts (`marketplace`)
 - `roadmap-harness-v1`: Build the federated roadmap harness (`build-kit`)
+- `landice-grace-knowledge`: GRACE-FO mass change knowledge for land ice, reviewed and offered for confirmation (`nasa-daac-knowledge`)
 - `r2-core-reference`: Qualify core as the reference capability on Claude Code, Cowork and Codex from one SKILL.md (`core`)
 
 ### Blocked
@@ -28,7 +29,6 @@
 Proposed, every dependency done, in priority order.
 
 - P1 `hydro-investigation-tutorial`: Write the hydrology investigation tutorial and run it with a non-author reader (`tutorials`)
-- P1 `landice-grace-knowledge`: GRACE-FO mass change knowledge for land ice, reviewed and offered for confirmation (`nasa-daac-knowledge`)
 - P1 `provider-confirmed-voicing`: Voice the provider-confirmed tier when citing a concept (`core`): gate: Lands in the release after 0.5.1; a release candidate never edits a skill.
 - P2 `hydro-coastal-water`: Coastal composites where hydrology meets ocean science (`ocean-science`)
 - P2 `r6-compat-probes`: Add non-blocking compatibility probes for Gemini CLI and Goose (`build-kit`)
@@ -612,7 +612,7 @@ land-ice is an installable capability whose first attested computation closes th
 
 | Deliverable | Repository | Status | Priority | Contributor | Issue |
 |---|---|---|---|---|---|
-| `landice-grace-knowledge`: GRACE-FO mass change knowledge for land ice, reviewed and offered for confirmation | `nasa-daac-knowledge` | proposed | P1 | ready | none |
+| `landice-grace-knowledge`: GRACE-FO mass change knowledge for land ice, reviewed and offered for confirmation | `nasa-daac-knowledge` | active | P1 | ready | [#123](https://github.com/open-science-pillars/nasa-daac-knowledge/issues/123) |
 | `sea-level-budget-closure`: Close the global sea level budget as an attested computation | `ocean-science` | proposed | P1 | needs-context | none |
 | `landice-promotion`: Promote land-ice out of planned with its first skill and release | `land-ice` | blocked | P1 | owner-only | none |
 | `landice-nsidc-elevation`: Add ice-sheet elevation and velocity, with NSIDC invited to confirm | `land-ice` | blocked | P2 | needs-context | none |

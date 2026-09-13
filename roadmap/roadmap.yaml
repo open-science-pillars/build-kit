@@ -1055,7 +1055,7 @@ initiatives:
       - id: landice-grace-knowledge
         title: GRACE-FO mass change knowledge for land ice, reviewed and offered for confirmation
         repo: nasa-daac-knowledge
-        status: proposed
+        status: active
         priority: P1
         depends_on: []
         gate: ""
@@ -1076,6 +1076,9 @@ initiatives:
           champion: PaulMRamirez
           prerequisites: [GRACE-FO mascon products, the OKF concept format]
         labels: [roadmap, priority:P1]
+        issue:
+          number: 123
+          url: https://github.com/open-science-pillars/nasa-daac-knowledge/issues/123
       - id: sea-level-budget-closure
         title: Close the global sea level budget as an attested computation
         repo: ocean-science
