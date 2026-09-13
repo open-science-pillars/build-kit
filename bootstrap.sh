@@ -10,8 +10,8 @@ set -euo pipefail
 
 ORG="https://github.com/open-science-pillars"
 WORKSPACE="${1:-$(pwd)/osp-workspace}"
-# Repos a developer needs cloned to continue the build. Add domain repos as
-# they are created (e.g. remote-sensing in Phase 3).
+# Repos a developer needs cloned to continue the build. Add a repository here
+# when it is created (the planned sphere repositories are already listed).
 REPOS=(.github marketplace core ocean-science hydrology tutorials \
        plugin-template knowledge-template nasa-daac-knowledge evals build-kit \
        archive-observatory agent-evals \
@@ -57,5 +57,5 @@ Done. Next:
 
 Codex users can invoke \$osp-roadmap and \$osp-session from the same workspace.
 Read build-kit/DEVELOPING.md first if this is your first session, and
-marketplace/docs/phase2-preregistration.md before any Phase-3 domain work.
+marketplace/docs/phase2-preregistration.md before any new-domain work.
 EOF

@@ -1,7 +1,7 @@
 # Open Science Pillars: Build Progress
 
 > **Historical build record.** This is no longer the live roadmap. See
-> [ROADMAP.md](ROADMAP.md), generated from `roadmap/roadmap.yaml`, for current
+> [ROADMAP.md](../ROADMAP.md), generated from `roadmap/roadmap.yaml`, for current
 > organization work. The rows below preserve the evidence and decisions from
 > numbered Sessions 0b-19.
 

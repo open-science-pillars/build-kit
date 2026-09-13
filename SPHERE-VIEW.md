@@ -58,7 +58,7 @@ installable.
 |---|---|---|---|---|
 | `composites` | composite | planned | all | Cross-sphere composites, each with its own steward, joint knowledge and validation; none yet |
 
-## Foundation and tooling
+<details><summary>Foundation and tooling (serve every sphere)</summary>
 
 | Repository | Kind | Status | Spheres | Notes |
 |---|---|---|---|---|
@@ -72,3 +72,5 @@ installable.
 | `marketplace` | foundation | available | all | The plugin catalog and the canonical documentation |
 | `plugin-template` | foundation | available | all | Template: a copy renames repository.name (and package.yaml) before it validates |
 | `tutorials` | foundation | available | all | Timed walkthroughs and the browser demo |
+
+</details>

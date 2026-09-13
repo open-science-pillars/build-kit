@@ -9,7 +9,7 @@ disable-model-invocation: true
 You are starting Open Science Pillars work `$ARGUMENTS`.
 
 1. If `$ARGUMENTS` is a historical numeric session, use its archived block in
-   `build-kit/IMPLEMENTATION-GUIDE.md` and `build-kit/PROGRESS.md`. State that
+   `build-kit/build-record/IMPLEMENTATION-GUIDE.md` and `build-kit/build-record/PROGRESS.md`. State that
    this is compatibility mode and do not create new numbered sessions.
 2. Otherwise run `uv run build-kit/scripts/roadmap.py brief $ARGUMENTS`. If the
    deliverable is not accepted and ready, or has an incomplete dependency or

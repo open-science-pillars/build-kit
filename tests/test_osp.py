@@ -156,6 +156,25 @@ class OspTests(unittest.TestCase):
         self.assertIn("| `ocean-science` | Ocean Physics | available |", first)
         self.assertIn("No domain capability yet.", first)
 
+    def test_sphere_view_collapses_foundation_and_tooling(self):
+        capability(self.root)
+        tooling(self.root)
+        repos = [(p.name, osp.read_repository(p)) for p in osp.workspace_repos(self.root)]
+        view = osp.render_sphere_view(repos)
+        self.assertIn("## Provider knowledge", view)
+        self.assertIn("## Composites", view)
+        self.assertNotIn("## Foundation and tooling", view)
+        block = view[view.index("<details><summary>Foundation and tooling (serve every sphere)</summary>"):]
+        self.assertTrue(block.startswith("<details><summary>Foundation and tooling (serve every sphere)</summary>\n\n| Repository |"), block[:120])
+        self.assertIn("| `build-kit` | tooling | available | all | Maintainers |", block)
+        self.assertTrue(block.rstrip().endswith("|\n\n</details>"), block[-80:])
+        profile = osp.render_profile_block(repos)
+        self.assertIn("**Provider knowledge**", profile)
+        self.assertNotIn("**Foundation and tooling**", profile)
+        block = profile[profile.index("<details><summary>Foundation and tooling (serve every sphere)</summary>"):]
+        self.assertTrue(block.startswith("<details><summary>Foundation and tooling (serve every sphere)</summary>\n\n- [build-kit]"), block[:120])
+        self.assertTrue(block.rstrip().endswith("Maintainers\n\n</details>"), block[-80:])
+
     def test_codeowners_names_registered_teams_only(self):
         repo = capability(self.root)
         (repo / "CODEOWNERS").write_text("* @someone\n/knowledge/ @open-science-pillars/no-such-team\n")
@@ -202,6 +221,24 @@ class OspTests(unittest.TestCase):
 
 if __name__ == "__main__":
     unittest.main()
+
+
+def tooling(root: Path, name="build-kit"):
+    """A tooling repository: no spheres, no package, an audience note."""
+    repo = root / name
+    write(repo / ".osp" / "repository.yaml", {
+        "schema_version": 1,
+        "repository": {"name": name, "kind": "tooling", "status": "available", "audience": "Maintainers"},
+        "classification": {"spheres": []},
+    })
+    (repo / "CODEOWNERS").write_text("* @open-science-pillars/foundation-maintainers\n")
+    write(repo / ".osp" / "governance.yaml", {
+        "schema_version": 2, "repository": name,
+        "maintainers": {"users": ["someone"], "teams": ["foundation-maintainers"], "status": "interim"},
+        "roadmap": {"proposals": "enabled", "authority": "repository-maintainers"},
+        "reviews": {"ordinary": 1, "cross_repository": "org-policy", "knowledge": "org-knowledge-policy"},
+    })
+    return repo
 
 
 def packaged(root: Path, name="ocean-science", **kwargs):

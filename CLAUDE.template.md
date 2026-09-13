@@ -16,23 +16,33 @@ documents. Those documents are law; when this file and a canonical
 document disagree, the canonical document wins, and you flag the
 discrepancy instead of silently choosing.
 
-<!-- Version pins: keep these current, or reference the docs by name
-     without a version so they never go stale. As of this template the
-     spec is v0.6.x and the implementation guide is v2.4.x. -->
+<!-- The canonical documents are referenced by name, never by version,
+     so this file does not go stale when the specification revises; the
+     specification's own changelog (docs/SPECIFICATION-CHANGELOG.md) is
+     the record of what changed. -->
 
-## Canonical documents (read before acting, cite by section)
+## Canonical documents (read before acting, cite rules by name)
 - marketplace/docs/SPECIFICATION.md          (what to build)
-- build-kit/IMPLEMENTATION-GUIDE.md   (in what order)
-- build-kit/PROGRESS.md               (current state; you update it)
-- marketplace/docs/ARCHITECTURE.md           (why; strategy)
+- marketplace/docs/MODEL.md                  (the model on one page)
+- marketplace/docs/decisions/                (ADR A, ADR B: why)
+- build-kit/roadmap/roadmap.yaml             (what is accepted, active, done;
+                                              rendered to build-kit/ROADMAP.md)
 - marketplace/docs/phase2-preregistration.md (go/stop conditions; a gate)
+- marketplace/GLOSSARY.md                    (the vocabulary)
 
 ## Repo map
-core, ocean-science, hydrology: plugins (skills/, agents/, knowledge/,
+core, ocean-science, hydrology: capabilities (skills/, agents/, knowledge/,
 verification/, evals/). marketplace: catalog + docs. tutorials: Quarto
 book. plugin-template, knowledge-template: scaffolds.
 nasa-daac-knowledge: canonical knowledge bundles, shipped as a plugin the
-domain plugins declare as a dependency.
+domain capabilities declare as a dependency.
+evals: the eval runner, graders and manifests. agent-evals: the benchmark
+case sets (ecco/ first). archive-observatory: metadata compliance
+instruments for archive operators.
+precipitation, land-ice, sea-ice, solid-earth, land-surface,
+atmospheric-composition, atmospheric-physics, land-ecosystems,
+ocean-biology, composites, partner-knowledge: planned sphere repositories,
+visible and not installable.
 build-kit: this harness. .github: org files.
 
 ## Global rules (non-negotiable)
@@ -53,19 +63,19 @@ build-kit: this harness. .github: org files.
    that runs headless. A skill without a green golden notebook is not done.
 7. Writing style in all prose: no em dashes. Use commas, colons,
    parentheses, or semicolons.
-8. Never mark a PROGRESS item complete without its checkpoint evidence.
+8. Never mark a roadmap deliverable done without its evidence.
 9. Every high-severity gotcha ships a matching eval case in the plugin's
    evals/ (the linter enforces this); seed cases are manually graded and
    recorded in evals/RESULTS-seed.md.
 10. Every gotcha claim carries an evidence link and a status field; the
     seeder drafts, humans merge (draft becomes verified only through
     steward review with verified_by set).
-11. Scope discipline: the current spec revision is frozen during a build
-    arc. New ideas and discovered gaps go to build-kit/build-record/PARKING.md
-    with a one-line rationale, triaged into the next spec revision only at
-    the scheduled window. The build writes the next spec revision;
-    forethought does not.
-12. Knowledge coupling (see marketplace/docs/design-knowledge-coupling.md):
+11. Scope discipline: the specification is the anchor, and a spec
+    revision is a roadmap deliverable. New ideas and discovered gaps go to
+    build-kit/roadmap/roadmap.yaml as draft proposals with a one-line
+    rationale; the owning repository's maintainers accept, defer or
+    reject them. Do not widen accepted work silently.
+12. Knowledge coupling (see marketplace/docs/knowledge-vs-skills.md):
     skills are deterministic procedures plus hard refusals; they carry NO
     dataset facts, inlined numbers, gotcha rules, or named-concept lists.
     Dataset knowledge lives in exactly one concept and is consulted
@@ -81,8 +91,8 @@ build-kit: this harness. .github: org files.
 
 Pillar means an ESSRP sphere (Atmosphere, Biosphere, Cryosphere,
 Geosphere, Hydrosphere). The decision records are ADR A and ADR B in
-marketplace/docs/decisions; the design is
-marketplace/docs/design-sphere-alignment-multi-runtime.md.
+marketplace/docs/decisions; marketplace/docs/MODEL.md is the model on
+one page.
 
 Scientific organization:
 - Sphere and discipline answer who asks.
@@ -92,7 +102,7 @@ Scientific organization:
 Canonical scientific behavior belongs in `skills/`.
 Canonical scientific facts belong in governed knowledge bundles.
 Canonical deterministic verification belongs in PROVE implementations.
-External action surfaces belong in REACH.
+External actions (connectors) belong in REACH.
 
 `.osp/repository.yaml` is the source of repository classification and status.
 `.osp/package.yaml` is the source of package and dependency semantics.
