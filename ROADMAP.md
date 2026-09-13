@@ -624,6 +624,7 @@ land-ice is an installable capability whose first attested computation closes th
 - [ ] The grace-fo-mascons dataset concept states the land-ice use, the solution version, the units and the reference period, is reviewed to stable, and a PO.DAAC contact has been invited to confirm it (provider confirmation is voiced when recorded, never required).
 - [ ] Gotchas exist, each with evidence and a matching eval case where the severity is high, for glacial isostatic adjustment, coastal leakage, the 2017 to 2018 gap between GRACE and GRACE-FO, and the degree-1 and C20 replacements.
 - [ ] A recipe converts a regional mass change to a sea level equivalent with its uncertainty, citing the concepts it uses.
+- Evidence: `nasa-daac-knowledge PR #124: the mascon dataset concept widened to land ice, the gap and low-degree gotchas, the mass-to-sea-level recipe, the grace-intermission-gap eval case (agent-evals PR #11, evals PR #32)`, `nasa-daac-knowledge PR #125: the four concepts re-verified against CMR and the PO.DAAC documentation index; TN-13 and TN-14 added as sources`
 
 **`sea-level-budget-closure`**
 
@@ -631,6 +632,7 @@ land-ice is an installable capability whose first attested computation closes th
 - [ ] An attester verifies the receipt (recompute, plausibility, provenance) and passes on the golden fixture; a refusal case exists for a period the gap between missions makes unclosable.
 - [ ] The computation concept is drafted with its sources and reaches stable on a human review; the recipe names where each term's trap is.
 - Depends on: `landice-grace-knowledge`
+- Evidence: `nasa-daac-knowledge PR #125: the executor, attester, computation concept, recipe and run skill; proven on a synthetic fixture with a known closure (no real-data run yet, and the steric term is read from a data root, not from the observations connector)`, `ocean-science PR #46: the golden and the prove probe on the fixture`
 
 **`landice-promotion`**
 
