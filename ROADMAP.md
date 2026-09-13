@@ -651,7 +651,7 @@ land-ice is an installable capability whose first attested computation closes th
 
 - [ ] A knowledge/nsidc provider bundle holds dataset concepts for ICESat-2 ATL15 and the ITS_LIVE velocity mosaics with their gotchas (height change is not mass change at high severity, with an eval case), drafted from sources fetched live and reviewed to stable by the maintainer.
 - [ ] The eval case is registered in the evals manifests, and an NSIDC contact has been invited to confirm the concepts (voiced when recorded, never required).
-- Evidence: `nasa-daac-knowledge PR #129 and agent-evals PR #14: the bundle, two dataset concepts, five gotchas and the case, seeded 2026-09-13 from nsidc.org, its-live.jpl.nasa.gov, CMR and Crossref`
+- Evidence: `nasa-daac-knowledge PR #129 and agent-evals PR #14: the bundle, two dataset concepts, five gotchas and the case, seeded 2026-09-13 from nsidc.org, its-live.jpl.nasa.gov, CMR and Crossref`, `nasa-daac-knowledge PR #127 (with the sea level budget run): the two dataset concepts and the four medium gotchas stable and signed by the maintainer; the high-severity gotcha carries a first review and waits on a second; the NSIDC invitation is outstanding`
 
 **`landice-nsidc-elevation`**
 
@@ -679,16 +679,16 @@ Concepts for products the bundles lack are drafted in parallel sessions from sou
 
 - [ ] The dataset concept and the gotchas (the 2000 dbar sampled floor at high severity with its eval case, the coverage limits, the fixed climatology) merge on the maintainer's review and reach stable on it.
 - [ ] The case is registered in the evals manifests.
-- Evidence: `ocean-science PR #47 and agent-evals PR #12, seeded 2026-09-13 from the Scripps product page, Crossref and the ESSD budget paper`
+- Evidence: `ocean-science PR #47 and agent-evals PR #12, seeded 2026-09-13 from the Scripps product page, Crossref and the ESSD budget paper`, `ocean-science PR #49: the dataset concept and the two medium gotchas stable and signed by the maintainer; the high-severity gotcha carries a first review and waits on a second`
 
 **`seed-grace-basin-tws`**
 
 - [ ] The basin recipe and the gotchas (the resolution floor at high severity with its eval case, total storage versus its components, the scale factors once and for hydrology) merge on the maintainer's review and reach stable on it, linking the PO.DAAC GRACE concepts rather than duplicating them.
 - [ ] The case is registered in the evals manifests.
-- Evidence: `hydrology PR #57, seeded 2026-09-13 from the mascon release note, the month list, CMR and Crossref`
+- Evidence: `hydrology PR #57, seeded 2026-09-13 from the mascon release note, the month list, CMR and Crossref`, `hydrology PR #59: the recipe and the two medium gotchas stable and signed by the maintainer; the high-severity gotcha carries a first review and waits on a second`
 
 **`seed-oscar-smap-sss`**
 
 - [ ] Dataset concepts for OSCAR version 2 and the JPL SMAP salinity product and their gotchas (two at high severity with eval cases) merge on the maintainer's review and reach stable on it.
 - [ ] The cases are registered in the evals manifests.
-- Evidence: `nasa-daac-knowledge PR #128 and agent-evals PR #13, seeded 2026-09-13 from the PO.DAAC collection pages, the archive's documentation, CMR and Crossref`
+- Evidence: `nasa-daac-knowledge PR #128 and agent-evals PR #13, seeded 2026-09-13 from the PO.DAAC collection pages, the archive's documentation, CMR and Crossref`, `nasa-daac-knowledge PR #127 (with the sea level budget run): the two dataset concepts and the three medium gotchas stable and signed by the maintainer; the two high-severity gotchas carry a first review and wait on a second`
