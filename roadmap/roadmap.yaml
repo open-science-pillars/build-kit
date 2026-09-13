@@ -1073,6 +1073,7 @@ initiatives:
         evidence:
           - "nasa-daac-knowledge PR #124: the mascon dataset concept widened to land ice, the gap and low-degree gotchas, the mass-to-sea-level recipe, the grace-intermission-gap eval case (agent-evals PR #11, evals PR #32)"
           - "nasa-daac-knowledge PR #125: the four concepts re-verified against CMR and the PO.DAAC documentation index; TN-13 and TN-14 added as sources"
+          - "nasa-daac-knowledge PR #126: the release note, TN-13, TN-14 and the month list read; every DOI verified against Crossref; the four concepts stable and signed by the maintainer. Outstanding: the PO.DAAC invitation to confirm"
         contributor:
           readiness: ready
           champion: PaulMRamirez
@@ -1102,6 +1103,7 @@ initiatives:
         evidence:
           - "nasa-daac-knowledge PR #125: the executor, attester, computation concept, recipe and run skill; proven on a synthetic fixture with a known closure (no real-data run yet, and the steric term is read from a data root, not from the observations connector)"
           - "ocean-science PR #46: the golden and the prove probe on the fixture"
+          - "nasa-daac-knowledge PR #126: the computation and recipe stable and signed by the maintainer, the deep-steric term cited to Purkey and Johnson 2010 as the 2018 budget carries it. Outstanding: the real-data run with Argo through the observations connector"
         contributor:
           readiness: needs-context
           champion: PaulMRamirez
