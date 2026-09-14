@@ -717,58 +717,58 @@ Concepts for products the bundles lack are drafted in parallel sessions from sou
 
 - [ ] The four to five gotchas on the MUR dataset concept (the grid is not the feature resolution at high severity with its eval case, foundation versus skin, the ice edge, analysis_error, near-real-time versus final) merge on the maintainer's review and reach stable on it.
 - [ ] Every eval case is registered in the evals manifests.
-- Evidence: `Round two of seeding (build-kit roadmap/seeds/round-2.yaml), issue #133 in nasa-daac-knowledge, opened 2026-09-14`
+- Evidence: `Round two of seeding (build-kit roadmap/seeds/round-2.yaml), issue #133 in nasa-daac-knowledge, opened 2026-09-14`, `nasa-daac-knowledge PR #141 and agent-evals PR #15, seeded 2026-09-14 from the PO.DAAC collection page and Crossref; the linted sea ice mechanism reworded to what the sources support`, `nasa-daac-knowledge PR #149: the four medium and low MUR gotchas stable and signed by the maintainer, the dataset concept relinked and re-signed; mur-grid-is-not-feature-resolution (high) carries a first review and waits on a second; case registered in evals PR #34`
 
 **`seed-nsidc-sea-ice`**
 
 - [ ] The NSIDC-0051 and Sea Ice Index dataset concepts and their gotchas (the pole hole at high severity with its eval case, extent versus area, near-real-time versus final, the two algorithms, the sensor transitions) merge on the maintainer's review and reach stable on it.
 - [ ] Every eval case is registered in the evals manifests.
-- Evidence: `Round two of seeding (build-kit roadmap/seeds/round-2.yaml), issue #134 in nasa-daac-knowledge, opened 2026-09-14`
+- Evidence: `Round two of seeding (build-kit roadmap/seeds/round-2.yaml), issue #134 in nasa-daac-knowledge, opened 2026-09-14`, `nasa-daac-knowledge PR #148 and agent-evals PR #22, seeded 2026-09-14 from the NSIDC product pages and guides, the NOAA archive listing, CMR and Crossref; two gap dates corrected against the daily file on lint`, `nasa-daac-knowledge PR #149: the two dataset concepts and the four medium gotchas stable and signed by the maintainer; sea-ice-pole-hole-by-sensor (high) carries a first review and waits on a second; case registered in evals PR #34`
 
 **`seed-esdis-requirements-2`**
 
 - [ ] Four to six requirement concepts (granule extents, cloud direct-access URLs, science keywords, version and DOI, processing level and format) in the shape of the eight existing ones merge on the maintainer's review and reach stable on it.
 - [ ] Every eval case is registered in the evals manifests.
-- Evidence: `Round two of seeding (build-kit roadmap/seeds/round-2.yaml), issue #135 in nasa-daac-knowledge, opened 2026-09-14`
+- Evidence: `Round two of seeding (build-kit roadmap/seeds/round-2.yaml), issue #135 in nasa-daac-knowledge, opened 2026-09-14`, `nasa-daac-knowledge PR #142, seeded 2026-09-14 from the UMM schemas, the CMR wiki element pages and the requirements base references (six concepts; processing level and format split)`, `nasa-daac-knowledge PR #149: all six requirement concepts stable and signed by the maintainer`
 
 **`seed-gesdisc-merra2`**
 
 - [ ] The MERRA-2 dataset concept and its gotchas (the corrected precipitation at high severity with its eval case, the time stamps, the streams, the grid weights, the short names) as the first concepts of the gesdisc bundle merge on the maintainer's review and reach stable on it.
 - [ ] Every eval case is registered in the evals manifests.
-- Evidence: `Round two of seeding (build-kit roadmap/seeds/round-2.yaml), issue #136 in nasa-daac-knowledge, opened 2026-09-14`
+- Evidence: `Round two of seeding (build-kit roadmap/seeds/round-2.yaml), issue #136 in nasa-daac-knowledge, opened 2026-09-14`, `nasa-daac-knowledge PR #144 and agent-evals PR #19, seeded 2026-09-14 from the GES DISC collection pages, the file specification, the GMAO pages, CMR and Crossref; the LFO corrected-precipitation claim corrected on lint`, `nasa-daac-knowledge PR #149: the dataset concept and the four medium and low gotchas stable and signed by the maintainer; merra2-prectotcorr-versus-prectot (high) carries a first review and waits on a second; case registered in evals PR #34`
 
 **`seed-asdc-ceres-ebaf`**
 
 - [ ] The CERES EBAF Ed4.2 dataset concept and its gotchas (the anchored imbalance at high severity with its eval case, the clear-sky definitions, the modelled surface fluxes, the product family, the baseline) as the first concepts of the asdc bundle merge on the maintainer's review and reach stable on it.
 - [ ] Every eval case is registered in the evals manifests.
-- Evidence: `Round two of seeding (build-kit roadmap/seeds/round-2.yaml), issue #137 in nasa-daac-knowledge, opened 2026-09-14`
+- Evidence: `Round two of seeding (build-kit roadmap/seeds/round-2.yaml), issue #137 in nasa-daac-knowledge, opened 2026-09-14`, `nasa-daac-knowledge PR #146 and agent-evals PR #20, seeded 2026-09-14 from the CERES product and documentation pages, the data quality summaries, CMR and Crossref`, `nasa-daac-knowledge PR #149: the dataset concept and the four medium and low gotchas stable and signed by the maintainer; ebaf-imbalance-anchored-to-ocean-heating (high) carries a first review and waits on a second; case registered in evals PR #34`
 
 **`seed-obdaac-chlorophyll`**
 
 - [ ] The MODIS-Aqua and PACE OCI chlorophyll dataset concepts and their gotchas (the blended algorithm at high severity with its eval case, composite gaps, one reprocessing per series, chlorophyll is not biomass, the orbit drift) as the first concepts of the obdaac bundle merge on the maintainer's review and reach stable on it.
 - [ ] Every eval case is registered in the evals manifests.
-- Evidence: `Round two of seeding (build-kit roadmap/seeds/round-2.yaml), issue #138 in nasa-daac-knowledge, opened 2026-09-14`
+- Evidence: `Round two of seeding (build-kit roadmap/seeds/round-2.yaml), issue #138 in nasa-daac-knowledge, opened 2026-09-14`, `nasa-daac-knowledge PR #147 and agent-evals PR #21, seeded 2026-09-14 from the OB.DAAC pages, the file attributes, CMR and Crossref; the orbit-drift gotcha dropped for want of a producer statement of its effect and recorded as a platform fact`, `nasa-daac-knowledge PR #149: the two dataset concepts and the three medium gotchas stable and signed by the maintainer; chlor-a-blended-ocx-and-ci (high) carries a first review and waits on a second; case registered in evals PR #34`
 
 **`seed-lpdaac-hls`**
 
 - [ ] The HLSL30 and HLSS30 dataset concepts and their gotchas (the bit-packed Fmask at high severity with its eval case, the band names, harmonized not native, tile overlap, scale and fill) as the first concepts of the lpdaac bundle merge on the maintainer's review and reach stable on it.
 - [ ] Every eval case is registered in the evals manifests.
-- Evidence: `Round two of seeding (build-kit roadmap/seeds/round-2.yaml), issue #139 in nasa-daac-knowledge, opened 2026-09-14`
+- Evidence: `Round two of seeding (build-kit roadmap/seeds/round-2.yaml), issue #139 in nasa-daac-knowledge, opened 2026-09-14`, `nasa-daac-knowledge PR #145 and agent-evals PR #18, seeded 2026-09-14 from the LP DAAC product pages and user guide, the HLS project pages, CMR and Crossref`, `nasa-daac-knowledge PR #149: the two dataset concepts and the four medium and low gotchas stable and signed by the maintainer; hls-fmask-is-bit-packed (high) carries a first review and waits on a second; case registered in evals PR #34`
 
 **`seed-ornldaac-daymet`**
 
 - [ ] The Daymet V4 dataset concept and its gotchas (the 365-day year at high severity with its eval case, the projection, tiles and mosaics, the R1 correction, station-sparse error) as the first concepts of the ornldaac bundle merge on the maintainer's review and reach stable on it.
 - [ ] Every eval case is registered in the evals manifests.
-- Evidence: `Round two of seeding (build-kit roadmap/seeds/round-2.yaml), issue #140 in nasa-daac-knowledge, opened 2026-09-14`
+- Evidence: `Round two of seeding (build-kit roadmap/seeds/round-2.yaml), issue #140 in nasa-daac-knowledge, opened 2026-09-14`, `nasa-daac-knowledge PR #143 and agent-evals PR #17, seeded 2026-09-14 from the ORNL DAAC dataset pages and guides, the Daymet project pages, CMR and Crossref; the area-bias sign and the 365-day gotcha title corrected on lint`, `nasa-daac-knowledge PR #149: the dataset concept and the four medium and low gotchas stable and signed by the maintainer; daymet-365-day-year (high) carries a first review and waits on a second; case registered in evals PR #34`
 
 **`seed-hydrology-snow-cover`**
 
 - [ ] The snow cover dataset concept and its gotchas (NDSI is not a fraction at high severity with its eval case, cloud persistence and gap filling, snow and cloud confusion, overpass time and compositing, snow cover is not SWE) merge on the maintainer's review and reach stable on it.
 - [ ] Every eval case is registered in the evals manifests.
-- Evidence: `Round two of seeding (build-kit roadmap/seeds/round-2.yaml), issue #60 in hydrology, opened 2026-09-14`
+- Evidence: `Round two of seeding (build-kit roadmap/seeds/round-2.yaml), issue #60 in hydrology, opened 2026-09-14`, `hydrology PR #61, seeded 2026-09-14 from the NSIDC product pages and user guides, CMR and Crossref, with its eval case under evals/`, `hydrology PR #62: the dataset concept and the four medium and low gotchas stable and signed by the maintainer; snow-cover-ndsi-is-not-fraction (high) carries a first review and waits on a second; case registered in evals PR #34`
 
 **`seed-ocean-tide-gauge-datums`**
 
 - [ ] The gotchas on the CO-OPS and PSMSL connectors (RLR versus metric and relative sea level versus land motion at high severity with their eval cases, the datum and epoch, modelled GIA, record length and gaps) merge on the maintainer's review and reach stable on it.
 - [ ] Every eval case is registered in the evals manifests.
-- Evidence: `Round two of seeding (build-kit roadmap/seeds/round-2.yaml), issue #50 in ocean-science, opened 2026-09-14`
+- Evidence: `Round two of seeding (build-kit roadmap/seeds/round-2.yaml), issue #50 in ocean-science, opened 2026-09-14`, `ocean-science PR #51 and agent-evals PR #16, seeded 2026-09-14 from the PSMSL and CO-OPS documentation pages and Crossref`, `ocean-science PR #52: the three medium gotchas stable and signed by the maintainer; psmsl-rlr-versus-metric and tide-gauge-relative-sea-level-and-land-motion (high) carry a first review and wait on a second; cases registered in evals PR #34`
