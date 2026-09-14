@@ -1261,3 +1261,203 @@ initiatives:
         issue:
           number: 130
           url: https://github.com/open-science-pillars/nasa-daac-knowledge/issues/130
+      - id: seed-mur-sst-gotchas
+        title: MUR SST gotchas for the podaac bundle, seeded and reviewed
+        repo: nasa-daac-knowledge
+        status: active
+        priority: P2
+        depends_on: []
+        gate: ""
+        acceptance:
+          - The four to five gotchas on the MUR dataset concept (the grid is not the feature resolution at high severity with its eval case, foundation versus skin, the ice edge, analysis_error, near-real-time versus final) merge on the maintainer's review and reach stable on it.
+          - Every eval case is registered in the evals manifests.
+        evidence:
+          - "Round two of seeding (build-kit roadmap/seeds/round-2.yaml), issue #133 in nasa-daac-knowledge, opened 2026-09-14"
+        contributor:
+          readiness: needs-context
+          champion: PaulMRamirez
+          prerequisites: [The MUR dataset concept]
+        labels: [roadmap, priority:P2]
+        issue:
+          number: 133
+          url: https://github.com/open-science-pillars/nasa-daac-knowledge/issues/133
+      - id: seed-nsidc-sea-ice
+        title: Sea ice concentration and the Sea Ice Index knowledge, seeded and reviewed
+        repo: nasa-daac-knowledge
+        status: active
+        priority: P2
+        depends_on: []
+        gate: ""
+        acceptance:
+          - The NSIDC-0051 and Sea Ice Index dataset concepts and their gotchas (the pole hole at high severity with its eval case, extent versus area, near-real-time versus final, the two algorithms, the sensor transitions) merge on the maintainer's review and reach stable on it.
+          - Every eval case is registered in the evals manifests.
+        evidence:
+          - "Round two of seeding (build-kit roadmap/seeds/round-2.yaml), issue #134 in nasa-daac-knowledge, opened 2026-09-14"
+        contributor:
+          readiness: needs-context
+          champion: PaulMRamirez
+          prerequisites: [The NSIDC bundle]
+        labels: [roadmap, priority:P2]
+        issue:
+          number: 134
+          url: https://github.com/open-science-pillars/nasa-daac-knowledge/issues/134
+      - id: seed-esdis-requirements-2
+        title: ESDIS requirements round two, seeded and reviewed
+        repo: nasa-daac-knowledge
+        status: active
+        priority: P2
+        depends_on: []
+        gate: ""
+        acceptance:
+          - Four to six requirement concepts (granule extents, cloud direct-access URLs, science keywords, version and DOI, processing level and format) in the shape of the eight existing ones merge on the maintainer's review and reach stable on it.
+          - Every eval case is registered in the evals manifests.
+        evidence:
+          - "Round two of seeding (build-kit roadmap/seeds/round-2.yaml), issue #135 in nasa-daac-knowledge, opened 2026-09-14"
+        contributor:
+          readiness: needs-context
+          champion: PaulMRamirez
+          prerequisites: [The ESDIS bundle and the observatory's sweeper]
+        labels: [roadmap, priority:P2]
+        issue:
+          number: 135
+          url: https://github.com/open-science-pillars/nasa-daac-knowledge/issues/135
+      - id: seed-gesdisc-merra2
+        title: MERRA-2 knowledge for the gesdisc bundle, seeded and reviewed
+        repo: nasa-daac-knowledge
+        status: active
+        priority: P2
+        depends_on: []
+        gate: ""
+        acceptance:
+          - The MERRA-2 dataset concept and its gotchas (the corrected precipitation at high severity with its eval case, the time stamps, the streams, the grid weights, the short names) as the first concepts of the gesdisc bundle merge on the maintainer's review and reach stable on it.
+          - Every eval case is registered in the evals manifests.
+        evidence:
+          - "Round two of seeding (build-kit roadmap/seeds/round-2.yaml), issue #136 in nasa-daac-knowledge, opened 2026-09-14"
+        contributor:
+          readiness: needs-context
+          champion: PaulMRamirez
+          prerequisites: [The gesdisc bundle scaffold]
+        labels: [roadmap, priority:P2]
+        issue:
+          number: 136
+          url: https://github.com/open-science-pillars/nasa-daac-knowledge/issues/136
+      - id: seed-asdc-ceres-ebaf
+        title: CERES EBAF knowledge for the asdc bundle, seeded and reviewed
+        repo: nasa-daac-knowledge
+        status: active
+        priority: P2
+        depends_on: []
+        gate: ""
+        acceptance:
+          - The CERES EBAF Ed4.2 dataset concept and its gotchas (the anchored imbalance at high severity with its eval case, the clear-sky definitions, the modelled surface fluxes, the product family, the baseline) as the first concepts of the asdc bundle merge on the maintainer's review and reach stable on it.
+          - Every eval case is registered in the evals manifests.
+        evidence:
+          - "Round two of seeding (build-kit roadmap/seeds/round-2.yaml), issue #137 in nasa-daac-knowledge, opened 2026-09-14"
+        contributor:
+          readiness: needs-context
+          champion: PaulMRamirez
+          prerequisites: [The asdc bundle scaffold]
+        labels: [roadmap, priority:P2]
+        issue:
+          number: 137
+          url: https://github.com/open-science-pillars/nasa-daac-knowledge/issues/137
+      - id: seed-obdaac-chlorophyll
+        title: Level 3 chlorophyll knowledge for the obdaac bundle, seeded and reviewed
+        repo: nasa-daac-knowledge
+        status: active
+        priority: P2
+        depends_on: []
+        gate: ""
+        acceptance:
+          - The MODIS-Aqua and PACE OCI chlorophyll dataset concepts and their gotchas (the blended algorithm at high severity with its eval case, composite gaps, one reprocessing per series, chlorophyll is not biomass, the orbit drift) as the first concepts of the obdaac bundle merge on the maintainer's review and reach stable on it.
+          - Every eval case is registered in the evals manifests.
+        evidence:
+          - "Round two of seeding (build-kit roadmap/seeds/round-2.yaml), issue #138 in nasa-daac-knowledge, opened 2026-09-14"
+        contributor:
+          readiness: needs-context
+          champion: PaulMRamirez
+          prerequisites: [The obdaac bundle scaffold]
+        labels: [roadmap, priority:P2]
+        issue:
+          number: 138
+          url: https://github.com/open-science-pillars/nasa-daac-knowledge/issues/138
+      - id: seed-lpdaac-hls
+        title: HLS knowledge for the lpdaac bundle, seeded and reviewed
+        repo: nasa-daac-knowledge
+        status: active
+        priority: P2
+        depends_on: []
+        gate: ""
+        acceptance:
+          - The HLSL30 and HLSS30 dataset concepts and their gotchas (the bit-packed Fmask at high severity with its eval case, the band names, harmonized not native, tile overlap, scale and fill) as the first concepts of the lpdaac bundle merge on the maintainer's review and reach stable on it.
+          - Every eval case is registered in the evals manifests.
+        evidence:
+          - "Round two of seeding (build-kit roadmap/seeds/round-2.yaml), issue #139 in nasa-daac-knowledge, opened 2026-09-14"
+        contributor:
+          readiness: needs-context
+          champion: PaulMRamirez
+          prerequisites: [The lpdaac bundle scaffold]
+        labels: [roadmap, priority:P2]
+        issue:
+          number: 139
+          url: https://github.com/open-science-pillars/nasa-daac-knowledge/issues/139
+      - id: seed-ornldaac-daymet
+        title: Daymet knowledge for the ornldaac bundle, seeded and reviewed
+        repo: nasa-daac-knowledge
+        status: active
+        priority: P2
+        depends_on: []
+        gate: ""
+        acceptance:
+          - The Daymet V4 dataset concept and its gotchas (the 365-day year at high severity with its eval case, the projection, tiles and mosaics, the R1 correction, station-sparse error) as the first concepts of the ornldaac bundle merge on the maintainer's review and reach stable on it.
+          - Every eval case is registered in the evals manifests.
+        evidence:
+          - "Round two of seeding (build-kit roadmap/seeds/round-2.yaml), issue #140 in nasa-daac-knowledge, opened 2026-09-14"
+        contributor:
+          readiness: needs-context
+          champion: PaulMRamirez
+          prerequisites: [The ornldaac bundle scaffold]
+        labels: [roadmap, priority:P2]
+        issue:
+          number: 140
+          url: https://github.com/open-science-pillars/nasa-daac-knowledge/issues/140
+      - id: seed-hydrology-snow-cover
+        title: MODIS and VIIRS snow cover knowledge, seeded and reviewed
+        repo: hydrology
+        status: active
+        priority: P2
+        depends_on: []
+        gate: ""
+        acceptance:
+          - The snow cover dataset concept and its gotchas (NDSI is not a fraction at high severity with its eval case, cloud persistence and gap filling, snow and cloud confusion, overpass time and compositing, snow cover is not SWE) merge on the maintainer's review and reach stable on it.
+          - Every eval case is registered in the evals manifests.
+        evidence:
+          - "Round two of seeding (build-kit roadmap/seeds/round-2.yaml), issue #60 in hydrology, opened 2026-09-14"
+        contributor:
+          readiness: needs-context
+          champion: PaulMRamirez
+          prerequisites: [The NSIDC snow products and the SNODAS connector]
+        labels: [roadmap, priority:P2]
+        issue:
+          number: 60
+          url: https://github.com/open-science-pillars/hydrology/issues/60
+      - id: seed-ocean-tide-gauge-datums
+        title: Tide gauge datum and land motion gotchas, seeded and reviewed
+        repo: ocean-science
+        status: active
+        priority: P2
+        depends_on: []
+        gate: ""
+        acceptance:
+          - The gotchas on the CO-OPS and PSMSL connectors (RLR versus metric and relative sea level versus land motion at high severity with their eval cases, the datum and epoch, modelled GIA, record length and gaps) merge on the maintainer's review and reach stable on it.
+          - Every eval case is registered in the evals manifests.
+        evidence:
+          - "Round two of seeding (build-kit roadmap/seeds/round-2.yaml), issue #50 in ocean-science, opened 2026-09-14"
+        contributor:
+          readiness: needs-context
+          champion: PaulMRamirez
+          prerequisites: [The CO-OPS and PSMSL connectors]
+        labels: [roadmap, priority:P2]
+        issue:
+          number: 50
+          url: https://github.com/open-science-pillars/ocean-science/issues/50

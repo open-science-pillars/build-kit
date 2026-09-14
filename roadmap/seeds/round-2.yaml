@@ -1,0 +1,474 @@
+# Round two of knowledge seeding: ten seeds run in parallel sessions, one
+# bundle each, dispatched and reviewed by a coordinator session. Rendered
+# into the sessions' briefs by scripts/seed_brief.py; the roadmap's
+# knowledge-seeding initiative carries one deliverable per seed.
+round: 2
+opened: 2026-09-14
+coordinator_rules:
+  - One seed per bundle, so no two sessions edit the same index, log or DIGEST.
+  - A seed never merges, never signs, never sets a status other than draft.
+  - The coordinator lints each PR with the knowledge linter, sends fixes back
+    to the seed session, merges on the maintainer's standing instruction, then
+    signs, promotes the non-high concepts, registers the eval cases in the
+    evals manifests and records the evidence on the roadmap deliverable.
+  - High-severity gotchas keep draft with one review until a second human review.
+seeds:
+  - id: seed-mur-sst-gotchas
+    title: MUR SST gotchas for the podaac bundle
+    repo: nasa-daac-knowledge
+    bundle: knowledge/podaac
+    branch: claude/seed-mur-sst
+    issue: 133
+    spheres: [ocean]
+    scope: >-
+      Four to five gotchas on the existing dataset concept
+      knowledge/podaac/datasets/ghrsst-mur.md (read it first; do not write a
+      new dataset concept and do not edit it beyond adding nothing): foundation
+      temperature versus skin temperature (the analysis is a foundation SST and
+      a diurnal skin comparison against it is wrong); the 0.01 degree grid is
+      interpolation and the feature resolution is coarser and varies with the
+      inputs, so a front's width read from the grid is not a measurement;
+      behaviour at the sea ice edge (the ice mask, the sea_ice_fraction field
+      and the fill temperature under ice); analysis_error is the analysis's
+      own error estimate and not a validation against buoys, so it is not the
+      accuracy of a value; near-real-time versus final files differ in inputs
+      and can differ in value for the same day.
+    datasets: []
+    gotchas:
+      - {slug: mur-foundation-not-skin-sst, severity: medium}
+      - {slug: mur-grid-is-not-feature-resolution, severity: high}
+      - {slug: mur-sea-ice-edge-and-fill, severity: medium}
+      - {slug: mur-analysis-error-is-not-validation, severity: medium}
+      - {slug: mur-nrt-versus-final, severity: low}
+    eval:
+      repo: agent-evals
+      subtree: mur/cases
+      branch: claude/seed-mur-sst
+    sources:
+      - domain: podaac.jpl.nasa.gov
+        read: "the MUR-JPL-L4-GLOB-v4.1 collection page, the user guide and the sea ice handling it documents"
+      - domain: doi.org and api.crossref.org
+        read: "the product DOI 10.5067/GHGMR-4FJ04 and Chin, Vazquez-Cuervo and Armstrong 2017 (doi 10.1016/j.rse.2017.07.029) on the registry record; the Elsevier page sits behind a bot check, cite the record"
+    models:
+      - knowledge/podaac/gotchas/grace-intermission-gap.md
+      - knowledge/podaac/gotchas/smap-sss-coastal-and-sea-ice-contamination.md
+    do_not_repeat:
+      - The dataset concept ghrsst-mur.md exists; link it by relative path.
+  - id: seed-nsidc-sea-ice
+    title: Sea ice concentration and the Sea Ice Index for the nsidc bundle
+    repo: nasa-daac-knowledge
+    bundle: knowledge/nsidc
+    branch: claude/seed-nsidc-sea-ice
+    issue: 134
+    spheres: [cryosphere]
+    scope: >-
+      Two dataset concepts and four to five gotchas. Datasets: NSIDC-0051
+      version 2, the NASA Team sea ice concentration from SMMR, SSM/I and
+      SSMIS (nsidc.org/data/nsidc-0051), and G02135, the Sea Ice Index
+      (nsidc.org/data/g02135), which is a NOAA at NSIDC product distributed
+      beside the DAAC's and the concept must say which archive holds it.
+      Gotchas: the pole hole differs by sensor and each product treats it
+      differently, so an Arctic total that ignores it steps at the sensor
+      changes; the 15 percent threshold defines extent, and extent is not
+      area, so the two series answer different questions; near-real-time
+      files (NSIDC-0081) and the final NSIDC-0051 differ in input and
+      calibration and a series that mixes them steps at the join; NASA Team
+      and Bootstrap concentrations differ systematically in the marginal ice
+      zone and in summer melt; sensor transitions (SMMR to SSM/I, F8 to F11
+      to F13 to F17) leave steps that the intercalibration reduces and does
+      not remove.
+    datasets:
+      - {slug: nsidc-0051-sea-ice-concentration}
+      - {slug: sea-ice-index-g02135}
+    gotchas:
+      - {slug: sea-ice-pole-hole-by-sensor, severity: high}
+      - {slug: sea-ice-extent-is-not-area, severity: medium}
+      - {slug: sea-ice-nrt-versus-final, severity: medium}
+      - {slug: sea-ice-nasa-team-versus-bootstrap, severity: medium}
+      - {slug: sea-ice-sensor-transitions, severity: medium}
+    eval:
+      repo: agent-evals
+      subtree: nsidc/cases
+      branch: claude/seed-nsidc-sea-ice
+    sources:
+      - domain: nsidc.org
+        read: "the product pages and user guides for NSIDC-0051 v2, NSIDC-0081, NSIDC-0079 and G02135, and the Sea Ice Index documentation"
+      - domain: noaadata.apps.nsidc.org
+        read: "the G02135 file listing to confirm file names and the monthly and daily layouts"
+      - domain: doi.org and api.crossref.org
+        read: "the product DOIs and Cavalieri and others 1999 (doi 10.1029/1999JC900081) and Comiso and others 1997 on the registry records; AGU and Wiley pages sit behind a bot check, cite the records"
+    models:
+      - knowledge/nsidc/datasets/icesat2-atl15.md
+      - knowledge/nsidc/gotchas/atl15-height-change-is-not-mass-change.md
+      - knowledge/nsidc/gotchas/polar-stereographic-not-latlon.md
+    do_not_repeat:
+      - The polar stereographic gotcha exists in this bundle; a sea ice concept links it rather than restating it.
+  - id: seed-esdis-requirements-2
+    title: Requirements round two for the esdis bundle
+    repo: nasa-daac-knowledge
+    bundle: knowledge/esdis
+    branch: claude/seed-esdis-requirements-2
+    issue: 135
+    spheres: []
+    scope: >-
+      Four to six requirement concepts in knowledge/esdis/requirements/, in
+      exactly the shape and frontmatter of the eight existing ones (read all
+      eight first): granule temporal and spatial extents present and inside
+      the collection's extents (class MUST where UMM-G requires the field,
+      SHOULD for the containment check); cloud (S3) related URLs present and
+      typed GET DATA VIA DIRECT ACCESS for cloud-hosted collections; science
+      keywords resolve in GCMD KMS (the existing concept covers platform and
+      instrument keywords; this one covers the science keyword hierarchy);
+      collection version and DOI agree across versions (a new version carries
+      its own DOI or the DOI's landing page states the version); processing
+      level and data format stated on the collection. Each concept names the
+      UMM-C or UMM-G field, where the rule is written, how the sweeper checks
+      it, and whether it is a mandate or a reviewed practice.
+    datasets: []
+    requirements:
+      - {slug: granule-extents-within-collection, class: SHOULD}
+      - {slug: cloud-direct-access-urls, class: SHOULD}
+      - {slug: science-keywords-valid, class: SHOULD}
+      - {slug: version-and-doi-agree, class: SHOULD}
+      - {slug: processing-level-and-format-stated, class: MUST}
+    gotchas: []
+    eval: null
+    sources:
+      - domain: wiki.earthdata.nasa.gov
+        read: "the UMM-C and UMM-G documentation and the metadata requirement pages"
+      - domain: cmr.earthdata.nasa.gov
+        read: "the UMM JSON schemas and the CMR documentation for the fields named"
+    models:
+      - knowledge/esdis/requirements/temporal-extent.md
+      - knowledge/esdis/requirements/gcmd-keywords-valid.md
+    do_not_repeat:
+      - The eight existing requirement concepts; link them where a new one refines one.
+  - id: seed-gesdisc-merra2
+    title: MERRA-2 for the new gesdisc bundle
+    repo: nasa-daac-knowledge
+    bundle: knowledge/gesdisc
+    branch: claude/seed-gesdisc-merra2
+    issue: 136
+    spheres: [atmosphere, hydrosphere]
+    scope: >-
+      The first concepts of the scaffolded, empty knowledge/gesdisc/ bundle
+      (its index, log and DIGEST exist; fill the sections, add a log entry,
+      re-render the digest). One dataset concept for MERRA-2 (the reanalysis
+      as a whole, naming the collections a user meets: M2T1NXSLV, M2T1NXFLX,
+      M2TMNXSLV and their monthly and instantaneous siblings, with CMR concept
+      ids) and four to five gotchas: PRECTOTCORR is the bias-corrected
+      precipitation and PRECTOT the model's, and a water budget that mixes
+      them is inconsistent; the hourly time-averaged collections stamp the
+      centre of the hour and the instantaneous ones the hour, so a join
+      without the offset misaligns by half an hour; the assimilation stream
+      boundaries (the four production streams) and the documented
+      discontinuities from observing system changes; the 0.5 by 0.625 degree
+      grid has cells whose area varies with latitude and a global mean needs
+      weights; the collection short names encode frequency, dimension and
+      group, and a search by variable name alone finds the wrong collection.
+    datasets:
+      - {slug: merra-2}
+    gotchas:
+      - {slug: merra2-prectotcorr-versus-prectot, severity: high}
+      - {slug: merra2-time-stamp-conventions, severity: medium}
+      - {slug: merra2-stream-boundaries-and-discontinuities, severity: medium}
+      - {slug: merra2-grid-weights, severity: low}
+      - {slug: merra2-collection-short-names, severity: medium}
+    eval:
+      repo: agent-evals
+      subtree: merra2/cases
+      branch: claude/seed-gesdisc-merra2
+    sources:
+      - domain: disc.gsfc.nasa.gov
+        read: "the MERRA-2 collection pages, the file specification document and the README documents"
+      - domain: gmao.gsfc.nasa.gov
+        read: "the MERRA-2 documentation and the relevant technical memoranda (the file specification, the streams and the precipitation correction)"
+      - domain: cmr.earthdata.nasa.gov
+        read: "the collection concept ids for the collections named"
+      - domain: doi.org and api.crossref.org
+        read: "Gelaro and others 2017 (doi 10.1175/JCLI-D-16-0758.1) and Reichle and others 2017 on the precipitation correction, on the registry records"
+    models:
+      - knowledge/podaac/datasets/grace-fo-mascons.md
+      - knowledge/podaac/gotchas/grace-intermission-gap.md
+      - knowledge/podaac/gotchas/grace-low-degree-replacements.md
+    do_not_repeat:
+      - The hydrology plugin's imerg-v07 and nldas2-forcing dataset concepts (hydrology/knowledge/datasets); name them where a concept depends on them.
+  - id: seed-asdc-ceres-ebaf
+    title: CERES EBAF Ed4.2 for the new asdc bundle
+    repo: nasa-daac-knowledge
+    bundle: knowledge/asdc
+    branch: claude/seed-asdc-ceres-ebaf
+    issue: 137
+    spheres: [atmosphere]
+    scope: >-
+      The first concepts of the scaffolded, empty knowledge/asdc/ bundle
+      (fill the sections, add a log entry, re-render the digest). One dataset
+      concept for CERES EBAF Edition 4.2 (TOA and surface, the monthly one
+      degree grids, the climatology, the CMR concept id) and four to five
+      gotchas: the net TOA flux is anchored so that its global mean matches
+      an in situ ocean heating estimate over a stated period, so the EBAF
+      imbalance is not an independent check of ocean heat content; the
+      clear-sky definitions (total-region clear-sky versus the cloud-free
+      composite) and the edition that changed them, so a cloud radiative
+      effect names its definition; the surface fluxes are computed with a
+      radiative transfer model and assimilated inputs, so their uncertainty
+      is larger and differently shaped than TOA; EBAF versus SYN1deg versus
+      SSF answer different questions and a diurnal or regional study that
+      uses EBAF misses what SYN1deg carries; the climatology period and the
+      edition change the anomaly baseline.
+    datasets:
+      - {slug: ceres-ebaf-ed4-2}
+    gotchas:
+      - {slug: ebaf-imbalance-anchored-to-ocean-heating, severity: high}
+      - {slug: ebaf-clear-sky-definitions, severity: medium}
+      - {slug: ebaf-surface-fluxes-are-modelled, severity: medium}
+      - {slug: ebaf-versus-syn1deg-versus-ssf, severity: medium}
+      - {slug: ebaf-climatology-baseline, severity: low}
+    eval:
+      repo: agent-evals
+      subtree: ceres/cases
+      branch: claude/seed-asdc-ceres-ebaf
+    sources:
+      - domain: ceres.larc.nasa.gov
+        read: "the EBAF product page, the data quality summary for Ed4.2 and the documentation it links"
+      - domain: asdc.larc.nasa.gov
+        read: "the collection pages and the DOI landing pages"
+      - domain: cmr.earthdata.nasa.gov
+        read: "the collection concept ids"
+      - domain: doi.org and api.crossref.org
+        read: "Loeb and others 2018 (doi 10.1175/JCLI-D-17-0208.1) and Kato and others 2018 (doi 10.1175/JCLI-D-17-0523.1) on the registry records"
+    models:
+      - knowledge/podaac/datasets/grace-fo-mascons.md
+      - knowledge/podaac/gotchas/grace-intermission-gap.md
+    do_not_repeat:
+      - The podaac bundle's ECCO ocean heat content recipe; name it where the anchoring gotcha depends on it.
+  - id: seed-obdaac-chlorophyll
+    title: Level 3 chlorophyll-a for the new obdaac bundle
+    repo: nasa-daac-knowledge
+    bundle: knowledge/obdaac
+    branch: claude/seed-obdaac-chlorophyll
+    issue: 138
+    spheres: [biosphere, ocean]
+    scope: >-
+      The first concepts of the scaffolded, empty knowledge/obdaac/ bundle
+      (fill the sections, add a log entry, re-render the digest). Two dataset
+      concepts for the level 3 mapped chlorophyll-a grids, MODIS-Aqua and
+      PACE OCI (the 4 km and 9 km grids, daily to monthly and climatological
+      composites, the reprocessing tag, the CMR concept ids), and four to
+      five gotchas: the chlorophyll algorithm is a blend of the band-ratio
+      OCx and the color index CI with a stated switch range, so values near
+      the switch and in turbid water are algorithm artefacts; monthly
+      composites have no data at high latitudes in winter and few in cloudy
+      seasons, so a monthly mean is a mean of the sampled days; a
+      reprocessing changes the whole record and a series must come from one
+      reprocessing; chlorophyll concentration is neither biomass nor primary
+      production; MODIS-Aqua's orbit drift late in the mission changes the
+      overpass time and the coverage.
+    datasets:
+      - {slug: modis-aqua-l3-chlorophyll}
+      - {slug: pace-oci-l3-chlorophyll}
+    gotchas:
+      - {slug: chlor-a-blended-ocx-and-ci, severity: high}
+      - {slug: chlor-a-composite-sampling-gaps, severity: medium}
+      - {slug: chlor-a-one-reprocessing-per-series, severity: medium}
+      - {slug: chlor-a-is-not-biomass, severity: medium}
+      - {slug: aqua-orbit-drift, severity: low}
+    eval:
+      repo: agent-evals
+      subtree: oceancolor/cases
+      branch: claude/seed-obdaac-chlorophyll
+    sources:
+      - domain: oceancolor.gsfc.nasa.gov
+        read: "the product pages, the chlorophyll algorithm description, the level 3 documentation and the reprocessing notes"
+      - domain: cmr.earthdata.nasa.gov
+        read: "the collection concept ids"
+      - domain: doi.org and api.crossref.org
+        read: "Hu, Lee and Franz 2012 (doi 10.1029/2011JC007395) and the PACE mission references on the registry records; AGU pages sit behind a bot check, cite the records"
+    models:
+      - knowledge/podaac/datasets/ghrsst-mur.md
+      - knowledge/podaac/gotchas/smap-sss-coastal-and-sea-ice-contamination.md
+    do_not_repeat: []
+  - id: seed-lpdaac-hls
+    title: HLS v2.0 for the new lpdaac bundle
+    repo: nasa-daac-knowledge
+    bundle: knowledge/lpdaac
+    branch: claude/seed-lpdaac-hls
+    issue: 139
+    spheres: [land]
+    scope: >-
+      The first concepts of the scaffolded, empty knowledge/lpdaac/ bundle
+      (fill the sections, add a log entry, re-render the digest). Two dataset
+      concepts for HLS version 2.0, HLSL30 and HLSS30 (the 30 m MGRS tiles,
+      the bands, the Fmask layer, the CMR concept ids), and four to five
+      gotchas: band names and band sets differ between L30 and S30 and a
+      script keyed on one fails or silently substitutes on the other; the
+      Fmask layer is bit-packed and the cloud, shadow, snow, water and
+      aerosol bits are read by masking, not by value; the BRDF nadir
+      adjustment and the S30 bandpass adjustment mean the two products are
+      harmonized and not identical to the source missions' surface
+      reflectance; MGRS tiles overlap and a mosaic that ignores it double
+      counts; the reflectance scale factor and the fill value.
+    datasets:
+      - {slug: hls-l30}
+      - {slug: hls-s30}
+    gotchas:
+      - {slug: hls-fmask-is-bit-packed, severity: high}
+      - {slug: hls-band-names-differ, severity: medium}
+      - {slug: hls-harmonized-not-native, severity: medium}
+      - {slug: hls-mgrs-tile-overlap, severity: medium}
+      - {slug: hls-scale-and-fill, severity: low}
+    eval:
+      repo: agent-evals
+      subtree: hls/cases
+      branch: claude/seed-lpdaac-hls
+    sources:
+      - domain: lpdaac.usgs.gov
+        read: "the HLSL30 and HLSS30 product pages and the HLS user guide"
+      - domain: hls.gsfc.nasa.gov
+        read: "the project's product description and the algorithm documentation"
+      - domain: cmr.earthdata.nasa.gov
+        read: "the collection concept ids"
+      - domain: doi.org and api.crossref.org
+        read: "Claverie and others 2018 (doi 10.1016/j.rse.2018.09.002) on the registry record; the Elsevier page sits behind a bot check"
+    models:
+      - knowledge/podaac/datasets/opera-dswx-hls.md
+      - knowledge/podaac/gotchas/dswx-class-mismatch.md
+    do_not_repeat:
+      - The podaac bundle's OPERA DSWx-HLS concept; name it, do not restate it.
+  - id: seed-ornldaac-daymet
+    title: Daymet V4 for the new ornldaac bundle
+    repo: nasa-daac-knowledge
+    bundle: knowledge/ornldaac
+    branch: claude/seed-ornldaac-daymet
+    issue: 140
+    spheres: [atmosphere, land]
+    scope: >-
+      The first concepts of the scaffolded, empty knowledge/ornldaac/ bundle
+      (fill the sections, add a log entry, re-render the digest). One dataset
+      concept for Daymet version 4 (daily surface weather on a 1 km grid for
+      North America, Hawaii and Puerto Rico; the variables; the tiles, the
+      mosaics and the region files; the CMR concept ids) and four to five
+      gotchas: every Daymet year has 365 days and December 31 is dropped in
+      leap years, so a join on calendar dates misaligns after February in a
+      leap year; the grid is a Lambert conformal conic projection and a
+      cell's area is not one square kilometre everywhere; tiles and mosaics
+      hold the same values in different files and the region files differ
+      in extent; the V4 R1 correction changed stated variables for stated
+      years; the values are interpolated from stations and station-sparse
+      terrain carries larger error, which the cross-validation statistics
+      quantify.
+    datasets:
+      - {slug: daymet-v4}
+    gotchas:
+      - {slug: daymet-365-day-year, severity: high}
+      - {slug: daymet-lcc-projection-and-cell-area, severity: medium}
+      - {slug: daymet-tiles-mosaics-regions, severity: medium}
+      - {slug: daymet-v4-r1-correction, severity: medium}
+      - {slug: daymet-station-sparse-error, severity: low}
+    eval:
+      repo: agent-evals
+      subtree: daymet/cases
+      branch: claude/seed-ornldaac-daymet
+    sources:
+      - domain: daac.ornl.gov
+        read: "the Daymet V4 dataset pages, the user guide and the V4 R1 release notes"
+      - domain: daymet.ornl.gov
+        read: "the project documentation and the data access notes"
+      - domain: cmr.earthdata.nasa.gov
+        read: "the collection concept ids"
+      - domain: doi.org and api.crossref.org
+        read: "Thornton and others 2021 (doi 10.1038/s41597-021-00973-0) on the registry record and at nature.com"
+    models:
+      - knowledge/podaac/datasets/grace-fo-mascons.md
+      - knowledge/podaac/gotchas/grace-intermission-gap.md
+    do_not_repeat: []
+  - id: seed-hydrology-snow-cover
+    title: MODIS and VIIRS snow cover knowledge
+    repo: hydrology
+    bundle: knowledge
+    branch: claude/seed-snow-cover
+    issue: 60
+    spheres: [hydrosphere, cryosphere]
+    scope: >-
+      One dataset concept in knowledge/datasets/ for the daily snow cover
+      products MOD10A1 version 61 and VNP10A1 version 2 (NSIDC DAAC), in the
+      shape of knowledge/datasets/smap-l3.md, and four to five gotchas in
+      knowledge/gotchas/: NDSI snow cover is a normalized index thresholded
+      into snow and not a fractional cover, and the fractional products are
+      separate; cloud persistence hides snow and the cloud-gap-filled
+      variants (MOD10A1F) carry an age field that a user reads; snow and
+      cloud are confused in the flags and the algorithm quality layer names
+      the cases; the observation is at the local solar time of the overpass
+      and daily composites choose one observation by stated rules; the
+      SNODAS concept in this bundle is modelled snow water equivalent and a
+      different quantity from observed snow cover.
+    datasets:
+      - {slug: modis-viirs-snow-cover}
+    gotchas:
+      - {slug: snow-cover-ndsi-is-not-fraction, severity: high}
+      - {slug: snow-cover-cloud-persistence-and-gap-filling, severity: medium}
+      - {slug: snow-cover-snow-cloud-confusion, severity: medium}
+      - {slug: snow-cover-overpass-time-and-compositing, severity: medium}
+      - {slug: snow-cover-is-not-swe, severity: low}
+    eval:
+      repo: hydrology
+      subtree: knowledge/evals
+      branch: claude/seed-snow-cover
+    sources:
+      - domain: nsidc.org
+        read: "the MOD10A1 v61, MOD10A1F and VNP10A1 v2 product pages and user guides"
+      - domain: cmr.earthdata.nasa.gov
+        read: "the collection concept ids"
+      - domain: doi.org and api.crossref.org
+        read: "the product DOIs and Hall and Riggs on the algorithm, on the registry records"
+    models:
+      - knowledge/datasets/smap-l3.md
+      - knowledge/gotchas/smap-radar-loss.md
+      - knowledge/gotchas/imerg-run-mixing.md
+      - knowledge/evals/grace-basin-below-resolution-floor.yaml
+    do_not_repeat:
+      - The SNODAS connector and gotcha (knowledge/connectors/snodas-nsidc.md, knowledge/gotchas/snodas-not-a-budget-term.md); link them.
+  - id: seed-ocean-tide-gauge-datums
+    title: Tide gauge datums and vertical land motion gotchas
+    repo: ocean-science
+    bundle: knowledge
+    branch: claude/seed-tide-gauge-datums
+    issue: 50
+    spheres: [ocean]
+    scope: >-
+      Four to five gotchas in knowledge/gotchas/ on the existing connector
+      concepts knowledge/connectors/coops-tides.md and
+      knowledge/connectors/psmsl-gauges.md (read both first; no new dataset
+      concept): PSMSL RLR records are reduced to a station datum and metric
+      records are not, so a trend from a metric record can be a datum
+      history; the CO-OPS datum choice (MLLW, NAVD88, the station datum) and
+      the 1983 to 2001 National Tidal Datum Epoch, so two stations' heights
+      compare only on one datum; vertical land motion is in a tide gauge
+      record and relative sea level is not sea level, so a gauge trend
+      compared with altimetry needs the land motion stated; GIA at a gauge
+      is a modelled correction that names its model; a gauge trend needs
+      the record length and the gaps stated, and a short record's trend is
+      dominated by variability.
+    datasets: []
+    gotchas:
+      - {slug: psmsl-rlr-versus-metric, severity: high}
+      - {slug: coops-datum-and-epoch, severity: medium}
+      - {slug: tide-gauge-relative-sea-level-and-land-motion, severity: high}
+      - {slug: tide-gauge-gia-is-modelled, severity: medium}
+      - {slug: tide-gauge-record-length-and-gaps, severity: medium}
+    eval:
+      repo: agent-evals
+      subtree: ecco/cases
+      branch: claude/seed-tide-gauge-datums
+    sources:
+      - domain: psmsl.org
+        read: "the RLR documentation, the metric data notes and a station page with its RLR diagram"
+      - domain: tidesandcurrents.noaa.gov and api.tidesandcurrents.noaa.gov
+        read: "the datum documentation, the National Tidal Datum Epoch page and the API documentation for the datum parameter"
+      - domain: doi.org and api.crossref.org
+        read: "Holgate and others 2013 (doi 10.2112/JCOASTRES-D-12-00175.1) and Peltier 2004 on the registry records"
+    models:
+      - knowledge/gotchas/rg-sampled-depth-floor.md
+      - knowledge/gotchas/rg-coverage-excludes-high-latitudes-and-marginal-seas.md
+    do_not_repeat:
+      - The connector concepts; link them by relative path.
