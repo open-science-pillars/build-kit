@@ -23,7 +23,7 @@ seeds:
     scope: >-
       Four to five gotchas on the existing dataset concept
       knowledge/podaac/datasets/ghrsst-mur.md (read it first; do not write a
-      new dataset concept and do not edit it beyond adding nothing): foundation
+      new dataset concept and do not edit the existing one): foundation
       temperature versus skin temperature (the analysis is a foundation SST and
       a diurnal skin comparison against it is wrong); the 0.01 degree grid is
       interpolation and the feature resolution is coarser and varies with the
