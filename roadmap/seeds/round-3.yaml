@@ -458,6 +458,9 @@ seeds:
         read: "the EBAF Ed4.2 product and data quality summary already cited by the bundle; the EBAF-TOA files themselves"
       - domain: doi.org and api.crossref.org
         read: "Loeb and others 2021 on the Earth energy imbalance and von Schuckmann and others 2023 on the heat inventory, on the registry records"
+    context:
+      - "ocean-science main carries the Argo ocean heat content computation from PR #56 (concept knowledge/computations/argo-ohc.md, stable): executor knowledge/references/computations/argo_ohc.py (--fixture --seed N | --data-root DIR, --window YYYY-MM:YYYY-MM, --depth 700|2000, --runtime NAME, --receipt PATH; exit 3 outside coverage), attester knowledge/references/attesters/argo_ohc_check.py (--selftest; --data-root DIR verifies the receipt against the tree), loaders ohc_rg_loader.py and ohc_data_root.py, and the committed root knowledge/references/retrieval/argo-ohc-root/ (ohc-700.csv, ohc-2000.csv, stamps, SOURCES.json, RECORD.json). Clone ocean-science beside this repository and produce the receipt this computation reads with `uv run knowledge/references/computations/argo_ohc.py --data-root knowledge/references/retrieval/argo-ohc-root --window 2006-01:2020-12 --depth 2000 --runtime <name> --receipt PATH` (no network); its record run gives a 0 to 2000 dbar trend of +9.67 ZJ/yr [8.45, 10.88] (0.60 W/m2 of Earth surface), a fitted change of +135.3 ZJ and an endpoint change of +110.1 ZJ with a 24.1 ZJ bar over that window, the deep ocean below 2000 dbar stated as an omission with the published rate; the receipt's run_id is bound to the runtime name."
+      - "Read the receipt's terms (value, units, uncertainty, stamp), bookkeeping and deep_omission fields rather than restating the ocean numbers; the energy budget's ocean side is that receipt plus the published deep and non-ocean terms with sources."
     do_not_repeat:
       - The CERES EBAF dataset concept and its five gotchas; link them.
     boundary: "Edit only under knowledge/asdc/ and tools/reference_runs.yaml. Do not edit tools/run_checks.sh; the coordinator adds the chain."
@@ -504,6 +507,11 @@ seeds:
         read: "the ATL15, BedMachine, ITS_LIVE and mascon products already cited by the bundles; the files themselves"
       - domain: doi.org and api.crossref.org
         read: "Otosaka and others 2023 (the IMBIE 2023 intercomparison) and Smith and others 2020, on the registry records"
+    context:
+      - "nasa-daac-knowledge main carries the firn and surface mass balance data root from PR #165 at knowledge/nsidc/references/retrieval/ice-sheet-balance-root/ (firn.csv with columns ice_sheet, domain, month, value_m, uncertainty_m, volume_km3, area_km2, n_cells, sampling; smb.csv; firn-stamp.json, smb-stamp.json, SOURCES.json, RECORD.json) built by knowledge/nsidc/references/loaders/isb_firn_gemb.py, isb_smb_gemb.py and isb_data_root.py; tools/run_checks.sh already runs the two loader selftests and `isb_data_root.py --root <root> --check`, and the coordinator extends those lines for the loaders you add."
+      - "The root holds Greenland firn air content anomalies (grounded ice sheet, mask 1, and peripheral glaciers, mask 2; monthly 1992-01 to 2023-12 against 2014-01-01, from the ITS_LIVE GEMB v1.1 product) and Antarctic ice-shelf firn (quarterly 1992-03 to 2017-09) and ice-shelf surface mass balance (Gt/yr); it holds no Greenland surface mass balance and no grounded-Antarctic term because the ITS_LIVE distribution carries none, and RACMO2 and MAR are named as alternates not read. The input-output method is therefore not possible for either sheet from this root alone: state it as an omission with the published discharge and surface mass balance named for the reader, or add a loader for a grounded surface mass balance source you can read on the listed domains."
+      - "The Greenland firn per-row uncertainty is the spread between GEMB and GSFC-FDM and crosses zero (29 ice-sheet rows below 0.005 m); floor it (the series median, 0.109 m, or the stamp's noise floor) in the computation and say so in the receipt. The firn and smb loaders' aggregation stamp strings say the fixed cell set is finite in the error field too while the code requires only the value and the mean; align the string with the code when you regenerate the stamps, and normalise the Greenland DOI in RECORD.json to the bare DOI."
+      - "PR #162 landed the BedMachine and ATL10 concepts (knowledge/nsidc/datasets/bedmachine-greenland-antarctica.md, icesat2-atl10-freeboard.md and four gotchas, the thickness and freeboard ones high severity): a discharge gate sits on grounded ice (mask 2) upstream of the grounding line, thickness is interpolated between flight lines with errbed saying where, and the Antarctic guide's mass-conservation threshold is 30 m/yr. Link these; do not restate them."
     do_not_repeat:
       - The ATL15, velocity, BedMachine, ATL10 and mascon concepts; link them.
     boundary: "Edit only under knowledge/nsidc/ and tools/reference_runs.yaml. Do not edit tools/run_checks.sh; the coordinator adds the chain."
@@ -547,6 +555,9 @@ seeds:
         read: "the retrospective's documentation and layout"
       - domain: doi.org and api.crossref.org
         read: "the specific yield reference used and the National Water Model retrospective reference, on the registry records"
+    context:
+      - "core main (PR #44) carries nwis_groundwater_levels on the observations server: it reads the Water Data API field-measurements collection (the API has no groundwater collection), parameter 72019 is depth to water below land surface in feet, the elevation codes 62610, 62611, 72150 and 72229 name their datums, every row carries vertical_datum, the observing procedure, approval and qualifiers, and a continuously recorded well is a daily series through usgs_daily; and nwm_retrospective_streamflow, which serves CONUS and Alaska (Hawaii and PR refused), takes a required window under a 14-chunk budget, and returns UTC daily means of the version 3.0 retrospective with the hours counted."
+      - "hydrology PR #67 (open or merged; read it first) carries the connector concepts knowledge/connectors/nwis-groundwater.md, hydrocron-lakes.md and nwm-retrospective.md with index and log lines; do not duplicate them. PR #66 landed knowledge/datasets/swot-lakes.md, the two lake gotchas and knowledge/recipes/precipitation-product-by-terrain.md, and added them to skills/swot-hydro and skills/load-precipitation."
     do_not_repeat:
       - The GRACE basin recipe and gotchas, the SWOT gauge confrontation recipe; link them.
     boundary: "Edit only under knowledge/, evals/, verification/basin_water_balance.py and verification/fixtures/water-balance/; do not edit the other verification scripts, .osp/, README.md or .github/."
@@ -587,6 +598,9 @@ seeds:
     models:
       - knowledge/gotchas/tide-gauge-relative-sea-level-and-land-motion.md
       - knowledge/connectors/psmsl-gauges.md
+    context:
+      - "core main (PR #44) carries gnss_vertical_velocity on the observations server: the Nevada Geodetic Laboratory MIDAS table for the IGS20 frame (IGS14 by name), a station's up velocity and uncertainty in mm/yr with its frame, epochs and steps, by station id or by the three nearest stations to a point with their distances, the table read once per process and matched locally. ocean-science PR #57 (open or merged; read it first) carries the connector concept knowledge/connectors/gnss-vertical-velocity.md with index and log lines; do not duplicate it."
+      - "ocean-science main also carries the Argo ocean heat content computation (knowledge/computations/argo-ohc.md) and the five tide gauge gotchas, three stable and two high-severity ones with one review; link them by path."
     do_not_repeat:
       - The five tide gauge gotchas and the two connectors; link them.
   - id: r3-lpdaac-vegetation
@@ -628,6 +642,8 @@ seeds:
     models:
       - knowledge/lpdaac/datasets/hls-l30.md
       - knowledge/lpdaac/gotchas/hls-fmask-is-bit-packed.md
+    context:
+      - "PR #164 landed knowledge/lpdaac/datasets/nasadem.md and mod11-land-surface-temperature.md (stable) with five gotchas; the MOD11 concept states the sinusoidal grid, the scale factors and the QC bit layout for that product, and the clear-sky gotcha explains the eight-day Clear_sky_days bit field. Link these where the vegetation products share the grid or the compositing rules; do not restate them."
     do_not_repeat:
       - The hydrology plugin's MOD16 concepts (knowledge/datasets/mod16a2gf.md); name them by bundle path.
   - id: r3-gesdisc-oco2-subsetter
@@ -672,5 +688,7 @@ seeds:
     models:
       - knowledge/gesdisc/datasets/merra-2.md
       - hydrology/knowledge/connectors/gesdisc-earthaccess.md
+    context:
+      - "PR #161 landed knowledge/gesdisc/datasets/airs-l3-temperature-humidity.md and omi-no2-and-ozone.md (stable) with five gotchas (the surface mask and the row anomaly high severity with one review); link them where the subsetter serves those collections; do not restate them."
     do_not_repeat:
       - The MERRA-2 and AIRS concepts; link them.

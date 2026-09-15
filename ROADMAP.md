@@ -16,13 +16,10 @@
 - `roadmap-harness-v1`: Build the federated roadmap harness (`build-kit`)
 - `landice-grace-knowledge`: GRACE-FO mass change knowledge for land ice, reviewed and offered for confirmation (`nasa-daac-knowledge`)
 - `r2-core-reference`: Qualify core as the reference capability on Claude Code, Cowork and Codex from one SKILL.md (`core`)
-- `argo-ohc-computation`: Ocean heat content from gridded Argo as an attested computation in ocean-science (`ocean-science`)
 - `basin-balance-groundwater`: Basin water balance with a groundwater term, and the National Water Model confrontation recipe (`hydrology`)
 - `energy-budget-closure`: Energy budget closure of CERES EBAF against ocean heat content as an attested computation (`nasa-daac-knowledge`)
 - `ice-sheet-balance-closure`: Ice sheet mass balance closure as an attested computation (`nasa-daac-knowledge`)
-- `ice-sheet-firn-root`: Firn air content and surface mass balance data root for the ice sheet closure (`nasa-daac-knowledge`)
 - `landice-nsidc-knowledge`: ICESat-2 height change and ice velocity knowledge in a new NSIDC bundle (`nasa-daac-knowledge`)
-- `observations-round-three`: Groundwater, lake, vertical land motion and National Water Model tools on the observations server (`core`)
 - `seed-argo-gridded-steric`: Roemmich and Gilson gridded Argo knowledge, seeded and reviewed (`ocean-science`)
 - `seed-asdc-ceres-ebaf`: CERES EBAF knowledge for the asdc bundle, seeded and reviewed (`nasa-daac-knowledge`)
 - `seed-esdis-requirements-2`: ESDIS requirements round two, seeded and reviewed (`nasa-daac-knowledge`)
@@ -79,10 +76,10 @@ Proposed, waiting on a dependency, in priority order.
 - P1 `r3-dependency-reference`: Validate dependency realization on ocean-science across runtimes (`ocean-science`)
 - P1 `tutorial-nonauthor-validation`: Complete non-author Tutorial 2 validation (`tutorials`)
 
-### Done (22)
+### Done (25)
 
 <details>
-<summary>22 done deliverables</summary>
+<summary>25 done deliverables</summary>
 
 - `hydro-usgs-waterdata-migration`: Migrate the USGS connector to the Water Data APIs and release it
 - `hydro-basin-unit`: Add basin delineation as the unit of analysis
@@ -106,6 +103,9 @@ Proposed, waiting on a dependency, in priority order.
 - `r7-release-qualification`: Advertise a runtime as supported only when the qualification harness passes
 - `r8-maintainer-run-qualification`: Qualify a release candidate through tickets the maintainers close, with waivers, and no secret in the automation
 - `sea-level-budget-closure`: Close the global sea level budget as an attested computation
+- `argo-ohc-computation`: Ocean heat content from gridded Argo as an attested computation in ocean-science
+- `observations-round-three`: Groundwater, lake, vertical land motion and National Water Model tools on the observations server
+- `ice-sheet-firn-root`: Firn air content and surface mass balance data root for the ice sheet closure
 
 </details>
 
@@ -801,37 +801,37 @@ Concepts for products the bundles lack are drafted in parallel sessions from sou
 
 - [ ] The CCMP and ASCAT wind dataset concepts as PO.DAAC holds them today and their gotchas (a wind analysis is not an observation at high severity with its eval case, neutral versus stress-equivalent winds, rain and ice flags, bulk flux inputs) merge on the maintainer's review and reach stable on it.
 - [ ] Every eval case is registered in the evals manifests.
-- Evidence: `Round three of seeding (build-kit roadmap/seeds/round-3.yaml), issue #151 in nasa-daac-knowledge, opened 2026-09-15`
+- Evidence: `Round three of seeding (build-kit roadmap/seeds/round-3.yaml), issue #151 in nasa-daac-knowledge, opened 2026-09-15`, `nasa-daac-knowledge PR #163 and agent-evals PR #26, seeded 2026-09-15 from the PO.DAAC collection pages and guides, CMR and Crossref; lint and fix round; merged 2026-09-15`, `nasa-daac-knowledge PR #169: the two datasets and the three medium gotchas stable and signed; wind-analysis-is-not-observation (high) carries a first review; case registered in evals PR #35`
 
 **`seed-nsidc-bedmachine-atl10`**
 
 - [ ] The BedMachine and ATL10 dataset concepts and their gotchas (interpolated thickness and freeboard is not thickness at high severity with their eval cases, the mask and grounding line, strong versus weak beams) merge on the maintainer's review and reach stable on it.
 - [ ] Every eval case is registered in the evals manifests.
-- Evidence: `Round three of seeding (build-kit roadmap/seeds/round-3.yaml), issue #152 in nasa-daac-knowledge, opened 2026-09-15`
+- Evidence: `Round three of seeding (build-kit roadmap/seeds/round-3.yaml), issue #152 in nasa-daac-knowledge, opened 2026-09-15`, `nasa-daac-knowledge PR #162 and agent-evals PR #24, seeded 2026-09-15 from the NSIDC product pages and guides, CMR and Crossref; lint and fix round; merged 2026-09-15`, `nasa-daac-knowledge PR #169: the two datasets and the two medium gotchas stable and signed; bedmachine-thickness-is-interpolated and atl10-freeboard-is-not-thickness (high) carry a first review; cases registered in evals PR #35`
 
 **`seed-gesdisc-airs-omi`**
 
 - [ ] The AIRS level 3 and OMI dataset concepts and their gotchas (pressure levels and the surface mask, the row anomaly at high severity with their eval cases, the ascending and descending nodes, the count field, the climatology period) merge on the maintainer's review and reach stable on it.
 - [ ] Every eval case is registered in the evals manifests.
-- Evidence: `Round three of seeding (build-kit roadmap/seeds/round-3.yaml), issue #153 in nasa-daac-knowledge, opened 2026-09-15`
+- Evidence: `Round three of seeding (build-kit roadmap/seeds/round-3.yaml), issue #153 in nasa-daac-knowledge, opened 2026-09-15`, `nasa-daac-knowledge PR #161 and agent-evals PR #23, seeded 2026-09-15 from GES DISC, the JPL AIRS guide and memoranda, CMR and Crossref; lint and fix round; merged 2026-09-15`, `nasa-daac-knowledge PR #166: the two datasets and the medium and low gotchas stable and signed by the maintainer; airs-pressure-levels-and-surface-mask and omi-row-anomaly (high) carry a first review; cases registered in evals PR #35`
 
 **`seed-lpdaac-nasadem-mod11`**
 
 - [ ] The NASADEM and MOD11 dataset concepts and their gotchas (orthometric versus ellipsoidal heights and the clear-sky view time at high severity with their eval cases, the void fill, day and night fields, classified emissivity) merge on the maintainer's review and reach stable on it.
 - [ ] Every eval case is registered in the evals manifests.
-- Evidence: `Round three of seeding (build-kit roadmap/seeds/round-3.yaml), issue #154 in nasa-daac-knowledge, opened 2026-09-15`
+- Evidence: `Round three of seeding (build-kit roadmap/seeds/round-3.yaml), issue #154 in nasa-daac-knowledge, opened 2026-09-15`, `nasa-daac-knowledge PR #164 and agent-evals PR #25, seeded 2026-09-15 from the LP DAAC product pages and guides, CMR and Crossref; lint and fix round; merged 2026-09-15`, `nasa-daac-knowledge PR #169: the two datasets and the medium and low gotchas stable and signed; nasadem-orthometric-versus-ellipsoidal and mod11-clear-sky-and-view-time (high) carry a first review; cases registered in evals PR #35`
 
 **`seed-ornldaac-gedi`**
 
 - [ ] The GEDI L4A and L4B dataset concepts and their gotchas (a footprint is not a pixel at high severity with its eval case, the standard error, the flags, biomass as a model output, the latitude limits) merge on the maintainer's review and reach stable on it.
 - [ ] Every eval case is registered in the evals manifests.
-- Evidence: `Round three of seeding (build-kit roadmap/seeds/round-3.yaml), issue #155 in nasa-daac-knowledge, opened 2026-09-15`
+- Evidence: `Round three of seeding (build-kit roadmap/seeds/round-3.yaml), issue #155 in nasa-daac-knowledge, opened 2026-09-15`, `nasa-daac-knowledge PR #168 and agent-evals PR #27, seeded 2026-09-15 from the ORNL DAAC product pages and guides, CMR and Crossref; lint found two blocking items, fix round in progress`
 
 **`seed-hydrology-precip-lakes`**
 
 - [ ] The precipitation-product-by-terrain recipe and the SWOT lake dataset concept with its gotchas (lake identity across passes at high severity with its eval case, the elevation datum) merge on the maintainer's review and reach stable on it.
 - [ ] Every eval case is registered in the evals manifests.
-- Evidence: `Round three of seeding (build-kit roadmap/seeds/round-3.yaml), issue #64 in hydrology, opened 2026-09-15`
+- Evidence: `Round three of seeding (build-kit roadmap/seeds/round-3.yaml), issue #64 in hydrology, opened 2026-09-15`, `hydrology PR #66, seeded 2026-09-15 from the PO.DAAC lake product pages and description, CMR and Crossref; lint and fix round; merged 2026-09-15`, `hydrology PR #68: the lake dataset, the datum gotcha and the recipe stable and signed; swot-lake-identity-across-passes (high) carries a first review; case registered in evals PR #36`
 
 **`seed-regional-sea-level`**
 
@@ -864,9 +864,9 @@ The ocean heat content, the Earth energy imbalance, the ice sheet mass balance a
 
 | Deliverable | Repository | Status | Priority | Contributor | Issue |
 |---|---|---|---|---|---|
-| `argo-ohc-computation`: Ocean heat content from gridded Argo as an attested computation in ocean-science | `ocean-science` | active | P2 | needs-context | [#54](https://github.com/open-science-pillars/ocean-science/issues/54) |
-| `observations-round-three`: Groundwater, lake, vertical land motion and National Water Model tools on the observations server | `core` | active | P2 | needs-context | [#43](https://github.com/open-science-pillars/core/issues/43) |
-| `ice-sheet-firn-root`: Firn air content and surface mass balance data root for the ice sheet closure | `nasa-daac-knowledge` | active | P2 | needs-context | [#156](https://github.com/open-science-pillars/nasa-daac-knowledge/issues/156) |
+| `argo-ohc-computation`: Ocean heat content from gridded Argo as an attested computation in ocean-science | `ocean-science` | done | P2 | needs-context | [#54](https://github.com/open-science-pillars/ocean-science/issues/54) |
+| `observations-round-three`: Groundwater, lake, vertical land motion and National Water Model tools on the observations server | `core` | done | P2 | needs-context | [#43](https://github.com/open-science-pillars/core/issues/43) |
+| `ice-sheet-firn-root`: Firn air content and surface mass balance data root for the ice sheet closure | `nasa-daac-knowledge` | done | P2 | needs-context | [#156](https://github.com/open-science-pillars/nasa-daac-knowledge/issues/156) |
 | `energy-budget-closure`: Energy budget closure of CERES EBAF against ocean heat content as an attested computation | `nasa-daac-knowledge` | active | P2 | needs-context | [#157](https://github.com/open-science-pillars/nasa-daac-knowledge/issues/157) |
 | `ice-sheet-balance-closure`: Ice sheet mass balance closure as an attested computation | `nasa-daac-knowledge` | active | P2 | needs-context | [#158](https://github.com/open-science-pillars/nasa-daac-knowledge/issues/158) |
 | `basin-balance-groundwater`: Basin water balance with a groundwater term, and the National Water Model confrontation recipe | `hydrology` | active | P2 | needs-context | [#65](https://github.com/open-science-pillars/hydrology/issues/65) |
@@ -877,18 +877,18 @@ The ocean heat content, the Earth energy imbalance, the ice sheet mass balance a
 
 - [ ] An executor computes 0 to 700 m and 0 to 2000 m ocean heat content change from the Roemmich and Gilson grids through TEOS-10 on a synthetic fixture and on a stamped data root, writes a receipt and refuses outside the product's coverage; an attester with a selftest verifies the receipt; a golden runs the chain on the committed root.
 - [ ] The computation concept, its recipe and its run skill merge on the coordinator's review and reach stable on the maintainer's; the real-data run is anchored to the published Argo-era trend with its source.
-- Evidence: `Round three of seeding (build-kit roadmap/seeds/round-3.yaml), issue #54 in ocean-science, opened 2026-09-15`
+- Evidence: `Round three of seeding (build-kit roadmap/seeds/round-3.yaml), issue #54 in ocean-science, opened 2026-09-15`, `ocean-science PR #56, built 2026-09-15 from the Roemmich and Gilson files through gsw, with fixture and data-root modes, a committed root and a golden; coordinator review and fix round (attester verifies the tree, run ids reproduce, endpoint bar inflated); merged 2026-09-15`, `ocean-science PR #58: the computation concept and the recipe stable and signed; the golden runs in CI from the goldens workflow; the record run over 2006 to 2020 lands 0.1 sigma from the published Argo-era 0 to 2000 dbar rate`
 
 **`observations-round-three`**
 
 - [ ] The nwis_groundwater_levels, hydrocron_lake_timeseries, gnss_vertical_velocity and nwm_retrospective_streamflow tools pass the offline test contract on recorded or hand-written fixtures, CONNECTORS.md discloses each, and the server version is bumped; the PR merges on green CI.
 - [ ] The connector concepts for the four tools merge in hydrology and ocean-science on the maintainer's review.
-- Evidence: `Round three of seeding (build-kit roadmap/seeds/round-3.yaml), issue #43 in core, opened 2026-09-15`
+- Evidence: `Round three of seeding (build-kit roadmap/seeds/round-3.yaml), issue #43 in core, opened 2026-09-15`, `core PR #44, built 2026-09-15 with live-recorded fixtures for all four tools, reviewed and fixed (NWM domains restricted to CONUS and Alaska, zstd errors structured); merged on green CI 2026-09-15; server 0.5.0`, `hydrology PR #67 and ocean-science PR #57: the four connector concepts, handed back as patches from the core seed, linted, fixed and merged 2026-09-15, then signed stable`
 
 **`ice-sheet-firn-root`**
 
 - [ ] Loaders with selftests write the per-ice-sheet monthly firn air content change and surface mass balance from the GEMB output distributed with ITS_LIVE into a stamped data root with RECORD.json and SOURCES.json, no raw product files committed; the PR merges on green CI and the check lines are wired at merge.
-- Evidence: `Round three of seeding (build-kit roadmap/seeds/round-3.yaml), issue #156 in nasa-daac-knowledge, opened 2026-09-15`
+- Evidence: `Round three of seeding (build-kit roadmap/seeds/round-3.yaml), issue #156 in nasa-daac-knowledge, opened 2026-09-15`, `nasa-daac-knowledge PR #165, built 2026-09-15 from the ITS_LIVE GEMB files on AWS (Greenland firn, Antarctic ice-shelf firn and surface mass balance; no Greenland surface mass balance or grounded-Antarctic term in the distribution); reviewed and merged on green CI; PR #167 wires the loader selftests and the root check into run_checks.sh`
 
 **`energy-budget-closure`**
 
