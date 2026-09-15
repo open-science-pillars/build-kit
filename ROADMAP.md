@@ -825,7 +825,7 @@ Concepts for products the bundles lack are drafted in parallel sessions from sou
 
 - [ ] The GEDI L4A and L4B dataset concepts and their gotchas (a footprint is not a pixel at high severity with its eval case, the standard error, the flags, biomass as a model output, the latitude limits) merge on the maintainer's review and reach stable on it.
 - [ ] Every eval case is registered in the evals manifests.
-- Evidence: `Round three of seeding (build-kit roadmap/seeds/round-3.yaml), issue #155 in nasa-daac-knowledge, opened 2026-09-15`, `nasa-daac-knowledge PR #168 and agent-evals PR #27, seeded 2026-09-15 from the ORNL DAAC product pages and guides, CMR and Crossref; lint found two blocking items, fix round in progress`
+- Evidence: `Round three of seeding (build-kit roadmap/seeds/round-3.yaml), issue #155 in nasa-daac-knowledge, opened 2026-09-15`, `nasa-daac-knowledge PR #168 and agent-evals PR #27, seeded 2026-09-15 from the ORNL DAAC product pages and guides, CMR and Crossref; lint found two blocking items, fix round in progress`, `nasa-daac-knowledge PR #168 merged 2026-09-15 after the fix round (the latitude margin, the L4A version behind L4B 2.1); the two datasets and the medium and low gotchas stable and signed by the maintainer; gedi-footprint-is-not-a-pixel (high) carries a first review; case registered in the evals manifest`
 
 **`seed-hydrology-precip-lakes`**
 
