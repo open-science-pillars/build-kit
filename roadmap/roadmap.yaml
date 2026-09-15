@@ -1616,7 +1616,7 @@ initiatives:
       - id: seed-regional-sea-level
         title: Regional sea level recipe with GIA and land motion for ocean-science, seeded and reviewed
         repo: ocean-science
-        status: active
+        status: done
         priority: P2
         depends_on: [observations-round-three]
         gate: ""
@@ -1625,6 +1625,8 @@ initiatives:
         - Every eval case is registered in the evals manifests.
         evidence:
           - "Round three of seeding (build-kit roadmap/seeds/round-3.yaml), issue #55 in ocean-science, opened 2026-09-15"
+          - "ocean-science PR #60, seeded 2026-09-15: the regional sea level trend recipe and the coastal heights (high) and velocity reference frame (medium) gotchas; coordinator lint and fix round (the trend stated as the sanctioned method re-implemented, not an attested run; the GIA sea surface rate derived; the Brest solutions cited not restated); merged 2026-09-15. The GNSS connector concept had landed in PR #57"
+          - "ocean-science signing PR: the recipe and the velocity frame gotcha stable and signed; the high coastal heights gotcha draft with one review. Eval case coastal-heights-ellipsoidal-versus-orthometric merged in agent-evals #28 and registered in the evals ocean-science manifest"
         contributor:
           readiness: needs-context
           champion: PaulMRamirez

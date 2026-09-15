@@ -41,7 +41,6 @@
 - `seed-ornldaac-gedi`: GEDI biomass knowledge for the ornldaac bundle, seeded and reviewed (`nasa-daac-knowledge`)
 - `seed-oscar-smap-sss`: OSCAR currents and SMAP salinity knowledge, seeded and reviewed (`nasa-daac-knowledge`)
 - `seed-podaac-air-sea-forcing`: Air-sea forcing knowledge for the podaac bundle, seeded and reviewed (`nasa-daac-knowledge`)
-- `seed-regional-sea-level`: Regional sea level recipe with GIA and land motion for ocean-science, seeded and reviewed (`ocean-science`)
 
 ### Blocked
 
@@ -76,10 +75,10 @@ Proposed, waiting on a dependency, in priority order.
 - P1 `r3-dependency-reference`: Validate dependency realization on ocean-science across runtimes (`ocean-science`)
 - P1 `tutorial-nonauthor-validation`: Complete non-author Tutorial 2 validation (`tutorials`)
 
-### Done (25)
+### Done (26)
 
 <details>
-<summary>25 done deliverables</summary>
+<summary>26 done deliverables</summary>
 
 - `hydro-usgs-waterdata-migration`: Migrate the USGS connector to the Water Data APIs and release it
 - `hydro-basin-unit`: Add basin delineation as the unit of analysis
@@ -103,6 +102,7 @@ Proposed, waiting on a dependency, in priority order.
 - `r7-release-qualification`: Advertise a runtime as supported only when the qualification harness passes
 - `r8-maintainer-run-qualification`: Qualify a release candidate through tickets the maintainers close, with waivers, and no secret in the automation
 - `sea-level-budget-closure`: Close the global sea level budget as an attested computation
+- `seed-regional-sea-level`: Regional sea level recipe with GIA and land motion for ocean-science, seeded and reviewed
 - `argo-ohc-computation`: Ocean heat content from gridded Argo as an attested computation in ocean-science
 - `observations-round-three`: Groundwater, lake, vertical land motion and National Water Model tools on the observations server
 - `ice-sheet-firn-root`: Firn air content and surface mass balance data root for the ice sheet closure
@@ -713,7 +713,7 @@ Concepts for products the bundles lack are drafted in parallel sessions from sou
 | `seed-lpdaac-nasadem-mod11`: NASADEM and MOD11 knowledge for the lpdaac bundle, seeded and reviewed | `nasa-daac-knowledge` | active | P2 | needs-context | [#154](https://github.com/open-science-pillars/nasa-daac-knowledge/issues/154) |
 | `seed-ornldaac-gedi`: GEDI biomass knowledge for the ornldaac bundle, seeded and reviewed | `nasa-daac-knowledge` | active | P2 | needs-context | [#155](https://github.com/open-science-pillars/nasa-daac-knowledge/issues/155) |
 | `seed-hydrology-precip-lakes`: Precipitation guidance recipe and SWOT lake knowledge for hydrology, seeded and reviewed | `hydrology` | active | P2 | needs-context | [#64](https://github.com/open-science-pillars/hydrology/issues/64) |
-| `seed-regional-sea-level`: Regional sea level recipe with GIA and land motion for ocean-science, seeded and reviewed | `ocean-science` | active | P2 | needs-context | [#55](https://github.com/open-science-pillars/ocean-science/issues/55) |
+| `seed-regional-sea-level`: Regional sea level recipe with GIA and land motion for ocean-science, seeded and reviewed | `ocean-science` | done | P2 | needs-context | [#55](https://github.com/open-science-pillars/ocean-science/issues/55) |
 | `seed-lpdaac-vegetation`: MODIS vegetation knowledge for the lpdaac bundle, seeded and reviewed | `nasa-daac-knowledge` | active | P2 | needs-context | [#159](https://github.com/open-science-pillars/nasa-daac-knowledge/issues/159) |
 | `seed-gesdisc-oco2-subsetter`: OCO-2 SIF knowledge and the GES DISC subsetter connector concept, seeded and reviewed | `nasa-daac-knowledge` | active | P2 | needs-context | [#160](https://github.com/open-science-pillars/nasa-daac-knowledge/issues/160) |
 
@@ -838,7 +838,7 @@ Concepts for products the bundles lack are drafted in parallel sessions from sou
 - [ ] The regional-sea-level-trend recipe, the GNSS vertical velocity connector concept if the core seed has not landed it, and the gotchas (coastal ellipsoidal versus orthometric heights at high severity with its eval case, the velocity reference frame) merge on the maintainer's review and reach stable on it.
 - [ ] Every eval case is registered in the evals manifests.
 - Depends on: `observations-round-three`
-- Evidence: `Round three of seeding (build-kit roadmap/seeds/round-3.yaml), issue #55 in ocean-science, opened 2026-09-15`
+- Evidence: `Round three of seeding (build-kit roadmap/seeds/round-3.yaml), issue #55 in ocean-science, opened 2026-09-15`, `ocean-science PR #60, seeded 2026-09-15: the regional sea level trend recipe and the coastal heights (high) and velocity reference frame (medium) gotchas; coordinator lint and fix round (the trend stated as the sanctioned method re-implemented, not an attested run; the GIA sea surface rate derived; the Brest solutions cited not restated); merged 2026-09-15. The GNSS connector concept had landed in PR #57`, `ocean-science signing PR: the recipe and the velocity frame gotcha stable and signed; the high coastal heights gotcha draft with one review. Eval case coastal-heights-ellipsoidal-versus-orthometric merged in agent-evals #28 and registered in the evals ocean-science manifest`
 
 **`seed-lpdaac-vegetation`**
 
