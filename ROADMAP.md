@@ -17,7 +17,6 @@
 - `landice-grace-knowledge`: GRACE-FO mass change knowledge for land ice, reviewed and offered for confirmation (`nasa-daac-knowledge`)
 - `r2-core-reference`: Qualify core as the reference capability on Claude Code, Cowork and Codex from one SKILL.md (`core`)
 - `basin-balance-groundwater`: Basin water balance with a groundwater term, and the National Water Model confrontation recipe (`hydrology`)
-- `energy-budget-closure`: Energy budget closure of CERES EBAF against ocean heat content as an attested computation (`nasa-daac-knowledge`)
 - `ice-sheet-balance-closure`: Ice sheet mass balance closure as an attested computation (`nasa-daac-knowledge`)
 - `landice-nsidc-knowledge`: ICESat-2 height change and ice velocity knowledge in a new NSIDC bundle (`nasa-daac-knowledge`)
 - `seed-argo-gridded-steric`: Roemmich and Gilson gridded Argo knowledge, seeded and reviewed (`ocean-science`)
@@ -73,10 +72,10 @@ Proposed, waiting on a dependency, in priority order.
 - P1 `r3-dependency-reference`: Validate dependency realization on ocean-science across runtimes (`ocean-science`)
 - P1 `tutorial-nonauthor-validation`: Complete non-author Tutorial 2 validation (`tutorials`)
 
-### Done (28)
+### Done (29)
 
 <details>
-<summary>28 done deliverables</summary>
+<summary>29 done deliverables</summary>
 
 - `hydro-usgs-waterdata-migration`: Migrate the USGS connector to the Water Data APIs and release it
 - `hydro-basin-unit`: Add basin delineation as the unit of analysis
@@ -106,6 +105,7 @@ Proposed, waiting on a dependency, in priority order.
 - `argo-ohc-computation`: Ocean heat content from gridded Argo as an attested computation in ocean-science
 - `observations-round-three`: Groundwater, lake, vertical land motion and National Water Model tools on the observations server
 - `ice-sheet-firn-root`: Firn air content and surface mass balance data root for the ice sheet closure
+- `energy-budget-closure`: Energy budget closure of CERES EBAF against ocean heat content as an attested computation
 
 </details>
 
@@ -867,7 +867,7 @@ The ocean heat content, the Earth energy imbalance, the ice sheet mass balance a
 | `argo-ohc-computation`: Ocean heat content from gridded Argo as an attested computation in ocean-science | `ocean-science` | done | P2 | needs-context | [#54](https://github.com/open-science-pillars/ocean-science/issues/54) |
 | `observations-round-three`: Groundwater, lake, vertical land motion and National Water Model tools on the observations server | `core` | done | P2 | needs-context | [#43](https://github.com/open-science-pillars/core/issues/43) |
 | `ice-sheet-firn-root`: Firn air content and surface mass balance data root for the ice sheet closure | `nasa-daac-knowledge` | done | P2 | needs-context | [#156](https://github.com/open-science-pillars/nasa-daac-knowledge/issues/156) |
-| `energy-budget-closure`: Energy budget closure of CERES EBAF against ocean heat content as an attested computation | `nasa-daac-knowledge` | active | P2 | needs-context | [#157](https://github.com/open-science-pillars/nasa-daac-knowledge/issues/157) |
+| `energy-budget-closure`: Energy budget closure of CERES EBAF against ocean heat content as an attested computation | `nasa-daac-knowledge` | done | P2 | needs-context | [#157](https://github.com/open-science-pillars/nasa-daac-knowledge/issues/157) |
 | `ice-sheet-balance-closure`: Ice sheet mass balance closure as an attested computation | `nasa-daac-knowledge` | active | P2 | needs-context | [#158](https://github.com/open-science-pillars/nasa-daac-knowledge/issues/158) |
 | `basin-balance-groundwater`: Basin water balance with a groundwater term, and the National Water Model confrontation recipe | `hydrology` | active | P2 | needs-context | [#65](https://github.com/open-science-pillars/hydrology/issues/65) |
 
@@ -895,7 +895,7 @@ The ocean heat content, the Earth energy imbalance, the ice sheet mass balance a
 - [ ] An executor integrates the EBAF net flux anomaly over a window against the ocean heat content change read from the Argo computation's receipt, states the residual with both uncertainties, refuses when the windows do not overlap, and is attested and registered; the check chain runs in run_checks.sh.
 - [ ] The computation concept, its recipe and its run skill merge on the coordinator's review and reach stable on the maintainer's; the numbers are anchored to the published Earth energy imbalance with sources.
 - Depends on: `argo-ohc-computation`
-- Evidence: `Round three of seeding (build-kit roadmap/seeds/round-3.yaml), issue #157 in nasa-daac-knowledge, opened 2026-09-15`
+- Evidence: `Round three of seeding (build-kit roadmap/seeds/round-3.yaml), issue #157 in nasa-daac-knowledge, opened 2026-09-15`, `nasa-daac-knowledge PR #174, built 2026-09-15: the attested energy budget closure in the asdc bundle, CERES EBAF net TOA flux (read through OPeNDAP, anchored on the product geodetic global mean) against the Argo ocean heat content receipt plus the published deep and non-ocean terms, with fixture and data-root modes, a committed root and five refusals; coordinator review ran the chain, determinism and tamper tests; fix round closed the attester window and identity hole, scaled the atmosphere term to the 95 percent level and reworded the Loeb 2021 comparison as a consistency check; merged 2026-09-15`, `nasa-daac-knowledge PR #179: the check chain wired into run_checks.sh, the registry runs under the asdc bundle key (reattest bundle support in PR #178), the computation concept, recipe and run skill stable and signed; the record run over 2006 to 2020 gives toa_net +0.87, ocean side +0.74, residual +0.13 W m-2 inside a bar of 0.19`
 
 **`ice-sheet-balance-closure`**
 
