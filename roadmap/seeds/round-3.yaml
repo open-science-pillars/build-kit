@@ -1,0 +1,676 @@
+# Round three of seeding: two waves. Wave A has no dependencies between its
+# seeds; wave B's closures read what wave A produced. One seed per bundle per
+# wave. Kinds: knowledge (concepts), computation (an attested computation in
+# the sea level budget's shape), connector (tools on the observations server),
+# data-root (a stamped data root and its loaders, no concepts). Rendered into
+# briefs by scripts/seed_brief.py; the roadmap carries one deliverable per seed.
+round: 3
+opened: 2026-09-15
+coordinator_rules:
+  - One seed per bundle per wave; wave B starts after wave A merges.
+  - A seed never merges, never signs, never sets a status other than draft, and
+    never edits tools/run_checks.sh or a plugin's check routine; the coordinator
+    adds a computation's check chain at merge.
+  - The Earthdata token in the environment is used only as a bearer header on a
+    download, never printed, logged, stored or committed.
+seeds:
+  - id: r3-argo-ohc
+    wave: A
+    kind: computation
+    title: Ocean heat content from gridded Argo as an attested computation
+    repo: ocean-science
+    bundle: knowledge
+    branch: claude/r3-argo-ohc
+    issue: 54
+    spheres: [ocean]
+    scope: >-
+      An attested computation in this plugin, in the sea level budget's shape:
+      global ocean heat content change for 0 to 700 m and 0 to 2000 m from the
+      Roemmich and Gilson gridded Argo temperature and salinity (the monthly
+      anomaly files and the climatology from sio-argo.ucsd.edu), with
+      conservative temperature and in situ density through the gsw
+      implementation of TEOS-10, cell area from the grid's latitude weights and
+      the product's land mask, layer thickness from the pressure levels, the
+      reference climatology and the anomaly convention stated, and the deep
+      ocean below 2000 m stated as an omission with the published rate named
+      for the reader. The executor runs on a synthetic fixture (--fixture
+      --seed N, a known heat content change recovered) or on a data root
+      (--data-root DIR) built by a loader from the Roemmich and Gilson files,
+      writes a receipt naming the computation, its code hash, the window, the
+      terms and the uncertainty, and refuses with a stated exit code when the
+      window leaves the product's coverage. Anchor the real-data run to the
+      published Argo-era 0 to 2000 m trend with its source and say how far the
+      run lands from it.
+    deliverables:
+      - "knowledge/references/computations/argo_ohc.py: the executor (--fixture --seed N | --data-root DIR, --window YYYY-MM:YYYY-MM, --depth 700|2000, --runtime, --receipt PATH; refusal exit 3 for a window outside coverage)"
+      - "knowledge/references/attesters/argo_ohc_check.py: the attester with --selftest, hashing the executor file on disk as the sanctioned code and checking the receipt's arithmetic and bookkeeping statements"
+      - "knowledge/references/loaders/ohc_rg_loader.py: builds the data root from the Roemmich and Gilson files with a selftest on a synthetic grid, writing ohc-700.csv, ohc-2000.csv and a stamp"
+      - "knowledge/references/loaders/ohc_data_root.py: RECORD.json with the manifest, the stamp and the bookkeeping table (climatology, anomaly convention, coverage, deep omission, uncertainty basis)"
+      - "knowledge/references/retrieval/argo-ohc-root/: the committed CSVs, stamps, SOURCES.json and RECORD.json (never the raw product files)"
+      - "knowledge/computations/argo-ohc.md (type Attested Computation, status draft), knowledge/recipes/argo-ohc.md, and a run skill under knowledge/references/skills/ in the shape of run-sea-level-budget.md in nasa-daac-knowledge"
+      - "the real-data run's numbers in the computation concept with the published anchor and its source"
+      - "verification/argo_ohc.py: a golden in the shape of hydrology's verification/basin_water_balance.py that runs the fixture chain, the refusal and the record run on the committed root and asserts the recorded numbers; the coordinator adds the goldens workflow at merge"
+    pattern:
+      - nasa-daac-knowledge/knowledge/podaac/references/computations/sea_level_budget.py
+      - nasa-daac-knowledge/knowledge/podaac/references/attesters/sea_level_budget_check.py
+      - nasa-daac-knowledge/knowledge/podaac/references/loaders/slb_steric_rg.py
+      - nasa-daac-knowledge/knowledge/podaac/references/loaders/slb_data_root.py
+      - nasa-daac-knowledge/knowledge/podaac/computations/sea-level-budget.md
+      - hydrology/knowledge/computations/basin-water-balance.md
+      - hydrology/knowledge/references/attesters/basin_water_balance_check.py
+    sources:
+      - domain: sio-argo.ucsd.edu
+        read: "the Roemmich and Gilson product page and the monthly anomaly and climatology files (the steric loader in nasa-daac-knowledge shows how they are read)"
+      - domain: teos-10.org
+        read: "the TEOS-10 manual sections on conservative temperature and the heat capacity constant"
+      - domain: doi.org and api.crossref.org
+        read: "Roemmich and Gilson 2009 (doi 10.1016/j.pocean.2009.03.004) and the published Argo-era ocean heat content trend used as the anchor (for example von Schuckmann and others or Cheng and others, on the registry records)"
+    do_not_repeat:
+      - The dataset concept knowledge/datasets/roemmich-gilson-argo-climatology.md and the three rg-* gotchas exist; link them.
+      - The podaac bundle's ecco-ocean-heat-content recipe is the ECCO-based counterpart; name it by bundle path.
+    boundary: "Edit only under knowledge/ (concepts, references, index.md, log.md) and verification/argo_ohc.py. Do not edit .osp/, README.md, .github/ or any other check script."
+  - id: r3-podaac-air-sea-forcing
+    wave: A
+    kind: knowledge
+    title: Air-sea forcing products at PO.DAAC
+    repo: nasa-daac-knowledge
+    bundle: knowledge/podaac
+    branch: claude/r3-podaac-air-sea-forcing
+    issue: 151
+    spheres: [ocean, atmosphere]
+    scope: >-
+      Dataset concepts for the wind analysis and scatterometer wind products
+      PO.DAAC holds. Confirm through CMR which CCMP collection (the version and
+      producer) and which ASCAT wind collections PO.DAAC distributes today and
+      write the concepts for those, naming the collection short names and
+      concept ids. Gotchas: a wind analysis is not an observation, its
+      background model fills the gaps and the analysis carries the model
+      there; neutral-stability versus stress-equivalent winds at the stated
+      reference height; rain and sea ice flags in scatterometer winds; a flux
+      product computed by a bulk formula carries its inputs' errors and its
+      formula's coefficients.
+    datasets:
+      - {slug: ccmp-wind-analysis}
+      - {slug: ascat-winds}
+    gotchas:
+      - {slug: wind-analysis-is-not-observation, severity: high}
+      - {slug: neutral-versus-stress-equivalent-wind, severity: medium}
+      - {slug: scatterometer-rain-and-ice-flags, severity: medium}
+      - {slug: bulk-flux-inputs-and-coefficients, severity: medium}
+    eval: {repo: agent-evals, subtree: ccmp/cases, branch: claude/r3-podaac-air-sea-forcing}
+    sources:
+      - domain: podaac.jpl.nasa.gov
+        read: "the collection pages and user guides for the CCMP and ASCAT wind collections found through CMR"
+      - domain: cmr.earthdata.nasa.gov
+        read: "the collection records, to confirm which versions PO.DAAC holds"
+      - domain: doi.org and api.crossref.org
+        read: "the product DOIs and the CCMP and ASCAT references on the registry records"
+    models:
+      - knowledge/podaac/datasets/oscar-v2.md
+      - knowledge/podaac/gotchas/oscar-is-geostrophic-plus-ekman.md
+    do_not_repeat:
+      - The OSCAR and SMAP salinity concepts; link them where the winds bear on them.
+  - id: r3-nsidc-bedmachine-atl10
+    wave: A
+    kind: knowledge
+    title: BedMachine ice thickness and ICESat-2 ATL10 freeboard
+    repo: nasa-daac-knowledge
+    bundle: knowledge/nsidc
+    branch: claude/r3-nsidc-bedmachine-atl10
+    issue: 152
+    spheres: [cryosphere]
+    scope: >-
+      Dataset concepts for BedMachine Greenland version 5 and BedMachine
+      Antarctica version 3 (thickness, bed, surface, mask, the error field,
+      the polar stereographic grids) and for ICESat-2 ATL10 sea ice freeboard
+      (beams, strong and weak beams, the freeboard definition, the height
+      segments). Gotchas: thickness is interpolated between flight lines and
+      mass conservation elsewhere, and the error field says where; the mask
+      distinguishes grounded ice, floating ice, rock and ocean, and a
+      discharge gate must sit on grounded ice upstream of the grounding line;
+      freeboard is not thickness and the snow load assumption sets the
+      conversion; strong and weak beams differ in precision. Write nothing
+      under knowledge/nsidc/references/; another session builds a data root
+      there.
+    datasets:
+      - {slug: bedmachine-greenland-antarctica}
+      - {slug: icesat2-atl10-freeboard}
+    gotchas:
+      - {slug: bedmachine-thickness-is-interpolated, severity: high}
+      - {slug: bedmachine-mask-and-grounding-line, severity: medium}
+      - {slug: atl10-freeboard-is-not-thickness, severity: high}
+      - {slug: atl10-strong-versus-weak-beams, severity: medium}
+    eval: {repo: agent-evals, subtree: nsidc/cases, branch: claude/r3-nsidc-bedmachine-atl10}
+    sources:
+      - domain: nsidc.org
+        read: "the product pages and user guides for IDBMG4 (BedMachine Greenland v5), NSIDC-0756 (BedMachine Antarctica v3) and ATL10"
+      - domain: cmr.earthdata.nasa.gov
+        read: "the collection concept ids"
+      - domain: doi.org and api.crossref.org
+        read: "Morlighem and others 2017 and 2020, Kwok and others 2019 on ATL10, on the registry records"
+    models:
+      - knowledge/nsidc/datasets/icesat2-atl15.md
+      - knowledge/nsidc/gotchas/atl15-height-change-is-not-mass-change.md
+    do_not_repeat:
+      - The velocity mosaic, ATL15, polar stereographic and sea ice concepts; link them.
+  - id: r3-gesdisc-airs-omi
+    wave: A
+    kind: knowledge
+    title: AIRS profiles and OMI trace gases
+    repo: nasa-daac-knowledge
+    bundle: knowledge/gesdisc
+    branch: claude/r3-gesdisc-airs-omi
+    issue: 153
+    spheres: [atmosphere]
+    scope: >-
+      Dataset concepts for the AIRS level 3 daily and monthly temperature and
+      water vapour products (the current version, ascending and descending
+      fields, the pressure levels, the count and quality fields) and the OMI
+      nitrogen dioxide (OMNO2d) and total ozone (OMTO3 or OMDOAO3) level 3
+      products. Gotchas: pressure levels versus model levels and the surface
+      pressure mask below the terrain; ascending and descending nodes are
+      different local times and a daily mean mixes them; the OMI row anomaly
+      since 2007 removes rows and the flag says which; a level 3 grid averages
+      retrievals of different quality and the count field bounds a cell's
+      value; an anomaly names its climatology period.
+    datasets:
+      - {slug: airs-l3-temperature-humidity}
+      - {slug: omi-no2-and-ozone}
+    gotchas:
+      - {slug: airs-pressure-levels-and-surface-mask, severity: high}
+      - {slug: airs-ascending-descending-nodes, severity: medium}
+      - {slug: omi-row-anomaly, severity: high}
+      - {slug: l3-count-field-bounds-a-cell, severity: medium}
+      - {slug: anomaly-names-its-climatology-period, severity: low}
+    eval: {repo: agent-evals, subtree: airs/cases, branch: claude/r3-gesdisc-airs-omi}
+    sources:
+      - domain: disc.gsfc.nasa.gov
+        read: "the AIRS and OMI collection pages, README documents and user guides"
+      - domain: airs.jpl.nasa.gov
+        read: "the AIRS level 3 product documentation"
+      - domain: aura.gsfc.nasa.gov
+        read: "the OMI instrument and row anomaly pages"
+      - domain: cmr.earthdata.nasa.gov
+        read: "the collection concept ids"
+      - domain: doi.org and api.crossref.org
+        read: "the product DOIs and the AIRS and OMI references on the registry records"
+    models:
+      - knowledge/gesdisc/datasets/merra-2.md
+      - knowledge/gesdisc/gotchas/merra2-prectotcorr-versus-prectot.md
+    do_not_repeat:
+      - The MERRA-2 concepts; link them where AIRS is compared with the reanalysis.
+  - id: r3-lpdaac-nasadem-mod11
+    wave: A
+    kind: knowledge
+    title: NASADEM and MOD11 land surface temperature
+    repo: nasa-daac-knowledge
+    bundle: knowledge/lpdaac
+    branch: claude/r3-lpdaac-nasadem-mod11
+    issue: 154
+    spheres: [land]
+    scope: >-
+      Dataset concepts for NASADEM (the height layer, the void-filled source
+      layer, the 1 arc second grid, the vertical datum) and the MOD11A1 and
+      MOD11A2 land surface temperature products (day and night fields, view
+      time and angle, emissivity, quality). Gotchas: NASADEM heights are
+      orthometric on EGM96 while GNSS and most satellite heights are
+      ellipsoidal on WGS 84, so a comparison without the geoid separation is
+      off by tens of metres; the void fill and the source layer say where the
+      height is not SRTM; MOD11 is a clear-sky product whose view time varies
+      and a daily mean is a clear-sky mean; day and night fields are different
+      quantities; emissivity is classified from land cover, not retrieved.
+    datasets:
+      - {slug: nasadem}
+      - {slug: mod11-land-surface-temperature}
+    gotchas:
+      - {slug: nasadem-orthometric-versus-ellipsoidal, severity: high}
+      - {slug: nasadem-void-fill-and-source-layer, severity: medium}
+      - {slug: mod11-clear-sky-and-view-time, severity: high}
+      - {slug: mod11-day-and-night-are-different, severity: medium}
+      - {slug: mod11-emissivity-is-classified, severity: low}
+    eval: {repo: agent-evals, subtree: nasadem/cases, branch: claude/r3-lpdaac-nasadem-mod11}
+    sources:
+      - domain: lpdaac.usgs.gov
+        read: "the NASADEM and MOD11A1 and MOD11A2 product pages and user guides"
+      - domain: cmr.earthdata.nasa.gov
+        read: "the collection concept ids"
+      - domain: doi.org and api.crossref.org
+        read: "the product DOIs and Wan 2014 on the MOD11 collection 6 algorithm, on the registry records"
+    models:
+      - knowledge/lpdaac/datasets/hls-l30.md
+      - knowledge/lpdaac/gotchas/hls-fmask-is-bit-packed.md
+    do_not_repeat:
+      - The HLS concepts; link them where the DEM or the temperature bears on them.
+  - id: r3-ornldaac-gedi
+    wave: A
+    kind: knowledge
+    title: GEDI L4A and L4B biomass
+    repo: nasa-daac-knowledge
+    bundle: knowledge/ornldaac
+    branch: claude/r3-ornldaac-gedi
+    issue: 155
+    spheres: [biosphere]
+    scope: >-
+      Dataset concepts for GEDI L4A footprint aboveground biomass density and
+      L4B gridded mean aboveground biomass density (the current versions, the
+      footprint geometry, the 1 km grid, the standard error layer, the quality
+      and degrade flags, the plant functional type stratification). Gotchas: a
+      footprint is not a pixel and a footprint mean is not an area estimate;
+      the L4B standard error is the hybrid estimator's, and a cell with few
+      footprints carries it; the quality and degrade flags gate every
+      footprint; biomass is a model output from height metrics calibrated by
+      plant functional type and region; the mission's latitude limits leave
+      the boreal forest out.
+    datasets:
+      - {slug: gedi-l4a-footprint-biomass}
+      - {slug: gedi-l4b-gridded-biomass}
+    gotchas:
+      - {slug: gedi-footprint-is-not-a-pixel, severity: high}
+      - {slug: gedi-l4b-standard-error, severity: medium}
+      - {slug: gedi-quality-and-degrade-flags, severity: medium}
+      - {slug: gedi-biomass-is-a-model-output, severity: medium}
+      - {slug: gedi-latitude-limits, severity: low}
+    eval: {repo: agent-evals, subtree: gedi/cases, branch: claude/r3-ornldaac-gedi}
+    sources:
+      - domain: daac.ornl.gov
+        read: "the GEDI L4A and L4B dataset pages and user guides"
+      - domain: cmr.earthdata.nasa.gov
+        read: "the collection concept ids"
+      - domain: doi.org and api.crossref.org
+        read: "Dubayah and others 2022 on L4A and the L4B reference, on the registry records"
+    models:
+      - knowledge/ornldaac/datasets/daymet-v4.md
+      - knowledge/ornldaac/gotchas/daymet-365-day-year.md
+    do_not_repeat: []
+  - id: r3-hydrology-precip-lakes
+    wave: A
+    kind: knowledge
+    title: Precipitation product guidance by terrain, and SWOT lake series
+    repo: hydrology
+    bundle: knowledge
+    branch: claude/r3-hydrology-precip-lakes
+    issue: 64
+    spheres: [hydrosphere]
+    scope: >-
+      A recipe on choosing a precipitation product by terrain and question
+      (IMERG, Daymet, MERRA-2 and NLDAS-2: what each does in complex terrain,
+      at high latitude, in the cold season, for extremes and for long series),
+      citing this bundle's IMERG and NLDAS-2 concepts, the orographic gotcha
+      and the provider bundles' Daymet and MERRA-2 concepts by bundle path
+      rather than restating them; and a dataset concept for the SWOT lake
+      products (the prior lake database, the lake single-pass and lake
+      average products) as a water surface elevation and area series, with
+      gotchas on lake identification across passes and on the water surface
+      elevation datum.
+    datasets:
+      - {slug: swot-lakes}
+    gotchas:
+      - {slug: swot-lake-identity-across-passes, severity: high}
+      - {slug: swot-lake-elevation-datum, severity: medium}
+    recipes:
+      - {slug: precipitation-product-by-terrain}
+    eval: {repo: hydrology, subtree: evals, branch: claude/r3-hydrology-precip-lakes}
+    sources:
+      - domain: podaac.jpl.nasa.gov
+        read: "the SWOT lake product pages and the product description document"
+      - domain: cmr.earthdata.nasa.gov
+        read: "the collection concept ids"
+      - domain: doi.org and api.crossref.org
+        read: "the product DOIs and the precipitation product intercomparison references on the registry records"
+    models:
+      - knowledge/datasets/swot-river-lake.md
+      - knowledge/recipes/grace-basin-tws.md
+      - knowledge/gotchas/imerg-cold-season-orographic-underestimation.md
+      - evals/grace-basin-below-resolution-floor.yaml
+    do_not_repeat:
+      - The IMERG, NLDAS-2, SWOT river and Hydrocron concepts in this bundle; link them.
+  - id: r3-observations-round-three
+    wave: A
+    kind: connector
+    title: Observations server round three
+    repo: core
+    bundle: connectors
+    branch: claude/r3-observations-round-three
+    issue: 43
+    spheres: [hydrosphere, ocean]
+    scope: >-
+      Four tools on connectors/observations_mcp.py, each a thin translation
+      from parameters to one request against one authoritative source, with
+      the same guard, cap, citation and fixture discipline as the existing
+      five: nwis_groundwater_levels (the Water Data API groundwater levels
+      collection, the same key handling and paging as the streamflow tools);
+      hydrocron_lake_timeseries (the Hydrocron lake collection beside reaches
+      and nodes, PriorLake ids); gnss_vertical_velocity (a station's
+      vertical velocity, uncertainty and reference frame from the Nevada
+      Geodetic Laboratory's station velocity table, with a nearest-station
+      lookup by coordinates); nwm_retrospective_streamflow (daily streamflow
+      at a reach from the NOAA National Water Model retrospective on AWS,
+      anonymous read, the retrospective version stated). Each tool records a
+      fixture and passes the offline --test contract; CONNECTORS.md gains a
+      section per tool; the server VERSION is bumped. Draft the connector
+      concepts for the four tools as separate PRs: hydrology (groundwater,
+      lakes, National Water Model under knowledge/connectors/) and
+      ocean-science (vertical land motion under knowledge/connectors/), in
+      the shape of the existing connector concepts there, status draft.
+    deliverables:
+      - "connectors/observations_mcp.py: the four tools, their parsers, fixtures under connectors/fixtures/, and the --test contract passing offline"
+      - "CONNECTORS.md: a section per tool (what leaves the machine, what happens when the source is unavailable, the key if any)"
+      - "hydrology PR: knowledge/connectors/nwis-groundwater.md, hydrocron-lakes.md, nwm-retrospective.md, with index.md and log.md lines"
+      - "ocean-science PR: knowledge/connectors/gnss-vertical-velocity.md with index.md and log.md lines"
+    pattern:
+      - core/connectors/observations_mcp.py
+      - core/CONNECTORS.md
+      - hydrology/knowledge/connectors/usgs-water.md
+      - hydrology/knowledge/connectors/hydrocron-swot.md
+      - ocean-science/knowledge/connectors/psmsl-gauges.md
+    sources:
+      - domain: api.waterdata.usgs.gov
+        read: "the OGC API collections for groundwater levels and their documentation"
+      - domain: soda.jpl.nasa.gov
+        read: "the Hydrocron API documentation and the lake collection (if this host is unreachable from the session, build the tool against the documented API with a hand-written fixture and say so in the PR body)"
+      - domain: geodesy.unr.edu
+        read: "the station list and the velocity table formats (the IGS14 or IGS20 velocity files and the station coordinates)"
+      - domain: noaa-nwm-retrospective-3-0-pds.s3.amazonaws.com
+        read: "the retrospective's layout (the zarr or netCDF chrtout stores and the feature id index)"
+    do_not_repeat: []
+    boundary: "In core edit only connectors/observations_mcp.py, connectors/fixtures/, CONNECTORS.md and, if a version is recorded there, .osp/package.yaml; do not touch skills, knowledge or workflows. In hydrology and ocean-science edit only knowledge/connectors/, knowledge/index.md and knowledge/log.md."
+  - id: r3-nsidc-firn-root
+    wave: A
+    kind: data-root
+    title: Firn and surface mass balance data root for the ice sheet closure
+    repo: nasa-daac-knowledge
+    bundle: knowledge/nsidc/references
+    branch: claude/r3-nsidc-firn-root
+    issue: 156
+    spheres: [cryosphere]
+    scope: >-
+      A stamped data root under
+      knowledge/nsidc/references/retrieval/ice-sheet-balance-root/ holding,
+      per ice sheet (Greenland, Antarctica) and per month, the firn air
+      content change and the surface mass balance from NASA's GEMB output as
+      distributed with ITS_LIVE on AWS (find the current GEMB product in the
+      ITS_LIVE bucket and its documentation, state its version, forcing and
+      grid), aggregated over each ice sheet's grounded area with the mask the
+      product carries or the IMBIE basin set, in gigatonnes and in metres of
+      firn air content. A loader per term with a selftest on a synthetic grid
+      writes a CSV and a stamp (what was read, when, version, grid, the
+      aggregation and the mask used); a data-root tool writes RECORD.json
+      with the manifest and the bookkeeping table; SOURCES.json names every
+      file read with its hash. No concepts; RACMO and MAR are named in the
+      stamp as alternates not read. Write nothing under knowledge/nsidc/
+      outside references/; another session writes the bundle's concepts.
+    deliverables:
+      - "knowledge/nsidc/references/loaders/isb_firn_gemb.py and isb_smb_gemb.py, each with --selftest, writing firn.csv and smb.csv with stamps"
+      - "knowledge/nsidc/references/loaders/isb_data_root.py writing RECORD.json (--check verifies the manifest)"
+      - "knowledge/nsidc/references/retrieval/ice-sheet-balance-root/: the CSVs, stamps, SOURCES.json, RECORD.json (never the raw product files)"
+    pattern:
+      - knowledge/podaac/references/loaders/slb_mass_mascons.py
+      - knowledge/podaac/references/loaders/slb_data_root.py
+      - knowledge/podaac/references/retrieval/sea-level-budget-root/RECORD.json
+    sources:
+      - domain: its-live.jpl.nasa.gov and the its-live-data bucket on AWS
+        read: "the GEMB product description, the file layout and the files themselves"
+      - domain: nsidc.org
+        read: "the ice sheet mask or IMBIE basin definitions used for the aggregation"
+      - domain: doi.org and api.crossref.org
+        read: "the GEMB references (Gardner and others) on the registry records"
+    do_not_repeat: []
+    boundary: "Edit only under knowledge/nsidc/references/loaders/ and knowledge/nsidc/references/retrieval/ice-sheet-balance-root/. No concept, index, log or DIGEST edits; no run_checks.sh edits."
+  - id: r3-energy-budget-closure
+    wave: B
+    kind: computation
+    title: Energy budget closure, CERES EBAF net flux against ocean heat content
+    repo: nasa-daac-knowledge
+    bundle: knowledge/asdc
+    branch: claude/r3-energy-budget-closure
+    issue: 157
+    depends_on: [r3-argo-ohc]
+    spheres: [atmosphere, ocean]
+    scope: >-
+      An attested computation in the sea level budget's shape: the CERES EBAF
+      net top-of-atmosphere flux anomaly integrated over a window (the global
+      mean over the one degree grid with cos-latitude weights, the anomaly
+      against the window's own mean so that the EBAF decade anchoring cancels)
+      against the ocean heat content change over the same window read from
+      the ocean-science Argo computation's receipt (0 to 2000 m, with the
+      stated deep and non-ocean terms added as published numbers with
+      sources), the residual stated with the uncertainty of both sides. The
+      anchoring gotcha in this bundle is the stated caveat: the absolute EBAF
+      imbalance is not independent of ocean heating; the anomaly comparison
+      is. Executor with fixture and data-root modes, receipt and refusal
+      codes; attester with selftest; a loader for the EBAF term into a
+      stamped data root; computation concept, recipe, run skill and a
+      registry entry; the numbers anchored to the published Earth energy
+      imbalance with sources.
+    deliverables:
+      - "knowledge/asdc/references/computations/energy_budget.py (--fixture --seed N | --data-root DIR with --ohc-receipt PATH, --window, --runtime, --receipt; refusal exit 3 when the windows do not overlap)"
+      - "knowledge/asdc/references/attesters/energy_budget_check.py with --selftest"
+      - "knowledge/asdc/references/loaders/eb_ceres_ebaf.py (selftest) and eb_data_root.py; the root at knowledge/asdc/references/retrieval/energy-budget-root/"
+      - "knowledge/asdc/computations/energy-budget.md, knowledge/asdc/recipes/energy-budget.md, a run skill under knowledge/asdc/references/skills/, and the registry entry in tools/reference_runs.yaml"
+    pattern:
+      - knowledge/podaac/references/computations/sea_level_budget.py
+      - knowledge/podaac/references/attesters/sea_level_budget_check.py
+      - knowledge/podaac/references/loaders/slb_altimetry_nasa_ssh.py
+      - knowledge/podaac/computations/sea-level-budget.md
+      - knowledge/asdc/gotchas/ebaf-imbalance-anchored-to-ocean-heating.md
+    sources:
+      - domain: ceres.larc.nasa.gov and asdc.larc.nasa.gov
+        read: "the EBAF Ed4.2 product and data quality summary already cited by the bundle; the EBAF-TOA files themselves"
+      - domain: doi.org and api.crossref.org
+        read: "Loeb and others 2021 on the Earth energy imbalance and von Schuckmann and others 2023 on the heat inventory, on the registry records"
+    do_not_repeat:
+      - The CERES EBAF dataset concept and its five gotchas; link them.
+    boundary: "Edit only under knowledge/asdc/ and tools/reference_runs.yaml. Do not edit tools/run_checks.sh; the coordinator adds the chain."
+  - id: r3-ice-sheet-balance-closure
+    wave: B
+    kind: computation
+    title: Ice sheet mass balance closure
+    repo: nasa-daac-knowledge
+    bundle: knowledge/nsidc
+    branch: claude/r3-ice-sheet-balance-closure
+    issue: 158
+    depends_on: [r3-nsidc-bedmachine-atl10, r3-nsidc-firn-root]
+    spheres: [cryosphere]
+    scope: >-
+      An attested computation in the sea level budget's shape, per ice sheet:
+      the GRACE and GRACE-FO mascon mass change over a window (the JPL mascon
+      grid summed over the ice sheet's mascons with the product's land mask
+      and the per-mascon uncertainty in quadrature, the GIA and low-degree
+      bookkeeping stated as the podaac concepts say) against the ATL15
+      volume change converted to mass with the firn air content change from
+      the firn data root and a stated ice density, and, as a third estimate
+      where the inputs allow, the input-output balance from the root's
+      surface mass balance and a discharge through flux gates built from
+      ITS_LIVE velocity and BedMachine thickness on grounded ice. The
+      residuals stated with uncertainties; a window outside the ATL15 and
+      mascon overlap refuses. Executor with fixture and data-root modes,
+      receipt and refusal codes; attester with selftest; loaders for the
+      mascon and ATL15 terms into the ice-sheet-balance-root beside the firn
+      terms; computation concept, recipe, run skill and registry entry; the
+      numbers anchored to the published intercomparison with sources.
+    deliverables:
+      - "knowledge/nsidc/references/computations/ice_sheet_balance.py (--fixture --seed N | --data-root DIR, --ice-sheet greenland|antarctica, --window, --runtime, --receipt; refusal exit 3 outside the overlap)"
+      - "knowledge/nsidc/references/attesters/ice_sheet_balance_check.py with --selftest"
+      - "knowledge/nsidc/references/loaders/isb_mass_mascons.py and isb_volume_atl15.py (selftests), extending the existing isb_data_root.py and the root's RECORD.json"
+      - "knowledge/nsidc/computations/ice-sheet-balance.md, knowledge/nsidc/recipes/ice-sheet-balance.md, a run skill under knowledge/nsidc/references/skills/, and the registry entry in tools/reference_runs.yaml"
+    pattern:
+      - knowledge/podaac/references/computations/sea_level_budget.py
+      - knowledge/podaac/references/loaders/slb_mass_mascons.py
+      - knowledge/nsidc/references/loaders/isb_data_root.py
+      - knowledge/podaac/computations/sea-level-budget.md
+      - knowledge/nsidc/gotchas/atl15-height-change-is-not-mass-change.md
+    sources:
+      - domain: nsidc.org and podaac.jpl.nasa.gov
+        read: "the ATL15, BedMachine, ITS_LIVE and mascon products already cited by the bundles; the files themselves"
+      - domain: doi.org and api.crossref.org
+        read: "Otosaka and others 2023 (the IMBIE 2023 intercomparison) and Smith and others 2020, on the registry records"
+    do_not_repeat:
+      - The ATL15, velocity, BedMachine, ATL10 and mascon concepts; link them.
+    boundary: "Edit only under knowledge/nsidc/ and tools/reference_runs.yaml. Do not edit tools/run_checks.sh; the coordinator adds the chain."
+  - id: r3-basin-balance-groundwater
+    wave: B
+    kind: computation
+    title: Basin water balance with the groundwater term, and the round-three connector concepts
+    repo: hydrology
+    bundle: knowledge
+    branch: claude/r3-basin-balance-groundwater
+    issue: 65
+    depends_on: [r3-hydrology-precip-lakes, r3-observations-round-three]
+    spheres: [hydrosphere]
+    scope: >-
+      Extend the basin water balance computation with a groundwater storage
+      change term from NWIS groundwater levels through the new observations
+      tool (a specific yield as a stated parameter with its source, the well
+      set and screened depths stated, the level change over the window
+      averaged over the wells with its spread), so the residual can be
+      partitioned between groundwater and the rest; keep the existing golden
+      and add one with the term; update the computation concept, the recipe
+      and the attester. Land the connector concepts for the groundwater,
+      lakes and National Water Model tools if the core seed's hydrology PR
+      has not merged (read that PR first and do not duplicate it), and add a
+      recipe that confronts a gauge's daily flow against the National Water
+      Model retrospective at the same reach.
+    deliverables:
+      - "knowledge/references/computations/basin_water_balance.py: the groundwater term, its parameters and its receipt fields; the attester updated; both goldens passing"
+      - "knowledge/computations/basin-water-balance.md and knowledge/recipes/basin-water-balance.md updated (a stable concept edited owes a new review; leave status stable and say so in the PR)"
+      - "knowledge/recipes/nwm-gauge-confrontation.md and its eval case under evals/"
+      - "verification/fixtures/water-balance/: one more frozen input tree carrying the groundwater term (its provenance in the fixtures README), and verification/basin_water_balance.py extended to run it and assert its recorded numbers"
+    pattern:
+      - knowledge/references/computations/basin_water_balance.py
+      - knowledge/references/attesters/basin_water_balance_check.py
+      - knowledge/computations/basin-water-balance.md
+      - knowledge/recipes/swot-gauge-confrontation.md
+    sources:
+      - domain: api.waterdata.usgs.gov
+        read: "the groundwater levels collection documentation"
+      - domain: noaa-nwm-retrospective-3-0-pds.s3.amazonaws.com
+        read: "the retrospective's documentation and layout"
+      - domain: doi.org and api.crossref.org
+        read: "the specific yield reference used and the National Water Model retrospective reference, on the registry records"
+    do_not_repeat:
+      - The GRACE basin recipe and gotchas, the SWOT gauge confrontation recipe; link them.
+    boundary: "Edit only under knowledge/, evals/, verification/basin_water_balance.py and verification/fixtures/water-balance/; do not edit the other verification scripts, .osp/, README.md or .github/."
+  - id: r3-regional-sea-level
+    wave: B
+    kind: knowledge
+    title: Regional sea level with GIA and vertical land motion
+    repo: ocean-science
+    bundle: knowledge
+    branch: claude/r3-regional-sea-level
+    issue: 55
+    depends_on: [r3-observations-round-three]
+    spheres: [ocean]
+    scope: >-
+      A recipe for a regional or coastal sea level trend that reconciles the
+      altimetry trend from NASA-SSH near the coast, the GIA correction named
+      with its model, the vertical land motion at the gauge from the GNSS
+      tool, and the tide gauge relative trend, with stated uncertainty and
+      the tide gauge gotchas cited; the connector concept for the vertical
+      land motion tool if the core seed's ocean-science PR has not merged
+      (read it first; do not duplicate); and gotchas on ellipsoidal versus
+      orthometric heights at the coast and on the reference frame of a
+      velocity.
+    datasets: []
+    gotchas:
+      - {slug: coastal-heights-ellipsoidal-versus-orthometric, severity: high}
+      - {slug: velocity-reference-frame, severity: medium}
+    recipes:
+      - {slug: regional-sea-level-trend}
+    eval: {repo: agent-evals, subtree: ecco/cases, branch: claude/r3-regional-sea-level}
+    sources:
+      - domain: geodesy.unr.edu
+        read: "the station velocity documentation and the reference frame notes"
+      - domain: psmsl.org and podaac.jpl.nasa.gov
+        read: "the pages already cited by the tide gauge and NASA-SSH concepts"
+      - domain: doi.org and api.crossref.org
+        read: "Blewitt and others 2018 on the Nevada Geodetic Laboratory products and Peltier 2004, on the registry records"
+    models:
+      - knowledge/gotchas/tide-gauge-relative-sea-level-and-land-motion.md
+      - knowledge/connectors/psmsl-gauges.md
+    do_not_repeat:
+      - The five tide gauge gotchas and the two connectors; link them.
+  - id: r3-lpdaac-vegetation
+    wave: B
+    kind: knowledge
+    title: MODIS vegetation indices, LAI and GPP
+    repo: nasa-daac-knowledge
+    bundle: knowledge/lpdaac
+    branch: claude/r3-lpdaac-vegetation
+    issue: 159
+    spheres: [biosphere, land]
+    scope: >-
+      Dataset concepts for MOD13Q1 and MOD13A1 vegetation indices, MOD15A2H
+      LAI and FPAR, and MOD17A2H GPP and MOD17A3HGF NPP (current collection,
+      layers, scale factors, the day-of-year and quality layers, the
+      sinusoidal grid). Gotchas: an index is not a state variable (NDVI
+      saturates over dense canopy, EVI differs, neither is greenness or
+      biomass); the composite's day-of-year layer says which day a pixel
+      is from and the compositing rule; LAI and GPP are model outputs with
+      quality flags that gate them; the 500 m sinusoidal grid's cell area
+      and reprojection.
+    datasets:
+      - {slug: mod13-vegetation-indices}
+      - {slug: mod15-lai-fpar}
+      - {slug: mod17-gpp-npp}
+    gotchas:
+      - {slug: index-is-not-a-state-variable, severity: high}
+      - {slug: composite-day-of-year-layer, severity: medium}
+      - {slug: lai-and-gpp-are-model-outputs, severity: medium}
+      - {slug: sinusoidal-grid-cell-area, severity: low}
+    eval: {repo: agent-evals, subtree: modis-land/cases, branch: claude/r3-lpdaac-vegetation}
+    sources:
+      - domain: lpdaac.usgs.gov
+        read: "the MOD13, MOD15 and MOD17 product pages and user guides"
+      - domain: cmr.earthdata.nasa.gov
+        read: "the collection concept ids"
+      - domain: doi.org and api.crossref.org
+        read: "the product DOIs and Huete and others 2002, Myneni and others 2002, Running and others 2004, on the registry records"
+    models:
+      - knowledge/lpdaac/datasets/hls-l30.md
+      - knowledge/lpdaac/gotchas/hls-fmask-is-bit-packed.md
+    do_not_repeat:
+      - The hydrology plugin's MOD16 concepts (knowledge/datasets/mod16a2gf.md); name them by bundle path.
+  - id: r3-gesdisc-oco2-subsetter
+    wave: B
+    kind: knowledge
+    title: OCO-2 solar-induced fluorescence and the GES DISC subsetter connector concept
+    repo: nasa-daac-knowledge
+    bundle: knowledge/gesdisc
+    branch: claude/r3-gesdisc-oco2-subsetter
+    issue: 160
+    spheres: [biosphere, atmosphere]
+    scope: >-
+      A dataset concept for the OCO-2 solar-induced fluorescence lite
+      product (and its OCO-3 sibling where the sources support it), with
+      gotchas: fluorescence is not photosynthesis and the relation is
+      empirical and biome-dependent; the two retrieval bands and their
+      offsets; sounding footprints are sparse and a gridded mean is a mean of
+      samples with a count; the daily correction factor; and a connector
+      concept for the GES DISC subsetter and OPeNDAP access to MERRA-2 and
+      AIRS (what the service does, the request shape, what leaves the
+      machine, the token), in the shape of hydrology's gesdisc-earthaccess
+      connector concept.
+    datasets:
+      - {slug: oco2-sif-lite}
+    gotchas:
+      - {slug: sif-is-not-photosynthesis, severity: high}
+      - {slug: sif-two-bands-and-offsets, severity: medium}
+      - {slug: sif-soundings-are-sparse, severity: medium}
+      - {slug: sif-daily-correction, severity: low}
+    connectors:
+      - {slug: gesdisc-subsetter-opendap}
+    eval: {repo: agent-evals, subtree: oco2/cases, branch: claude/r3-gesdisc-oco2-subsetter}
+    sources:
+      - domain: disc.gsfc.nasa.gov
+        read: "the OCO-2 SIF lite product pages and user guide, and the subsetter and OPeNDAP documentation"
+      - domain: ocov2.jpl.nasa.gov
+        read: "the mission's SIF product documentation"
+      - domain: cmr.earthdata.nasa.gov
+        read: "the collection concept ids"
+      - domain: doi.org and api.crossref.org
+        read: "Sun and others 2018 on OCO-2 SIF, on the registry record"
+    models:
+      - knowledge/gesdisc/datasets/merra-2.md
+      - hydrology/knowledge/connectors/gesdisc-earthaccess.md
+    do_not_repeat:
+      - The MERRA-2 and AIRS concepts; link them.
