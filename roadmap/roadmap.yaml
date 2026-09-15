@@ -1638,7 +1638,7 @@ initiatives:
       - id: seed-lpdaac-vegetation
         title: MODIS vegetation knowledge for the lpdaac bundle, seeded and reviewed
         repo: nasa-daac-knowledge
-        status: active
+        status: done
         priority: P2
         depends_on: [seed-lpdaac-nasadem-mod11]
         gate: ""
@@ -1647,6 +1647,8 @@ initiatives:
         - Every eval case is registered in the evals manifests.
         evidence:
           - "Round three of seeding (build-kit roadmap/seeds/round-3.yaml), issue #159 in nasa-daac-knowledge, opened 2026-09-15"
+          - "nasa-daac-knowledge PR #172, seeded 2026-09-15: MOD13 vegetation indices, MOD15 LAI and FPAR, MOD17 GPP and NPP dataset concepts and four gotchas (index is not a state variable at high severity with its eval case, composite day of year layer, LAI and GPP are model outputs, sinusoidal grid cell area); coordinator lint and fix round (arithmetic, fill code statements against the CMR variable records, the composite day title, the BPLUT minimum temperatures, the 2001 start of the annual record); merged 2026-09-15"
+          - "nasa-daac-knowledge signing PR: six concepts stable and signed; the high index gotcha draft with one review. Eval case index-is-not-a-state-variable merged in agent-evals #29 and registered in the evals manifest (evals #39)"
         contributor:
           readiness: needs-context
           champion: PaulMRamirez
@@ -1658,7 +1660,7 @@ initiatives:
       - id: seed-gesdisc-oco2-subsetter
         title: OCO-2 SIF knowledge and the GES DISC subsetter connector concept, seeded and reviewed
         repo: nasa-daac-knowledge
-        status: active
+        status: done
         priority: P2
         depends_on: [seed-gesdisc-airs-omi]
         gate: ""
@@ -1667,6 +1669,8 @@ initiatives:
         - Every eval case is registered in the evals manifests.
         evidence:
           - "Round three of seeding (build-kit roadmap/seeds/round-3.yaml), issue #160 in nasa-daac-knowledge, opened 2026-09-15"
+          - "nasa-daac-knowledge PR #173, seeded 2026-09-15: the OCO-2 and OCO-3 SIF Lite dataset concept, four SIF gotchas (SIF is not photosynthesis at high severity with its eval case, two bands and offsets, soundings are sparse, daily correction) and the GES DISC subsetter and OPeNDAP connector concept; coordinator lint and fix round (the SoundingId field, the guide's two 740 nm formulas, the 11.2r declared extent, the AIRS migration list, the retiring on-premises DMR probes, the PO.DAAC L2 Cloud Subsetter named); merged 2026-09-15"
+          - "nasa-daac-knowledge signing PR: the dataset, the connector and three gotchas stable and signed; the high SIF gotcha draft with one review. Eval case sif-is-not-photosynthesis merged in agent-evals #30 and registered in the evals manifest (evals #39)"
         contributor:
           readiness: needs-context
           champion: PaulMRamirez
