@@ -25,13 +25,11 @@
 - `seed-esdis-requirements-2`: ESDIS requirements round two, seeded and reviewed (`nasa-daac-knowledge`)
 - `seed-gesdisc-airs-omi`: AIRS and OMI knowledge for the gesdisc bundle, seeded and reviewed (`nasa-daac-knowledge`)
 - `seed-gesdisc-merra2`: MERRA-2 knowledge for the gesdisc bundle, seeded and reviewed (`nasa-daac-knowledge`)
-- `seed-gesdisc-oco2-subsetter`: OCO-2 SIF knowledge and the GES DISC subsetter connector concept, seeded and reviewed (`nasa-daac-knowledge`)
 - `seed-grace-basin-tws`: GRACE terrestrial water storage for basins, seeded and reviewed (`hydrology`)
 - `seed-hydrology-precip-lakes`: Precipitation guidance recipe and SWOT lake knowledge for hydrology, seeded and reviewed (`hydrology`)
 - `seed-hydrology-snow-cover`: MODIS and VIIRS snow cover knowledge, seeded and reviewed (`hydrology`)
 - `seed-lpdaac-hls`: HLS knowledge for the lpdaac bundle, seeded and reviewed (`nasa-daac-knowledge`)
 - `seed-lpdaac-nasadem-mod11`: NASADEM and MOD11 knowledge for the lpdaac bundle, seeded and reviewed (`nasa-daac-knowledge`)
-- `seed-lpdaac-vegetation`: MODIS vegetation knowledge for the lpdaac bundle, seeded and reviewed (`nasa-daac-knowledge`)
 - `seed-mur-sst-gotchas`: MUR SST gotchas for the podaac bundle, seeded and reviewed (`nasa-daac-knowledge`)
 - `seed-nsidc-bedmachine-atl10`: BedMachine and ATL10 knowledge for the nsidc bundle, seeded and reviewed (`nasa-daac-knowledge`)
 - `seed-nsidc-sea-ice`: Sea ice concentration and the Sea Ice Index knowledge, seeded and reviewed (`nasa-daac-knowledge`)
@@ -75,10 +73,10 @@ Proposed, waiting on a dependency, in priority order.
 - P1 `r3-dependency-reference`: Validate dependency realization on ocean-science across runtimes (`ocean-science`)
 - P1 `tutorial-nonauthor-validation`: Complete non-author Tutorial 2 validation (`tutorials`)
 
-### Done (26)
+### Done (28)
 
 <details>
-<summary>26 done deliverables</summary>
+<summary>28 done deliverables</summary>
 
 - `hydro-usgs-waterdata-migration`: Migrate the USGS connector to the Water Data APIs and release it
 - `hydro-basin-unit`: Add basin delineation as the unit of analysis
@@ -103,6 +101,8 @@ Proposed, waiting on a dependency, in priority order.
 - `r8-maintainer-run-qualification`: Qualify a release candidate through tickets the maintainers close, with waivers, and no secret in the automation
 - `sea-level-budget-closure`: Close the global sea level budget as an attested computation
 - `seed-regional-sea-level`: Regional sea level recipe with GIA and land motion for ocean-science, seeded and reviewed
+- `seed-lpdaac-vegetation`: MODIS vegetation knowledge for the lpdaac bundle, seeded and reviewed
+- `seed-gesdisc-oco2-subsetter`: OCO-2 SIF knowledge and the GES DISC subsetter connector concept, seeded and reviewed
 - `argo-ohc-computation`: Ocean heat content from gridded Argo as an attested computation in ocean-science
 - `observations-round-three`: Groundwater, lake, vertical land motion and National Water Model tools on the observations server
 - `ice-sheet-firn-root`: Firn air content and surface mass balance data root for the ice sheet closure
@@ -714,8 +714,8 @@ Concepts for products the bundles lack are drafted in parallel sessions from sou
 | `seed-ornldaac-gedi`: GEDI biomass knowledge for the ornldaac bundle, seeded and reviewed | `nasa-daac-knowledge` | active | P2 | needs-context | [#155](https://github.com/open-science-pillars/nasa-daac-knowledge/issues/155) |
 | `seed-hydrology-precip-lakes`: Precipitation guidance recipe and SWOT lake knowledge for hydrology, seeded and reviewed | `hydrology` | active | P2 | needs-context | [#64](https://github.com/open-science-pillars/hydrology/issues/64) |
 | `seed-regional-sea-level`: Regional sea level recipe with GIA and land motion for ocean-science, seeded and reviewed | `ocean-science` | done | P2 | needs-context | [#55](https://github.com/open-science-pillars/ocean-science/issues/55) |
-| `seed-lpdaac-vegetation`: MODIS vegetation knowledge for the lpdaac bundle, seeded and reviewed | `nasa-daac-knowledge` | active | P2 | needs-context | [#159](https://github.com/open-science-pillars/nasa-daac-knowledge/issues/159) |
-| `seed-gesdisc-oco2-subsetter`: OCO-2 SIF knowledge and the GES DISC subsetter connector concept, seeded and reviewed | `nasa-daac-knowledge` | active | P2 | needs-context | [#160](https://github.com/open-science-pillars/nasa-daac-knowledge/issues/160) |
+| `seed-lpdaac-vegetation`: MODIS vegetation knowledge for the lpdaac bundle, seeded and reviewed | `nasa-daac-knowledge` | done | P2 | needs-context | [#159](https://github.com/open-science-pillars/nasa-daac-knowledge/issues/159) |
+| `seed-gesdisc-oco2-subsetter`: OCO-2 SIF knowledge and the GES DISC subsetter connector concept, seeded and reviewed | `nasa-daac-knowledge` | done | P2 | needs-context | [#160](https://github.com/open-science-pillars/nasa-daac-knowledge/issues/160) |
 
 #### Acceptance details
 
@@ -845,14 +845,14 @@ Concepts for products the bundles lack are drafted in parallel sessions from sou
 - [ ] The MOD13, MOD15 and MOD17 dataset concepts and their gotchas (an index is not a state variable at high severity with its eval case, the day-of-year layer, model outputs and their flags, the sinusoidal grid) merge on the maintainer's review and reach stable on it.
 - [ ] Every eval case is registered in the evals manifests.
 - Depends on: `seed-lpdaac-nasadem-mod11`
-- Evidence: `Round three of seeding (build-kit roadmap/seeds/round-3.yaml), issue #159 in nasa-daac-knowledge, opened 2026-09-15`
+- Evidence: `Round three of seeding (build-kit roadmap/seeds/round-3.yaml), issue #159 in nasa-daac-knowledge, opened 2026-09-15`, `nasa-daac-knowledge PR #172, seeded 2026-09-15: MOD13 vegetation indices, MOD15 LAI and FPAR, MOD17 GPP and NPP dataset concepts and four gotchas (index is not a state variable at high severity with its eval case, composite day of year layer, LAI and GPP are model outputs, sinusoidal grid cell area); coordinator lint and fix round (arithmetic, fill code statements against the CMR variable records, the composite day title, the BPLUT minimum temperatures, the 2001 start of the annual record); merged 2026-09-15`, `nasa-daac-knowledge signing PR: six concepts stable and signed; the high index gotcha draft with one review. Eval case index-is-not-a-state-variable merged in agent-evals #29 and registered in the evals manifest (evals #39)`
 
 **`seed-gesdisc-oco2-subsetter`**
 
 - [ ] The OCO-2 SIF lite dataset concept, the subsetter and OPeNDAP connector concept and the gotchas (fluorescence is not photosynthesis at high severity with its eval case, the two bands, sparse soundings, the daily correction) merge on the maintainer's review and reach stable on it.
 - [ ] Every eval case is registered in the evals manifests.
 - Depends on: `seed-gesdisc-airs-omi`
-- Evidence: `Round three of seeding (build-kit roadmap/seeds/round-3.yaml), issue #160 in nasa-daac-knowledge, opened 2026-09-15`
+- Evidence: `Round three of seeding (build-kit roadmap/seeds/round-3.yaml), issue #160 in nasa-daac-knowledge, opened 2026-09-15`, `nasa-daac-knowledge PR #173, seeded 2026-09-15: the OCO-2 and OCO-3 SIF Lite dataset concept, four SIF gotchas (SIF is not photosynthesis at high severity with its eval case, two bands and offsets, soundings are sparse, daily correction) and the GES DISC subsetter and OPeNDAP connector concept; coordinator lint and fix round (the SoundingId field, the guide's two 740 nm formulas, the 11.2r declared extent, the AIRS migration list, the retiring on-premises DMR probes, the PO.DAAC L2 Cloud Subsetter named); merged 2026-09-15`, `nasa-daac-knowledge signing PR: the dataset, the connector and three gotchas stable and signed; the high SIF gotcha draft with one review. Eval case sif-is-not-photosynthesis merged in agent-evals #30 and registered in the evals manifest (evals #39)`
 
 ### Close budgets across spheres with attested computations
 
