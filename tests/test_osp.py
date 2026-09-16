@@ -1,6 +1,9 @@
 from __future__ import annotations
 
+import argparse
+import contextlib
 import importlib.util
+import io
 import json
 import tempfile
 import unittest
@@ -736,3 +739,13 @@ class PlacementCheckTests(unittest.TestCase):
         copy.write_text("# pinned_from: knowledge/references/computations/ohc.py\n" + source.read_text())
         _, warnings = self.check()
         self.assertFalse(any(" P7:" in w for w in warnings), warnings)
+
+    def test_the_command_measures_a_bundle_repository_without_a_package(self):
+        bundle = capability(self.root, name="nasa-daac-knowledge", status="planned")
+        (bundle / "knowledge" / "podaac" / "references" / "skills").mkdir(parents=True)
+        args = argparse.Namespace(repos=[str(bundle)], strict=True, workspace=None, workspace_dir=None, standalone=True)
+        buf = io.StringIO()
+        with contextlib.redirect_stdout(buf):
+            rc = osp.command_placement_check(args)
+        self.assertEqual(1, rc)
+        self.assertIn("P2", buf.getvalue())

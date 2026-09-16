@@ -1246,7 +1246,12 @@ def command_placement_check(args: argparse.Namespace) -> int:
     total = 0
     warned = 0
     workspace = Path(args.workspace).resolve() if getattr(args, "workspace", None) else None
-    for repo_dir in package_dirs(args):
+    # A knowledge package carries repository.yaml and no package.yaml until
+    # it ships as a plugin; the placement rule applies to it all the same.
+    dirs = [d for d in resolve_dirs(args) if (d / ".osp" / "repository.yaml").is_file()]
+    if not dirs:
+        raise OspError("no repository carries .osp/repository.yaml")
+    for repo_dir in dirs:
         errors, warnings = placement_check(repo_dir, workspace=workspace, strict=args.strict)
         for w in warnings:
             print(f"warning: {w}")
