@@ -1758,7 +1758,7 @@ initiatives:
       - id: energy-budget-closure
         title: Energy budget closure of CERES EBAF against ocean heat content as an attested computation
         repo: nasa-daac-knowledge
-        status: active
+        status: done
         priority: P2
         depends_on: [argo-ohc-computation]
         gate: ""
@@ -1767,6 +1767,8 @@ initiatives:
         - The computation concept, its recipe and its run skill merge on the coordinator's review and reach stable on the maintainer's; the numbers are anchored to the published Earth energy imbalance with sources.
         evidence:
           - "Round three of seeding (build-kit roadmap/seeds/round-3.yaml), issue #157 in nasa-daac-knowledge, opened 2026-09-15"
+          - "nasa-daac-knowledge PR #174, built 2026-09-15: the attested energy budget closure in the asdc bundle, CERES EBAF net TOA flux (read through OPeNDAP, anchored on the product geodetic global mean) against the Argo ocean heat content receipt plus the published deep and non-ocean terms, with fixture and data-root modes, a committed root and five refusals; coordinator review ran the chain, determinism and tamper tests; fix round closed the attester window and identity hole, scaled the atmosphere term to the 95 percent level and reworded the Loeb 2021 comparison as a consistency check; merged 2026-09-15"
+          - "nasa-daac-knowledge PR #179: the check chain wired into run_checks.sh, the registry runs under the asdc bundle key (reattest bundle support in PR #178), the computation concept, recipe and run skill stable and signed; the record run over 2006 to 2020 gives toa_net +0.87, ocean side +0.74, residual +0.13 W m-2 inside a bar of 0.19"
         contributor:
           readiness: needs-context
           champion: PaulMRamirez
