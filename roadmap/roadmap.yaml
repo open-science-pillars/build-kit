@@ -1039,6 +1039,125 @@ initiatives:
           prerequisites: [The consult-knowledge skill, the provenance ladder decision]
         labels: [roadmap, priority:P1]
 
+      - id: c1-placement-gate
+        issue:
+          number: 62
+          url: https://github.com/open-science-pillars/build-kit/issues/62
+        title: Measure code placement by plane in build-kit and every plugin gate
+        repo: build-kit
+        status: active
+        priority: P1
+        depends_on: [m4-documentation-alignment]
+        gate: "ADR C (code placement by plane) is accepted and specification section 11 states the rule; the migrations below make the dated warnings errors on 2026-10-01."
+        acceptance:
+          - "osp.py placement-check reports P1 to P7 of the placement gate with their codes, exits nonzero on an error, and --strict turns the dated warnings into errors."
+          - "Every plugin gate workflow (core, ocean-science, hydrology, nasa-daac-knowledge, plugin-template, knowledge-template) runs it beside validate, render --check and plugin-check."
+          - "The seed brief renderer applies the wrapping rule to every computation seed: the wrapping skill is a deliverable in the sphere capability, run instructions never go under references/skills/, and a seed names its wrap."
+        evidence: []
+        contributor:
+          readiness: needs-context
+          champion: PaulMRamirez
+          prerequisites: [OSP architecture, build-kit tooling]
+        labels: [roadmap, priority:P1]
+      - id: c2-ocean-science-placement
+        issue:
+          number: 62
+          url: https://github.com/open-science-pillars/ocean-science/issues/62
+        title: Move ocean-science to one home per plane and wrap its computations
+        repo: ocean-science
+        status: active
+        priority: P1
+        depends_on: [c1-placement-gate]
+        gate: null
+        acceptance:
+          - "The skill scripts of cite-ecco and receipt-figures live under their scripts/ directories and the cite-ecco copy carries a pinned_from line naming its source."
+          - "knowledge/references/skills/ is gone; the argo-ohc run instructions are the argo-ohc skill and the concept carries executor.skill: ocean-science/argo-ohc."
+          - "Every podaac ECCO computation and the sea level budget in nasa-daac-knowledge name the ocean-science skill that wraps them, and each such skill runs the executor by the installed bundle's path and the attester on the receipt."
+          - "osp.py placement-check --strict passes on the repository."
+        evidence: []
+        contributor:
+          readiness: needs-context
+          champion: PaulMRamirez
+          prerequisites: [ocean-science skills, attested computations]
+        labels: [roadmap, priority:P1]
+      - id: c3-hydrology-placement
+        issue:
+          number: 72
+          url: https://github.com/open-science-pillars/hydrology/issues/72
+        title: Move hydrology runtime helpers out of the goldens' fixtures tree
+        repo: hydrology
+        status: active
+        priority: P1
+        depends_on: [c1-placement-gate]
+        gate: null
+        acceptance:
+          - "The seven runtime helpers (load_et, load_precipitation, load_peaks, load_drought_panels, load_reservoir_ledger, load_swot_confrontation, delineate_basin) live under the scripts/ directory of the skill that runs them; the fixture builders and frozen inputs stay under verification/fixtures/."
+          - "No SKILL.md names a path under verification/; the basin water balance concept carries executor.skill: hydrology/basin-water-balance."
+          - "osp.py placement-check --strict passes and the goldens stay green."
+        evidence: []
+        contributor:
+          readiness: needs-context
+          champion: PaulMRamirez
+          prerequisites: [hydrology skills, the goldens]
+        labels: [roadmap, priority:P1]
+      - id: c4-nasa-daac-placement
+        issue:
+          number: 181
+          url: https://github.com/open-science-pillars/nasa-daac-knowledge/issues/181
+        title: Retire the run-skill references in nasa-daac-knowledge and point every computation at its executor and wrap
+        repo: nasa-daac-knowledge
+        status: active
+        priority: P1
+        depends_on: [c1-placement-gate, c2-ocean-science-placement]
+        gate: null
+        acceptance:
+          - "No bundle holds references/skills/; each retired run skill's content lives in the wrapping skill of the sphere capability, or its concept records that the capability does not yet exist."
+          - "Every Attested Computation's executor.resource names the executor script; the podaac computations carry executor.skill naming their ocean-science wrap; the bundle logs record the moves."
+          - "tools/scaffold_bundle.py creates no references/skills/ directory; osp.py placement-check --strict passes; run_checks stays ALL GREEN."
+        evidence: []
+        contributor:
+          readiness: needs-context
+          champion: PaulMRamirez
+          prerequisites: [OKF v0.2, attested computations]
+        labels: [roadmap, priority:P1]
+      - id: c5-template-placement
+        issue:
+          number: 20
+          url: https://github.com/open-science-pillars/plugin-template/issues/20
+        title: Ship the templates in the shape the placement gate expects
+        repo: plugin-template
+        status: active
+        priority: P2
+        depends_on: [c1-placement-gate]
+        gate: null
+        acceptance:
+          - "plugin-template ships one skill with a scripts/ directory and a golden that reads verification/fixtures/, and its gate runs placement-check."
+          - "knowledge-template ships no references/skills/ and its gate runs placement-check."
+        evidence: []
+        contributor:
+          readiness: ready
+          champion: PaulMRamirez
+          prerequisites: [the templates]
+        labels: [roadmap, priority:P2]
+      - id: c6-unwrapped-computations
+        issue:
+          number: 182
+          url: https://github.com/open-science-pillars/nasa-daac-knowledge/issues/182
+        title: Wrap the energy budget and ice sheet balance computations when their sphere capabilities exist
+        repo: nasa-daac-knowledge
+        status: blocked
+        priority: P2
+        depends_on: [c4-nasa-daac-placement]
+        gate: "The atmospheric-physics and land-ice repositories are planned; the wrap of each computation is a deliverable of that capability's first release, and until then the placement gate reports the two computations as unwrapped (P6), reachable through consult-knowledge and their concepts."
+        acceptance:
+          - "asdc energy-budget carries executor.skill naming a skill in atmospheric-physics that runs its executor and attester."
+          - "nsidc ice-sheet-balance carries executor.skill naming a skill in land-ice that runs its executor and attester."
+        evidence: []
+        contributor:
+          readiness: needs-context
+          champion: PaulMRamirez
+          prerequisites: [the planned capability's first release]
+        labels: [roadmap, priority:P2]
   - id: cryosphere-land-ice
     title: Open the Cryosphere through land-ice and the sea level budget
     outcome: land-ice is an installable capability whose first attested computation

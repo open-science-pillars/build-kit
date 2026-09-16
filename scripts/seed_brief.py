@@ -40,6 +40,7 @@ PLUGIN_CHECKS = (
     "`uv run ../build-kit/scripts/osp.py validate . --standalone`, "
     "`uv run ../build-kit/scripts/osp.py render . --check`, "
     "`uv run ../build-kit/scripts/osp.py plugin-check .`, "
+    "`uv run ../build-kit/scripts/osp.py placement-check .`, "
     "`uv run ../build-kit/scripts/osp.py advertise . --check --into README.md`, "
     "`uv run ../nasa-daac-knowledge/tools/check_okf_v02.py knowledge`, "
     "`uv run ../nasa-daac-knowledge/tools/check_script_deps.py .`, "
@@ -133,14 +134,18 @@ LOADER_RULES = (
     "check_script_deps.py reads, with each dependency pinned, and runs under `uv run`.")
 
 CONCEPT_RULES = (
-    "The computation concept has `type: Attested Computation` and names the executor, the "
-    "run skill and the attester in its frontmatter with the keys the pattern concept uses "
-    "(computation, executor.resource, executor.receipt, attester.resource); the recipe has "
-    "`type: Recipe`; the run skill sits under references/skills/ in the pattern skill's "
-    "shape; all three carry `status: draft`, the generated block and `stale_after` six "
-    "months out. Every number in the concept names the receipt it came from, and the "
-    "real-data run is anchored to the published value with its source and the distance "
-    "from it.")
+    "The computation concept has `type: Attested Computation` and names the executor and "
+    "the attester in its frontmatter with the keys the pattern concept uses (computation, "
+    "executor.resource naming the executor script itself, executor.receipt, "
+    "attester.resource) and, when this seed names a wrapping skill, `executor.skill: "
+    "<capability>/<skill>`; the recipe has `type: Recipe`; both carry `status: draft`, the "
+    "generated block and `stale_after` six months out. The run instructions are a skill "
+    "(a SKILL.md in the sphere capability), never a concept: create no references/skills/ "
+    "directory, and put no script under skills/<name>/ outside its scripts/ directory and "
+    "none under verification/ that a skill runs (the placement rule; `uv run "
+    "../build-kit/scripts/osp.py placement-check .` reports a violation with its code). "
+    "Every number in the concept names the receipt it came from, and the real-data run is "
+    "anchored to the published value with its source and the distance from it.")
 
 NO_CHECK_EDIT = (
     "Never edit the repository's check routine (tools/run_checks.sh, a workflow under "
@@ -332,6 +337,31 @@ def deliverables_text(seed: dict) -> str:
     return "DELIVERABLES:\n" + "\n".join(f"- {d}" for d in seed["deliverables"])
 
 
+def wrap_text(seed: dict) -> str:
+    """The wrapping rule (ADR C): every attested computation is wrapped by
+    a skill in the capability whose sphere it names. A seed names its wrap
+    as `wrap: <capability>/<skill>`; a seed without one records why."""
+    wrap = seed.get("wrap")
+    if not wrap:
+        return ("WRAP. Every attested computation is wrapped by a skill in the capability whose "
+                "sphere it names, and this seed names none: the capability that would wrap it does "
+                "not yet exist as a package, or the coordinator files the wrap separately. Leave "
+                "`executor.skill` out of the concept, write the run instructions into the PR body "
+                "(the coordinator carries them to the wrapping skill or the roadmap line), and expect "
+                "the placement gate to report the concept as unwrapped (P6); that is the floor, not "
+                "the goal.")
+    cap, _, skill = wrap.partition("/")
+    where = ("in this repository" if cap == seed["repo"] else
+             f"in {cap}: clone it beside this repository, build the skill on a branch named `{seed['branch']}` "
+             f"there, and open a second pull request against its main; the two are reviewed together")
+    return (f"WRAP. The run instructions are the skill `{wrap}` (skills/{skill}/SKILL.md {where}). The "
+            "skill invokes the executor by the installed bundle's path (`${CLAUDE_PLUGIN_ROOT}` for the "
+            "capability's own bundle; the checkout named by the bundle's environment variable for a "
+            "provider bundle, as ocean-science's receipt-figures skill does), states the parameters it "
+            "binds and the runtime name it passes, and tells the agent to run the attester on the receipt "
+            f"before quoting a number from it. The concept carries `executor.skill: {wrap}`.")
+
+
 def render_computation(round_: dict, seed: dict) -> str:
     repo, bundle, branch = seed["repo"], seed["bundle"], seed["branch"]
     provider = repo == "nasa-daac-knowledge"
@@ -370,6 +400,8 @@ WHAT TO BUILD ({seed['title']}). {seed['scope'].strip()}
 {deliverables_text(seed)}
 
 {pattern_text(seed)}
+
+{wrap_text(seed)}
 {context_text(seed)}
 SOURCES, and what to read on each:
 {sources_text(seed)}

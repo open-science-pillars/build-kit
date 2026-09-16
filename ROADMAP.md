@@ -14,8 +14,13 @@
 - `federated-governance-baseline`: Declare repository-level roadmap authority (`.github`)
 - `reconcile-project-record`: Reconcile specifications, progress, limitations, and counts (`marketplace`)
 - `roadmap-harness-v1`: Build the federated roadmap harness (`build-kit`)
+- `c1-placement-gate`: Measure code placement by plane in build-kit and every plugin gate (`build-kit`)
+- `c2-ocean-science-placement`: Move ocean-science to one home per plane and wrap its computations (`ocean-science`)
+- `c3-hydrology-placement`: Move hydrology runtime helpers out of the goldens' fixtures tree (`hydrology`)
+- `c4-nasa-daac-placement`: Retire the run-skill references in nasa-daac-knowledge and point every computation at its executor and wrap (`nasa-daac-knowledge`)
 - `landice-grace-knowledge`: GRACE-FO mass change knowledge for land ice, reviewed and offered for confirmation (`nasa-daac-knowledge`)
 - `r2-core-reference`: Qualify core as the reference capability on Claude Code, Cowork and Codex from one SKILL.md (`core`)
+- `c5-template-placement`: Ship the templates in the shape the placement gate expects (`plugin-template`)
 - `landice-nsidc-knowledge`: ICESat-2 height change and ice velocity knowledge in a new NSIDC bundle (`nasa-daac-knowledge`)
 - `seed-argo-gridded-steric`: Roemmich and Gilson gridded Argo knowledge, seeded and reviewed (`ocean-science`)
 - `seed-asdc-ceres-ebaf`: CERES EBAF knowledge for the asdc bundle, seeded and reviewed (`nasa-daac-knowledge`)
@@ -40,6 +45,7 @@
 ### Blocked
 
 - `landice-promotion`: Promote land-ice out of planned with its first skill and release (`land-ice`): Do not start until the powered-ablation decision authorizes new domains and a dated entry exists in the pre-registration; the planned gate refuses package, surfaces and runtime metadata until then.
+- `c6-unwrapped-computations`: Wrap the energy budget and ice sheet balance computations when their sphere capabilities exist (`nasa-daac-knowledge`): The atmospheric-physics and land-ice repositories are planned; the wrap of each computation is a deliverable of that capability's first release, and until then the placement gate reports the two computations as unwrapped (P6), reachable through consult-knowledge and their concepts.
 - `hydro-deferred-connectors`: Model context, the PeakFQ fixture, ECOSTRESS, and the SWOT hydrology move (`hydrology`): depends on `hydro-w2-w5-workflows`, `hydro-stewards-and-releases`
 - `landice-nsidc-elevation`: Reconcile mass change and elevation change for one ice sheet, in the land-ice capability (`land-ice`): Start when land-ice is promoted and the NSIDC knowledge is stable; the concepts themselves are captured first in the provider bundle.
 - `phase3-flood-slice`: Build the baseline-first remote-sensing flood slice (`marketplace`): Do not start until the powered-ablation decision authorizes Phase 3.
@@ -483,6 +489,12 @@ Pillar means sphere; canonical .osp metadata drives organization and runtime pro
 | `r8-maintainer-run-qualification`: Qualify a release candidate through tickets the maintainers close, with waivers, and no secret in the automation | `build-kit` | done | P1 | needs-context | none |
 | `r9-headless-ci-qualification`: Run the headless qualification legs in the organization's CI on a release candidate | `build-kit` | proposed | P2 | owner-only | [#32](https://github.com/open-science-pillars/build-kit/issues/32) |
 | `provider-confirmed-voicing`: Voice the provider-confirmed tier when citing a concept | `core` | proposed | P1 | ready | none |
+| `c1-placement-gate`: Measure code placement by plane in build-kit and every plugin gate | `build-kit` | active | P1 | needs-context | [#62](https://github.com/open-science-pillars/build-kit/issues/62) |
+| `c2-ocean-science-placement`: Move ocean-science to one home per plane and wrap its computations | `ocean-science` | active | P1 | needs-context | [#62](https://github.com/open-science-pillars/ocean-science/issues/62) |
+| `c3-hydrology-placement`: Move hydrology runtime helpers out of the goldens' fixtures tree | `hydrology` | active | P1 | needs-context | [#72](https://github.com/open-science-pillars/hydrology/issues/72) |
+| `c4-nasa-daac-placement`: Retire the run-skill references in nasa-daac-knowledge and point every computation at its executor and wrap | `nasa-daac-knowledge` | active | P1 | needs-context | [#181](https://github.com/open-science-pillars/nasa-daac-knowledge/issues/181) |
+| `c5-template-placement`: Ship the templates in the shape the placement gate expects | `plugin-template` | active | P2 | ready | [#20](https://github.com/open-science-pillars/plugin-template/issues/20) |
+| `c6-unwrapped-computations`: Wrap the energy budget and ice sheet balance computations when their sphere capabilities exist | `nasa-daac-knowledge` | blocked | P2 | needs-context | [#182](https://github.com/open-science-pillars/nasa-daac-knowledge/issues/182) |
 
 #### Acceptance details
 
@@ -628,6 +640,49 @@ Pillar means sphere; canonical .osp metadata drives organization and runtime pro
 - [ ] The consult-knowledge skill voices four tiers when it cites a high-severity claim (unverified, machine-confirmed, human-reviewed, provider-confirmed), deriving provider-confirmed from a human verified event with role provider.
 - [ ] A behavior prompt and an eval case cover a provider-confirmed citation and a maintainer-reviewed one, voiced differently.
 - Gate: Lands in the release after 0.5.1; a release candidate never edits a skill.
+
+**`c1-placement-gate`**
+
+- [ ] osp.py placement-check reports P1 to P7 of the placement gate with their codes, exits nonzero on an error, and --strict turns the dated warnings into errors.
+- [ ] Every plugin gate workflow (core, ocean-science, hydrology, nasa-daac-knowledge, plugin-template, knowledge-template) runs it beside validate, render --check and plugin-check.
+- [ ] The seed brief renderer applies the wrapping rule to every computation seed: the wrapping skill is a deliverable in the sphere capability, run instructions never go under references/skills/, and a seed names its wrap.
+- Depends on: `m4-documentation-alignment`
+- Gate: ADR C (code placement by plane) is accepted and specification section 11 states the rule; the migrations below make the dated warnings errors on 2026-10-01.
+
+**`c2-ocean-science-placement`**
+
+- [ ] The skill scripts of cite-ecco and receipt-figures live under their scripts/ directories and the cite-ecco copy carries a pinned_from line naming its source.
+- [ ] knowledge/references/skills/ is gone; the argo-ohc run instructions are the argo-ohc skill and the concept carries executor.skill: ocean-science/argo-ohc.
+- [ ] Every podaac ECCO computation and the sea level budget in nasa-daac-knowledge name the ocean-science skill that wraps them, and each such skill runs the executor by the installed bundle's path and the attester on the receipt.
+- [ ] osp.py placement-check --strict passes on the repository.
+- Depends on: `c1-placement-gate`
+
+**`c3-hydrology-placement`**
+
+- [ ] The seven runtime helpers (load_et, load_precipitation, load_peaks, load_drought_panels, load_reservoir_ledger, load_swot_confrontation, delineate_basin) live under the scripts/ directory of the skill that runs them; the fixture builders and frozen inputs stay under verification/fixtures/.
+- [ ] No SKILL.md names a path under verification/; the basin water balance concept carries executor.skill: hydrology/basin-water-balance.
+- [ ] osp.py placement-check --strict passes and the goldens stay green.
+- Depends on: `c1-placement-gate`
+
+**`c4-nasa-daac-placement`**
+
+- [ ] No bundle holds references/skills/; each retired run skill's content lives in the wrapping skill of the sphere capability, or its concept records that the capability does not yet exist.
+- [ ] Every Attested Computation's executor.resource names the executor script; the podaac computations carry executor.skill naming their ocean-science wrap; the bundle logs record the moves.
+- [ ] tools/scaffold_bundle.py creates no references/skills/ directory; osp.py placement-check --strict passes; run_checks stays ALL GREEN.
+- Depends on: `c1-placement-gate`, `c2-ocean-science-placement`
+
+**`c5-template-placement`**
+
+- [ ] plugin-template ships one skill with a scripts/ directory and a golden that reads verification/fixtures/, and its gate runs placement-check.
+- [ ] knowledge-template ships no references/skills/ and its gate runs placement-check.
+- Depends on: `c1-placement-gate`
+
+**`c6-unwrapped-computations`**
+
+- [ ] asdc energy-budget carries executor.skill naming a skill in atmospheric-physics that runs its executor and attester.
+- [ ] nsidc ice-sheet-balance carries executor.skill naming a skill in land-ice that runs its executor and attester.
+- Depends on: `c4-nasa-daac-placement`
+- Gate: The atmospheric-physics and land-ice repositories are planned; the wrap of each computation is a deliverable of that capability's first release, and until then the placement gate reports the two computations as unwrapped (P6), reachable through consult-knowledge and their concepts.
 
 ### Open the Cryosphere through land-ice and the sea level budget
 

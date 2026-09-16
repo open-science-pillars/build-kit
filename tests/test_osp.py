@@ -619,3 +619,120 @@ class ReleaseCandidateTests(AdvertiseTests):
 
     def test_ordinary_check_does_not_demand_decisions(self):
         self.assertEqual([], osp.advertisement(self.repo)["errors"])
+
+
+class PlacementCheckTests(unittest.TestCase):
+    """The placement gate (ADR C): P1 to P7 on a repository shaped by the
+    placement rule, then each finding provoked on its own."""
+
+    TODAY = "2026-09-16"
+
+    def setUp(self):
+        self.tmp = tempfile.TemporaryDirectory()
+        self.root = Path(self.tmp.name)
+        self.repo = packaged(self.root)
+        refs = self.repo / "knowledge" / "references"
+        (refs / "computations").mkdir(parents=True)
+        (refs / "computations" / "ohc.py").write_text("print('executor')\n")
+        (refs / "attesters").mkdir()
+        (refs / "attesters" / "attest_ohc.py").write_text("print('attester')\n")
+        (self.repo / "knowledge" / "computations").mkdir()
+        (self.repo / "knowledge" / "computations" / "ohc.md").write_text(
+            "---\ntype: Attested Computation\ntitle: OHC\ncomputation: references/computations/ohc.py\n"
+            "executor:\n  resource: references/computations/ohc.py\n  receipt: receipts/ohc.json\n"
+            "  skill: ocean-science/load-ecco\nattester:\n  resource: references/attesters/attest_ohc.py\n---\n\nBody.\n")
+        (self.repo / "skills" / "load-ecco" / "scripts").mkdir()
+        (self.repo / "skills" / "load-ecco" / "scripts" / "render.py").write_text("print('render')\n")
+        (self.repo / "verification" / "fixtures").mkdir(parents=True)
+        (self.repo / "verification" / "ohc.py").write_text("print('golden')\n")
+        (self.repo / "verification" / "fixtures" / "freeze_inputs.py").write_text("print('freeze')\n")
+        (self.repo / ".github" / "workflows").mkdir(parents=True)
+        (self.repo / ".github" / "workflows" / "goldens.yml").write_text(
+            "jobs:\n  goldens:\n    steps:\n      - run: uv run verification/ohc.py\n")
+
+    def tearDown(self):
+        self.tmp.cleanup()
+
+    def check(self, **kwargs):
+        kwargs.setdefault("today", self.TODAY)
+        return osp.placement_check(self.repo, **kwargs)
+
+    def test_a_repository_placed_by_plane_is_clean(self):
+        errors, warnings = self.check(strict=True)
+        self.assertEqual(([], []), (errors, warnings))
+
+    def test_orphan_sanctioned_code_is_an_error(self):
+        (self.repo / "knowledge" / "references" / "loaders").mkdir()
+        (self.repo / "knowledge" / "references" / "loaders" / "load_x.py").write_text("pass\n")
+        errors, _ = self.check()
+        self.assertTrue(any("P1" in e and "load_x.py" in e for e in errors), errors)
+
+    def test_migration_findings_warn_now_and_fail_later(self):
+        (self.repo / "knowledge" / "references" / "skills").mkdir()
+        (self.repo / "skills" / "load-ecco" / "helper.py").write_text("pass\n")
+        skill = self.repo / "skills" / "load-ecco" / "SKILL.md"
+        skill.write_text(skill.read_text() + "\nRun `uv run verification/fixtures/freeze_inputs.py` first.\n")
+        (self.repo / "verification" / "salt.py").write_text("print('unrun')\n")
+        codes = ["P2", "P3", "P4", "P5"]
+        errors, warnings = self.check()
+        self.assertEqual([], errors, errors)
+        for code in codes:
+            self.assertTrue(any(f" {code}:" in w for w in warnings), (code, warnings))
+        self.assertTrue(any("salt.py" in w and "neither" in w for w in warnings), warnings)
+        self.assertTrue(any("freeze_inputs.py" in w and "fixture script" in w for w in warnings), warnings)
+        errors, _ = self.check(strict=True)
+        for code in codes:
+            self.assertTrue(any(f" {code}:" in e for e in errors), (code, errors))
+        errors, _ = self.check(today=osp.PLACEMENT_ERRORS_FROM)
+        self.assertTrue(any(" P2:" in e for e in errors), errors)
+
+    def test_a_qualification_surface_counts_as_running_a_golden(self):
+        (self.repo / "verification" / "budget.py").write_text("print('surface')\n")
+        surfaces = self.repo / ".osp" / "surfaces.yaml"
+        surfaces.write_text(surfaces.read_text() + "  notes:\n    - verification/budget.py\n")
+        _, warnings = self.check()
+        self.assertFalse(any("budget.py" in w for w in warnings), warnings)
+
+    def test_a_workflow_glob_runs_every_golden(self):
+        (self.repo / "verification" / "salt.py").write_text("print('globbed')\n")
+        (self.repo / ".github" / "workflows" / "goldens.yml").write_text(
+            "jobs:\n  goldens:\n    steps:\n      - run: for g in verification/*.py; do uv run $g; done\n")
+        _, warnings = self.check()
+        self.assertFalse(any(" P5:" in w for w in warnings), warnings)
+
+    def concept(self, wrap_line: str) -> None:
+        (self.repo / "knowledge" / "computations" / "ohc.md").write_text(
+            "---\ntype: Attested Computation\ntitle: OHC\ncomputation: references/computations/ohc.py\n"
+            "executor:\n  resource: references/computations/ohc.py\n  receipt: receipts/ohc.json\n"
+            + wrap_line + "attester:\n  resource: references/attesters/attest_ohc.py\n---\n\nBody.\n")
+
+    def test_wrapping(self):
+        self.concept("")
+        errors, warnings = self.check()
+        self.assertEqual([], errors)
+        self.assertTrue(any(" P6:" in w and "unwrapped" in w for w in warnings), warnings)
+        self.concept("  skill: ocean-science/nope\n")
+        errors, _ = self.check()
+        self.assertTrue(any(" P6:" in e and "resolves to no skill" in e for e in errors), errors)
+        self.concept("  skill: Ocean Science\n")
+        errors, _ = self.check()
+        self.assertTrue(any(" P6:" in e and "<capability>/<skill>" in e for e in errors), errors)
+        self.concept("  skill: hydrology/basin-water-balance\n")
+        errors, warnings = self.check()
+        self.assertEqual([], errors)
+        self.assertTrue(any(" P6:" in w and "not checked out" in w for w in warnings), warnings)
+        other = capability(self.root, name="hydrology")
+        (other / "skills" / "basin-water-balance").mkdir(parents=True)
+        (other / "skills" / "basin-water-balance" / "SKILL.md").write_text("---\nname: basin-water-balance\n---\n")
+        errors, warnings = self.check(workspace=self.root)
+        self.assertEqual(([], []), (errors, warnings))
+
+    def test_a_copied_script_needs_a_pin(self):
+        source = self.repo / "knowledge" / "references" / "computations" / "ohc.py"
+        copy = self.repo / "skills" / "load-ecco" / "scripts" / "ohc.py"
+        copy.write_text(source.read_text())
+        _, warnings = self.check()
+        self.assertTrue(any(" P7:" in w and "pinned_from" in w for w in warnings), warnings)
+        copy.write_text("# pinned_from: knowledge/references/computations/ohc.py\n" + source.read_text())
+        _, warnings = self.check()
+        self.assertFalse(any(" P7:" in w for w in warnings), warnings)
