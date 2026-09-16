@@ -1045,7 +1045,7 @@ initiatives:
           url: https://github.com/open-science-pillars/build-kit/issues/62
         title: Measure code placement by plane in build-kit and every plugin gate
         repo: build-kit
-        status: active
+        status: done
         priority: P1
         depends_on: [m4-documentation-alignment]
         gate: "ADR C (code placement by plane) is accepted and specification section 11 states the rule; the migrations below make the dated warnings errors on 2026-10-01."
@@ -1053,7 +1053,9 @@ initiatives:
           - "osp.py placement-check reports P1 to P7 of the placement gate with their codes, exits nonzero on an error, and --strict turns the dated warnings into errors."
           - "Every plugin gate workflow (core, ocean-science, hydrology, nasa-daac-knowledge, plugin-template, knowledge-template) runs it beside validate, render --check and plugin-check."
           - "The seed brief renderer applies the wrapping rule to every computation seed: the wrapping skill is a deliverable in the sphere capability, run instructions never go under references/skills/, and a seed names its wrap."
-        evidence: []
+        evidence:
+          - "build-kit PR #63: osp.py placement-check (P1 to P7, the dated warning rule, --strict, --workspace), PlacementCheckTests, the osp metadata guide section, seed_brief.py's wrapping rule and placement-check among the plugin checks; PR #64: the command selects repositories by repository.yaml so a bundle without a package is measured"
+          - "The gate step runs in the plugin gates of ocean-science (PR #63), hydrology (PR #73), nasa-daac-knowledge (PR #183), plugin-template (PR #21) and knowledge-template (PR #12); core's gate step is the maintainer's, since its working branch is the head of the open release pull request #39"
         contributor:
           readiness: needs-context
           champion: PaulMRamirez
@@ -1065,7 +1067,7 @@ initiatives:
           url: https://github.com/open-science-pillars/ocean-science/issues/62
         title: Move ocean-science to one home per plane and wrap its computations
         repo: ocean-science
-        status: active
+        status: done
         priority: P1
         depends_on: [c1-placement-gate]
         gate: null
@@ -1074,7 +1076,8 @@ initiatives:
           - "knowledge/references/skills/ is gone; the argo-ohc run instructions are the argo-ohc skill and the concept carries executor.skill: ocean-science/argo-ohc."
           - "Every podaac ECCO computation and the sea level budget in nasa-daac-knowledge name the ocean-science skill that wraps them, and each such skill runs the executor by the installed bundle's path and the attester on the receipt."
           - "osp.py placement-check --strict passes on the repository."
-        evidence: []
+        evidence:
+          - "ocean-science PR #63: cite-ecco and receipt-figures scripts under scripts/ with the cite-ecco copy pinned to nasa-daac-knowledge main; run-argo-ohc retired into the argo-ohc skill and the concept wrapped (executor.skill: ocean-science/argo-ohc, re-signed); attested run sections in ocean-budget, transport-analysis, compare-obs, sea-level-analysis and ecco, and a new sea-level-budget skill, wrapping every podaac computation; goldens.yml names every golden (a dispatch-only job for the cache-reading notebooks); placement-check --strict PASSED with 0 warnings"
         contributor:
           readiness: needs-context
           champion: PaulMRamirez
@@ -1086,7 +1089,7 @@ initiatives:
           url: https://github.com/open-science-pillars/hydrology/issues/72
         title: Move hydrology runtime helpers out of the goldens' fixtures tree
         repo: hydrology
-        status: active
+        status: done
         priority: P1
         depends_on: [c1-placement-gate]
         gate: null
@@ -1094,7 +1097,8 @@ initiatives:
           - "The seven runtime helpers (load_et, load_precipitation, load_peaks, load_drought_panels, load_reservoir_ledger, load_swot_confrontation, delineate_basin) live under the scripts/ directory of the skill that runs them; the fixture builders and frozen inputs stay under verification/fixtures/."
           - "No SKILL.md names a path under verification/; the basin water balance concept carries executor.skill: hydrology/basin-water-balance."
           - "osp.py placement-check --strict passes and the goldens stay green."
-        evidence: []
+        evidence:
+          - "hydrology PR #73: the seven runtime helpers moved to load-et, load-precipitation, load-peaks, delineate-basin, drought-anatomy, reservoir-ledger and swot-hydro scripts/ directories with the goldens, README, connector concept and fixtures README following; no SKILL.md names the goldens' tree; basin-water-balance wrapped (executor.skill, the skill states its parameters, runtime and attester step); the two edited stable concepts re-signed; all thirteen goldens green; placement-check --strict PASSED with 0 warnings"
         contributor:
           readiness: needs-context
           champion: PaulMRamirez
@@ -1106,7 +1110,7 @@ initiatives:
           url: https://github.com/open-science-pillars/nasa-daac-knowledge/issues/181
         title: Retire the run-skill references in nasa-daac-knowledge and point every computation at its executor and wrap
         repo: nasa-daac-knowledge
-        status: active
+        status: done
         priority: P1
         depends_on: [c1-placement-gate, c2-ocean-science-placement]
         gate: null
@@ -1114,7 +1118,8 @@ initiatives:
           - "No bundle holds references/skills/; each retired run skill's content lives in the wrapping skill of the sphere capability, or its concept records that the capability does not yet exist."
           - "Every Attested Computation's executor.resource names the executor script; the podaac computations carry executor.skill naming their ocean-science wrap; the bundle logs record the moves."
           - "tools/scaffold_bundle.py creates no references/skills/ directory; osp.py placement-check --strict passes; run_checks stays ALL GREEN."
-        evidence: []
+        evidence:
+          - "nasa-daac-knowledge PR #183: the five run-instruction references retired (podaac run-golden, run-sea-level, run-sea-level-budget; asdc run-energy-budget; nsidc run-ice-sheet-balance); every podaac computation carries executor.skill naming its ocean-science wrap and executor.resource names the executor script; the asdc and nsidc concepts carry their data-root layouts as a section and stay unwrapped until their capabilities exist; eighteen stable concepts re-signed; scaffold_bundle.py never created references/skills/; run_checks ALL GREEN; placement-check --strict PASSED with the two unwrapped computations as its only warnings"
         contributor:
           readiness: needs-context
           champion: PaulMRamirez
@@ -1126,14 +1131,15 @@ initiatives:
           url: https://github.com/open-science-pillars/plugin-template/issues/20
         title: Ship the templates in the shape the placement gate expects
         repo: plugin-template
-        status: active
+        status: done
         priority: P2
         depends_on: [c1-placement-gate]
         gate: null
         acceptance:
           - "plugin-template ships one skill with a scripts/ directory and a golden that reads verification/fixtures/, and its gate runs placement-check."
           - "knowledge-template ships no references/skills/ and its gate runs placement-check."
-        evidence: []
+        evidence:
+          - "plugin-template PR #21: skills/example-workflow/scripts/example_helper.py with --selftest, the SKILL.md invoking it through the plugin root and naming no goldens path, a committed fixture and its builder, goldens.yml running every golden, the placement-check step; knowledge-template PR #12: the placement-check step in the bundle gate and the README stating where a computation's run instructions go; both strict-clean"
         contributor:
           readiness: ready
           champion: PaulMRamirez
