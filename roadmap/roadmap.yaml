@@ -1800,7 +1800,7 @@ initiatives:
       - id: basin-balance-groundwater
         title: Basin water balance with a groundwater term, and the National Water Model confrontation recipe
         repo: hydrology
-        status: active
+        status: done
         priority: P2
         depends_on: [seed-hydrology-precip-lakes, observations-round-three]
         gate: ""
@@ -1809,6 +1809,8 @@ initiatives:
         - The nwm-gauge-confrontation recipe and its eval case merge on the maintainer's review and reach stable on it; the case is registered in the evals manifests.
         evidence:
           - "Round three of seeding (build-kit roadmap/seeds/round-3.yaml), issue #65 in hydrology, opened 2026-09-15"
+          - "hydrology PR #70, built 2026-09-15: the groundwater partition of dS in the attested basin water balance (water-table fluctuation over 58 unconfined USGS wells in the Ohio at Olmsted basin, frozen as a fourth fixture tree with a selection script), bar three on the specific yield and the partition, the NWM gauge confrontation recipe with its methodology eval case; coordinator review ran the golden, the four trees and a tamper suite; fix round attested every receipt field, added the parameter guard, connected-component clustering, the sigma at spread and the term without the largest site; merged 2026-09-16"
+          - "hydrology PR #71: the edited computation concept and recipe re-signed, the NWM recipe stable and signed; the eval case registered in the evals hydrology manifest (evals #40). The groundwater term is +9.75 km3 with a sigma of 15.0, one riverbank well field carrying nearly all of it"
         contributor:
           readiness: needs-context
           champion: PaulMRamirez
