@@ -16,7 +16,6 @@
 - `roadmap-harness-v1`: Build the federated roadmap harness (`build-kit`)
 - `landice-grace-knowledge`: GRACE-FO mass change knowledge for land ice, reviewed and offered for confirmation (`nasa-daac-knowledge`)
 - `r2-core-reference`: Qualify core as the reference capability on Claude Code, Cowork and Codex from one SKILL.md (`core`)
-- `basin-balance-groundwater`: Basin water balance with a groundwater term, and the National Water Model confrontation recipe (`hydrology`)
 - `ice-sheet-balance-closure`: Ice sheet mass balance closure as an attested computation (`nasa-daac-knowledge`)
 - `landice-nsidc-knowledge`: ICESat-2 height change and ice velocity knowledge in a new NSIDC bundle (`nasa-daac-knowledge`)
 - `seed-argo-gridded-steric`: Roemmich and Gilson gridded Argo knowledge, seeded and reviewed (`ocean-science`)
@@ -72,10 +71,10 @@ Proposed, waiting on a dependency, in priority order.
 - P1 `r3-dependency-reference`: Validate dependency realization on ocean-science across runtimes (`ocean-science`)
 - P1 `tutorial-nonauthor-validation`: Complete non-author Tutorial 2 validation (`tutorials`)
 
-### Done (29)
+### Done (30)
 
 <details>
-<summary>29 done deliverables</summary>
+<summary>30 done deliverables</summary>
 
 - `hydro-usgs-waterdata-migration`: Migrate the USGS connector to the Water Data APIs and release it
 - `hydro-basin-unit`: Add basin delineation as the unit of analysis
@@ -106,6 +105,7 @@ Proposed, waiting on a dependency, in priority order.
 - `observations-round-three`: Groundwater, lake, vertical land motion and National Water Model tools on the observations server
 - `ice-sheet-firn-root`: Firn air content and surface mass balance data root for the ice sheet closure
 - `energy-budget-closure`: Energy budget closure of CERES EBAF against ocean heat content as an attested computation
+- `basin-balance-groundwater`: Basin water balance with a groundwater term, and the National Water Model confrontation recipe
 
 </details>
 
@@ -869,7 +869,7 @@ The ocean heat content, the Earth energy imbalance, the ice sheet mass balance a
 | `ice-sheet-firn-root`: Firn air content and surface mass balance data root for the ice sheet closure | `nasa-daac-knowledge` | done | P2 | needs-context | [#156](https://github.com/open-science-pillars/nasa-daac-knowledge/issues/156) |
 | `energy-budget-closure`: Energy budget closure of CERES EBAF against ocean heat content as an attested computation | `nasa-daac-knowledge` | done | P2 | needs-context | [#157](https://github.com/open-science-pillars/nasa-daac-knowledge/issues/157) |
 | `ice-sheet-balance-closure`: Ice sheet mass balance closure as an attested computation | `nasa-daac-knowledge` | active | P2 | needs-context | [#158](https://github.com/open-science-pillars/nasa-daac-knowledge/issues/158) |
-| `basin-balance-groundwater`: Basin water balance with a groundwater term, and the National Water Model confrontation recipe | `hydrology` | active | P2 | needs-context | [#65](https://github.com/open-science-pillars/hydrology/issues/65) |
+| `basin-balance-groundwater`: Basin water balance with a groundwater term, and the National Water Model confrontation recipe | `hydrology` | done | P2 | needs-context | [#65](https://github.com/open-science-pillars/hydrology/issues/65) |
 
 #### Acceptance details
 
@@ -909,4 +909,4 @@ The ocean heat content, the Earth energy imbalance, the ice sheet mass balance a
 - [ ] The basin water balance executor carries a groundwater storage change term from NWIS groundwater levels with a stated specific yield, the attester and both goldens pass on the frozen fixture trees, and the updated computation concept and recipe merge on the coordinator's review.
 - [ ] The nwm-gauge-confrontation recipe and its eval case merge on the maintainer's review and reach stable on it; the case is registered in the evals manifests.
 - Depends on: `seed-hydrology-precip-lakes`, `observations-round-three`
-- Evidence: `Round three of seeding (build-kit roadmap/seeds/round-3.yaml), issue #65 in hydrology, opened 2026-09-15`
+- Evidence: `Round three of seeding (build-kit roadmap/seeds/round-3.yaml), issue #65 in hydrology, opened 2026-09-15`, `hydrology PR #70, built 2026-09-15: the groundwater partition of dS in the attested basin water balance (water-table fluctuation over 58 unconfined USGS wells in the Ohio at Olmsted basin, frozen as a fourth fixture tree with a selection script), bar three on the specific yield and the partition, the NWM gauge confrontation recipe with its methodology eval case; coordinator review ran the golden, the four trees and a tamper suite; fix round attested every receipt field, added the parameter guard, connected-component clustering, the sigma at spread and the term without the largest site; merged 2026-09-16`, `hydrology PR #71: the edited computation concept and recipe re-signed, the NWM recipe stable and signed; the eval case registered in the evals hydrology manifest (evals #40). The groundwater term is +9.75 km3 with a sigma of 15.0, one riverbank well field carrying nearly all of it`
