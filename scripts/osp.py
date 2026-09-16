@@ -1084,6 +1084,183 @@ def command_plugin_check(args: argparse.Namespace) -> int:
 
 
 # ---------------------------------------------------------------------------
+# Code placement (ADR C; the placement rule, the wrapping rule and the
+# placement gate in the specification): every file of code has one home
+# chosen by the plane it serves. Sanctioned code of an Attested
+# Computation stays in the bundle's references tree; a procedure is a
+# skill; a script a skill runs at runtime lives in that skill's scripts
+# directory; nothing a skill invokes lives under verification; every
+# computation is wrapped by a skill in its sphere capability. The gate
+# measures paths and names and never runs a computation or a golden.
+# ---------------------------------------------------------------------------
+
+PLACEMENT_ERRORS_FROM = "2026-10-01"   # ADR C: P2 to P5 are warnings until the migrations land
+COMPUTATION_TYPE = "Attested Computation"
+TEXT_SUFFIXES = {".md", ".yaml", ".yml", ".json", ".sh", ".py", ".toml", ".txt"}
+
+
+def _py_files(root: Path) -> list[Path]:
+    if not root.is_dir():
+        return []
+    return sorted(p for p in root.rglob("*.py") if "__pycache__" not in p.parts)
+
+
+def _repo_texts(repo_dir: Path) -> dict[Path, str]:
+    """Every text file of the repository, for name references."""
+    out: dict[Path, str] = {}
+    for p in repo_dir.rglob("*"):
+        if not p.is_file() or p.suffix not in TEXT_SUFFIXES:
+            continue
+        if any(part in {".git", "__pycache__", "node_modules", "dist"} for part in p.parts):
+            continue
+        try:
+            out[p] = p.read_text(encoding="utf-8")
+        except (UnicodeDecodeError, OSError):
+            continue
+    return out
+
+
+def _skill_dirs(repo_dir: Path) -> list[Path]:
+    skills = repo_dir / "skills"
+    if not skills.is_dir():
+        return []
+    return sorted(d for d in skills.iterdir() if d.is_dir() and (d / "SKILL.md").is_file())
+
+
+def _bundle_dirs(repo_dir: Path) -> list[Path]:
+    """Bundles: knowledge/ itself when it holds concepts directly, else
+    each child of knowledge/ that does."""
+    know = repo_dir / "knowledge"
+    if not know.is_dir():
+        return []
+    if any((know / d).is_dir() for d in ("computations", "gotchas", "datasets", "recipes", "references")):
+        return [know]
+    return sorted(d for d in know.iterdir() if d.is_dir() and not d.name.startswith("."))
+
+
+def placement_check(repo_dir: Path, workspace: Path | None = None, strict: bool = False,
+                    today: str | None = None) -> tuple[list[str], list[str]]:
+    """The placement gate: findings P1 to P7 of the specification's
+    placement rule, as (errors, warnings). P2 to P5 are warnings until
+    PLACEMENT_ERRORS_FROM unless strict."""
+    import datetime as _dt
+    errors: list[str] = []
+    warnings: list[str] = []
+    name = repo_dir.name
+    today = today or _dt.date.today().isoformat()
+    migrating = (today < PLACEMENT_ERRORS_FROM) and not strict
+    soft = warnings if migrating else errors
+    texts = _repo_texts(repo_dir)
+
+    def rel(p: Path) -> str:
+        return p.relative_to(repo_dir).as_posix()
+
+    # P1: orphan sanctioned code under knowledge/**/references/
+    for bundle in _bundle_dirs(repo_dir):
+        refs = bundle / "references"
+        for script in _py_files(refs):
+            named = any(script.name in text for path, text in texts.items() if path != script)
+            if not named:
+                errors.append(f"{name} P1: {rel(script)} is sanctioned code no concept, data root, "
+                              "registry entry or check chain names (orphan)")
+        # P2: run instructions filed as knowledge
+        if (refs / "skills").is_dir():
+            soft.append(f"{name} P2: {rel(refs / 'skills')} exists; run instructions are a skill in the "
+                        "sphere capability, not a concept (the placement rule)")
+    # P3: a skill script outside scripts/
+    skill_texts: dict[Path, str] = {}
+    for sd in _skill_dirs(repo_dir):
+        for script in _py_files(sd):
+            if "scripts" not in script.relative_to(sd).parts:
+                soft.append(f"{name} P3: {rel(script)} is a skill script outside {rel(sd)}/scripts/")
+        # P4: a skill that runs the goldens tree
+        text = (sd / "SKILL.md").read_text(encoding="utf-8")
+        skill_texts[sd] = text
+        if re.search(r"(?<![\w/.-])verification/", text):
+            soft.append(f"{name} P4: {rel(sd / 'SKILL.md')} names a path under verification/, which "
+                        "is the goldens' tree; a runtime helper lives in the skill's scripts/")
+    # P5: a golden the workflow does not run, and the reverse, a fixture
+    # script a skill names. A golden a qualification surface runs on a
+    # maintainer's machine (surfaces.yaml names it) counts as run.
+    ver = repo_dir / "verification"
+    goldens = sorted(ver.glob("*.py")) if ver.is_dir() else []
+    if goldens:
+        wf_dir = repo_dir / ".github" / "workflows"
+        wf_text = "\n".join(p.read_text(encoding="utf-8") for p in sorted(wf_dir.glob("*.yml"))) if wf_dir.is_dir() else ""
+        surfaces = repo_dir / ".osp" / "surfaces.yaml"
+        covered = wf_text + ("\n" + surfaces.read_text(encoding="utf-8") if surfaces.is_file() else "")
+        if not wf_text:
+            soft.append(f"{name} P5: verification/ holds goldens but no workflow runs them")
+        elif "verification/*.py" not in wf_text:
+            for g in goldens:
+                if rel(g) not in covered:
+                    soft.append(f"{name} P5: {rel(g)} is a golden that neither the goldens workflow nor a "
+                                "qualification surface runs")
+    for script in _py_files(ver / "fixtures"):
+        namers = [rel(sd / "SKILL.md") for sd, text in skill_texts.items()
+                  if rel(script) in text or script.name in text]
+        if namers:
+            soft.append(f"{name} P5: {rel(script)} is a fixture script that {', '.join(namers)} names; "
+                        "a runtime helper lives in the skill's scripts/")
+    # P6: an unwrapped computation, and a wrap that resolves to nothing
+    for bundle in _bundle_dirs(repo_dir):
+        comps = bundle / "computations"
+        for concept in sorted(comps.glob("*.md")) if comps.is_dir() else []:
+            fm = parse_frontmatter(concept.read_text(encoding="utf-8")) or {}
+            if fm.get("type") != COMPUTATION_TYPE:
+                continue
+            executor = fm.get("executor") if isinstance(fm.get("executor"), dict) else {}
+            wrap = executor.get("skill")
+            if not wrap:
+                warnings.append(f"{name} P6: {rel(concept)} is unwrapped (no executor.skill); the wrapping "
+                                "skill lives in the sphere capability that depends on this bundle")
+                continue
+            m = re.fullmatch(r"([a-z0-9][a-z0-9-]*)/([a-z0-9][a-z0-9-]*)", str(wrap))
+            if not m:
+                errors.append(f"{name} P6: {rel(concept)} executor.skill {wrap!r} is not <capability>/<skill>")
+                continue
+            cap, skill = m.groups()
+            cap_dir = (repo_dir if cap == name else (workspace or repo_dir.parent) / cap)
+            if not (cap_dir / ".osp" / "package.yaml").is_file():
+                warnings.append(f"{name} P6: {rel(concept)} names {wrap}; {cap} is not checked out beside this "
+                                "repository, so the wrap is unresolved here")
+            elif not (cap_dir / "skills" / skill / "SKILL.md").is_file():
+                errors.append(f"{name} P6: {rel(concept)} names {wrap}, which resolves to no skill in {cap}")
+    # P7: a copied script without a pin
+    by_digest: dict[str, list[Path]] = {}
+    for script in _py_files(repo_dir):
+        if any(part in {".git", "dist", "node_modules"} for part in script.parts):
+            continue
+        by_digest.setdefault(hashlib.sha256(script.read_bytes()).hexdigest(), []).append(script)
+    for paths in by_digest.values():
+        if len(paths) < 2:
+            continue
+        pinned = any("pinned_from:" in "\n".join(p.read_text(encoding="utf-8").splitlines()[:40]) for p in paths)
+        if not pinned:
+            warnings.append(f"{name} P7: byte-identical scripts {', '.join(rel(p) for p in paths)}; the copy "
+                            "carries a pinned_from: line naming its source")
+    return errors, warnings
+
+
+def command_placement_check(args: argparse.Namespace) -> int:
+    total = 0
+    warned = 0
+    workspace = Path(args.workspace).resolve() if getattr(args, "workspace", None) else None
+    for repo_dir in package_dirs(args):
+        errors, warnings = placement_check(repo_dir, workspace=workspace, strict=args.strict)
+        for w in warnings:
+            print(f"warning: {w}")
+        for e in errors:
+            print(f"error: {e}")
+        total += len(errors)
+        warned += len(warnings)
+        print(f"{repo_dir.name}: {'FAILED' if errors else 'placed by plane'}")
+    print(f"osp placement-check: {'FAILED' if total else 'PASSED'} ({total} errors, {warned} warnings"
+          f"{'; strict' if args.strict else ''})")
+    return 1 if total else 0
+
+
+# ---------------------------------------------------------------------------
 # Advertising and publishing (ADR B, decision 10; the design's release
 # rule): a runtime is advertised as supported for a release only on a
 # qualified record for that release; a release stays valid when a runtime
@@ -1471,6 +1648,10 @@ def parser() -> argparse.ArgumentParser:
     lk.add_argument("--report", action="store_true", help="print a stale lock without failing")
     pc = sub.add_parser("plugin-check")
     pc.add_argument("repos", nargs="*")
+    pl = sub.add_parser("placement-check")
+    pl.add_argument("repos", nargs="*")
+    pl.add_argument("--strict", action="store_true", help="P2 to P5 are errors now, not only from the migration date")
+    pl.add_argument("--workspace", help="where sibling capabilities are checked out, to resolve executor.skill")
     ad = sub.add_parser("advertise")
     ad.add_argument("repos", nargs="*")
     ad.add_argument("--check", action="store_true", help="fail on a support claim with no qualified record for this release, or a stale README block")
@@ -1486,7 +1667,8 @@ def parser() -> argparse.ArgumentParser:
 
 COMMANDS = {"validate": command_validate, "topics": command_topics, "sphere-view": command_sphere_view,
             "teams": command_teams, "render": command_render, "lock": command_lock,
-            "plugin-check": command_plugin_check, "advertise": command_advertise, "publish": command_publish}
+            "plugin-check": command_plugin_check, "placement-check": command_placement_check,
+            "advertise": command_advertise, "publish": command_publish}
 
 
 def main() -> int:

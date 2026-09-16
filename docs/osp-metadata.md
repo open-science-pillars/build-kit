@@ -155,6 +155,38 @@ Conformance is a package gate, not a runtime claim: a package that
 passes is not thereby qualified on any runtime (the qualification
 deliverables of the architecture alignment initiative).
 
+## placement-check
+
+`osp.py placement-check` measures the placement rule of the
+specification (section 11, "one home per plane", decided in ADR C): every
+file of code has one home chosen by the plane it serves. Sanctioned code
+of an Attested Computation (its executor, attester, loaders and
+derivations) stays under the bundle's `references/` tree because the
+concept names it by path and the attester hashes it; a procedure,
+including the run instructions of a computation, is a skill; a script a
+skill runs at runtime lives in `skills/<name>/scripts/`; the goldens live
+at the top of `verification/` and their fixtures under
+`verification/fixtures/`; nothing a skill invokes lives under
+`verification/`. The gate never runs a computation, an attester or a
+golden; it reads paths, names and frontmatter, prints each finding with
+its code, and exits nonzero on an error.
+
+| Code | Finding | Severity |
+|---|---|---|
+| P1 | orphan sanctioned code: a `.py` under `knowledge/**/references/` no other file of the repository names | error |
+| P2 | run instructions filed as knowledge: a `knowledge/**/references/skills/` directory | warning until 2026-10-01 |
+| P3 | a skill script outside `scripts/`: a `.py` under `skills/<name>/` that is not under its `scripts/` | warning until 2026-10-01 |
+| P4 | a skill that runs the goldens tree: a `SKILL.md` naming a path under `verification/` | warning until 2026-10-01 |
+| P5 | a golden the workflow does not run (neither globbed nor listed by a workflow, and not a qualification surface in `surfaces.yaml`), or a `verification/fixtures/` script a `SKILL.md` names | warning until 2026-10-01 |
+| P6 | an unwrapped computation: an Attested Computation without `executor.skill`; a value that is not `<capability>/<skill>` or names a skill the capability does not have is an error; a capability not checked out beside the repository is a warning | warning |
+| P7 | a copied script: two byte-identical `.py` files in one repository without a `pinned_from:` line in the copy's first forty lines | warning |
+
+`--strict` turns the dated warnings into errors now (a migration pull
+request runs it to prove the repository is clean); `--workspace DIR`
+names the directory the sibling capabilities are checked out in when
+they are not beside the repository. The gate runs in every plugin gate
+workflow beside `validate`, `render --check` and `plugin-check`.
+
 ## release-lock.json
 
 `osp.py lock` writes `.osp/release-lock.json`:
@@ -251,6 +283,7 @@ uv run build-kit/scripts/osp.py teams               # gh commands that create th
 uv run build-kit/scripts/osp.py render              # write the four projections of every package
 uv run build-kit/scripts/osp.py render . --check    # drift gate inside a repository
 uv run build-kit/scripts/osp.py plugin-check .      # Agent Plugins 1.0.0 conformance of the portable package
+uv run build-kit/scripts/osp.py placement-check .  # one home per plane (P1 to P7); --strict on a migration
 uv run build-kit/scripts/osp.py lock .              # write .osp/release-lock.json
 uv run build-kit/scripts/osp.py lock . --check      # enforced on a release tag; --report on a pull request
 uv run build-kit/scripts/osp.py advertise . --check # every support claim has a qualified record
