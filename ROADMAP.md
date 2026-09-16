@@ -14,13 +14,8 @@
 - `federated-governance-baseline`: Declare repository-level roadmap authority (`.github`)
 - `reconcile-project-record`: Reconcile specifications, progress, limitations, and counts (`marketplace`)
 - `roadmap-harness-v1`: Build the federated roadmap harness (`build-kit`)
-- `c1-placement-gate`: Measure code placement by plane in build-kit and every plugin gate (`build-kit`)
-- `c2-ocean-science-placement`: Move ocean-science to one home per plane and wrap its computations (`ocean-science`)
-- `c3-hydrology-placement`: Move hydrology runtime helpers out of the goldens' fixtures tree (`hydrology`)
-- `c4-nasa-daac-placement`: Retire the run-skill references in nasa-daac-knowledge and point every computation at its executor and wrap (`nasa-daac-knowledge`)
 - `landice-grace-knowledge`: GRACE-FO mass change knowledge for land ice, reviewed and offered for confirmation (`nasa-daac-knowledge`)
 - `r2-core-reference`: Qualify core as the reference capability on Claude Code, Cowork and Codex from one SKILL.md (`core`)
-- `c5-template-placement`: Ship the templates in the shape the placement gate expects (`plugin-template`)
 - `landice-nsidc-knowledge`: ICESat-2 height change and ice velocity knowledge in a new NSIDC bundle (`nasa-daac-knowledge`)
 - `seed-argo-gridded-steric`: Roemmich and Gilson gridded Argo knowledge, seeded and reviewed (`ocean-science`)
 - `seed-asdc-ceres-ebaf`: CERES EBAF knowledge for the asdc bundle, seeded and reviewed (`nasa-daac-knowledge`)
@@ -76,10 +71,10 @@ Proposed, waiting on a dependency, in priority order.
 - P1 `r3-dependency-reference`: Validate dependency realization on ocean-science across runtimes (`ocean-science`)
 - P1 `tutorial-nonauthor-validation`: Complete non-author Tutorial 2 validation (`tutorials`)
 
-### Done (31)
+### Done (36)
 
 <details>
-<summary>31 done deliverables</summary>
+<summary>36 done deliverables</summary>
 
 - `hydro-usgs-waterdata-migration`: Migrate the USGS connector to the Water Data APIs and release it
 - `hydro-basin-unit`: Add basin delineation as the unit of analysis
@@ -102,6 +97,11 @@ Proposed, waiting on a dependency, in priority order.
 - `r5-cross-runtime-evals`: Record capability, release lock, runtime and model on every eval result
 - `r7-release-qualification`: Advertise a runtime as supported only when the qualification harness passes
 - `r8-maintainer-run-qualification`: Qualify a release candidate through tickets the maintainers close, with waivers, and no secret in the automation
+- `c1-placement-gate`: Measure code placement by plane in build-kit and every plugin gate
+- `c2-ocean-science-placement`: Move ocean-science to one home per plane and wrap its computations
+- `c3-hydrology-placement`: Move hydrology runtime helpers out of the goldens' fixtures tree
+- `c4-nasa-daac-placement`: Retire the run-skill references in nasa-daac-knowledge and point every computation at its executor and wrap
+- `c5-template-placement`: Ship the templates in the shape the placement gate expects
 - `sea-level-budget-closure`: Close the global sea level budget as an attested computation
 - `seed-regional-sea-level`: Regional sea level recipe with GIA and land motion for ocean-science, seeded and reviewed
 - `seed-lpdaac-vegetation`: MODIS vegetation knowledge for the lpdaac bundle, seeded and reviewed
@@ -489,11 +489,11 @@ Pillar means sphere; canonical .osp metadata drives organization and runtime pro
 | `r8-maintainer-run-qualification`: Qualify a release candidate through tickets the maintainers close, with waivers, and no secret in the automation | `build-kit` | done | P1 | needs-context | none |
 | `r9-headless-ci-qualification`: Run the headless qualification legs in the organization's CI on a release candidate | `build-kit` | proposed | P2 | owner-only | [#32](https://github.com/open-science-pillars/build-kit/issues/32) |
 | `provider-confirmed-voicing`: Voice the provider-confirmed tier when citing a concept | `core` | proposed | P1 | ready | none |
-| `c1-placement-gate`: Measure code placement by plane in build-kit and every plugin gate | `build-kit` | active | P1 | needs-context | [#62](https://github.com/open-science-pillars/build-kit/issues/62) |
-| `c2-ocean-science-placement`: Move ocean-science to one home per plane and wrap its computations | `ocean-science` | active | P1 | needs-context | [#62](https://github.com/open-science-pillars/ocean-science/issues/62) |
-| `c3-hydrology-placement`: Move hydrology runtime helpers out of the goldens' fixtures tree | `hydrology` | active | P1 | needs-context | [#72](https://github.com/open-science-pillars/hydrology/issues/72) |
-| `c4-nasa-daac-placement`: Retire the run-skill references in nasa-daac-knowledge and point every computation at its executor and wrap | `nasa-daac-knowledge` | active | P1 | needs-context | [#181](https://github.com/open-science-pillars/nasa-daac-knowledge/issues/181) |
-| `c5-template-placement`: Ship the templates in the shape the placement gate expects | `plugin-template` | active | P2 | ready | [#20](https://github.com/open-science-pillars/plugin-template/issues/20) |
+| `c1-placement-gate`: Measure code placement by plane in build-kit and every plugin gate | `build-kit` | done | P1 | needs-context | [#62](https://github.com/open-science-pillars/build-kit/issues/62) |
+| `c2-ocean-science-placement`: Move ocean-science to one home per plane and wrap its computations | `ocean-science` | done | P1 | needs-context | [#62](https://github.com/open-science-pillars/ocean-science/issues/62) |
+| `c3-hydrology-placement`: Move hydrology runtime helpers out of the goldens' fixtures tree | `hydrology` | done | P1 | needs-context | [#72](https://github.com/open-science-pillars/hydrology/issues/72) |
+| `c4-nasa-daac-placement`: Retire the run-skill references in nasa-daac-knowledge and point every computation at its executor and wrap | `nasa-daac-knowledge` | done | P1 | needs-context | [#181](https://github.com/open-science-pillars/nasa-daac-knowledge/issues/181) |
+| `c5-template-placement`: Ship the templates in the shape the placement gate expects | `plugin-template` | done | P2 | ready | [#20](https://github.com/open-science-pillars/plugin-template/issues/20) |
 | `c6-unwrapped-computations`: Wrap the energy budget and ice sheet balance computations when their sphere capabilities exist | `nasa-daac-knowledge` | blocked | P2 | needs-context | [#182](https://github.com/open-science-pillars/nasa-daac-knowledge/issues/182) |
 
 #### Acceptance details
@@ -648,6 +648,7 @@ Pillar means sphere; canonical .osp metadata drives organization and runtime pro
 - [ ] The seed brief renderer applies the wrapping rule to every computation seed: the wrapping skill is a deliverable in the sphere capability, run instructions never go under references/skills/, and a seed names its wrap.
 - Depends on: `m4-documentation-alignment`
 - Gate: ADR C (code placement by plane) is accepted and specification section 11 states the rule; the migrations below make the dated warnings errors on 2026-10-01.
+- Evidence: `build-kit PR #63: osp.py placement-check (P1 to P7, the dated warning rule, --strict, --workspace), PlacementCheckTests, the osp metadata guide section, seed_brief.py's wrapping rule and placement-check among the plugin checks; PR #64: the command selects repositories by repository.yaml so a bundle without a package is measured`, `The gate step runs in the plugin gates of ocean-science (PR #63), hydrology (PR #73), nasa-daac-knowledge (PR #183), plugin-template (PR #21) and knowledge-template (PR #12); core's gate step is the maintainer's, since its working branch is the head of the open release pull request #39`
 
 **`c2-ocean-science-placement`**
 
@@ -656,6 +657,7 @@ Pillar means sphere; canonical .osp metadata drives organization and runtime pro
 - [ ] Every podaac ECCO computation and the sea level budget in nasa-daac-knowledge name the ocean-science skill that wraps them, and each such skill runs the executor by the installed bundle's path and the attester on the receipt.
 - [ ] osp.py placement-check --strict passes on the repository.
 - Depends on: `c1-placement-gate`
+- Evidence: `ocean-science PR #63: cite-ecco and receipt-figures scripts under scripts/ with the cite-ecco copy pinned to nasa-daac-knowledge main; run-argo-ohc retired into the argo-ohc skill and the concept wrapped (executor.skill: ocean-science/argo-ohc, re-signed); attested run sections in ocean-budget, transport-analysis, compare-obs, sea-level-analysis and ecco, and a new sea-level-budget skill, wrapping every podaac computation; goldens.yml names every golden (a dispatch-only job for the cache-reading notebooks); placement-check --strict PASSED with 0 warnings`
 
 **`c3-hydrology-placement`**
 
@@ -663,6 +665,7 @@ Pillar means sphere; canonical .osp metadata drives organization and runtime pro
 - [ ] No SKILL.md names a path under verification/; the basin water balance concept carries executor.skill: hydrology/basin-water-balance.
 - [ ] osp.py placement-check --strict passes and the goldens stay green.
 - Depends on: `c1-placement-gate`
+- Evidence: `hydrology PR #73: the seven runtime helpers moved to load-et, load-precipitation, load-peaks, delineate-basin, drought-anatomy, reservoir-ledger and swot-hydro scripts/ directories with the goldens, README, connector concept and fixtures README following; no SKILL.md names the goldens' tree; basin-water-balance wrapped (executor.skill, the skill states its parameters, runtime and attester step); the two edited stable concepts re-signed; all thirteen goldens green; placement-check --strict PASSED with 0 warnings`
 
 **`c4-nasa-daac-placement`**
 
@@ -670,12 +673,14 @@ Pillar means sphere; canonical .osp metadata drives organization and runtime pro
 - [ ] Every Attested Computation's executor.resource names the executor script; the podaac computations carry executor.skill naming their ocean-science wrap; the bundle logs record the moves.
 - [ ] tools/scaffold_bundle.py creates no references/skills/ directory; osp.py placement-check --strict passes; run_checks stays ALL GREEN.
 - Depends on: `c1-placement-gate`, `c2-ocean-science-placement`
+- Evidence: `nasa-daac-knowledge PR #183: the five run-instruction references retired (podaac run-golden, run-sea-level, run-sea-level-budget; asdc run-energy-budget; nsidc run-ice-sheet-balance); every podaac computation carries executor.skill naming its ocean-science wrap and executor.resource names the executor script; the asdc and nsidc concepts carry their data-root layouts as a section and stay unwrapped until their capabilities exist; eighteen stable concepts re-signed; scaffold_bundle.py never created references/skills/; run_checks ALL GREEN; placement-check --strict PASSED with the two unwrapped computations as its only warnings`
 
 **`c5-template-placement`**
 
 - [ ] plugin-template ships one skill with a scripts/ directory and a golden that reads verification/fixtures/, and its gate runs placement-check.
 - [ ] knowledge-template ships no references/skills/ and its gate runs placement-check.
 - Depends on: `c1-placement-gate`
+- Evidence: `plugin-template PR #21: skills/example-workflow/scripts/example_helper.py with --selftest, the SKILL.md invoking it through the plugin root and naming no goldens path, a committed fixture and its builder, goldens.yml running every golden, the placement-check step; knowledge-template PR #12: the placement-check step in the bundle gate and the README stating where a computation's run instructions go; both strict-clean`
 
 **`c6-unwrapped-computations`**
 
