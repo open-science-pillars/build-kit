@@ -1780,7 +1780,7 @@ initiatives:
       - id: ice-sheet-balance-closure
         title: Ice sheet mass balance closure as an attested computation
         repo: nasa-daac-knowledge
-        status: active
+        status: done
         priority: P2
         depends_on: [ice-sheet-firn-root, seed-nsidc-bedmachine-atl10]
         gate: ""
@@ -1789,6 +1789,8 @@ initiatives:
         - The computation concept, its recipe and its run skill merge on the coordinator's review and reach stable on the maintainer's; the numbers are anchored to the published intercomparison with sources.
         evidence:
           - "Round three of seeding (build-kit roadmap/seeds/round-3.yaml), issue #158 in nasa-daac-knowledge, opened 2026-09-15"
+          - "nasa-daac-knowledge PR #176, built 2026-09-15: the attested ice sheet mass balance closure in the nsidc bundle, JPL mascon gravimetry (a 25 percent ice-fraction selection with a stated selection systematic) against the ITS_LIVE altimetric volume change with the GEMB firn term, per ice sheet, with fixture and data-root modes, the mass and volume terms loaded beside the firn root of PR #165, an ATL15 loader awaiting a fetchable granule, and six refusals (Antarctica refuses for want of a grounded firn term); coordinator review ran the chain, determinism and tamper tests; fix round corrected the provider comparison sign, stated the window-dependent closure and the spike attribution, bound the data root to its RECORD manifest and moved the registry runs under the nsidc bundle key; merged 2026-09-16"
+          - "nasa-daac-knowledge PR #180: the check chain wired into run_checks.sh, the computation concept, recipe and run skill stable and signed; the Greenland anchor over 2003 to 2016 gives gravimetry -281 and altimetry -283 Gt per year, a residual of -25 inside a bar of 141, both about 55 Gt per year more negative than the IMBIE reconciled rate, a product property the concept states"
         contributor:
           readiness: needs-context
           champion: PaulMRamirez
