@@ -16,7 +16,6 @@
 - `roadmap-harness-v1`: Build the federated roadmap harness (`build-kit`)
 - `landice-grace-knowledge`: GRACE-FO mass change knowledge for land ice, reviewed and offered for confirmation (`nasa-daac-knowledge`)
 - `r2-core-reference`: Qualify core as the reference capability on Claude Code, Cowork and Codex from one SKILL.md (`core`)
-- `ice-sheet-balance-closure`: Ice sheet mass balance closure as an attested computation (`nasa-daac-knowledge`)
 - `landice-nsidc-knowledge`: ICESat-2 height change and ice velocity knowledge in a new NSIDC bundle (`nasa-daac-knowledge`)
 - `seed-argo-gridded-steric`: Roemmich and Gilson gridded Argo knowledge, seeded and reviewed (`ocean-science`)
 - `seed-asdc-ceres-ebaf`: CERES EBAF knowledge for the asdc bundle, seeded and reviewed (`nasa-daac-knowledge`)
@@ -71,10 +70,10 @@ Proposed, waiting on a dependency, in priority order.
 - P1 `r3-dependency-reference`: Validate dependency realization on ocean-science across runtimes (`ocean-science`)
 - P1 `tutorial-nonauthor-validation`: Complete non-author Tutorial 2 validation (`tutorials`)
 
-### Done (30)
+### Done (31)
 
 <details>
-<summary>30 done deliverables</summary>
+<summary>31 done deliverables</summary>
 
 - `hydro-usgs-waterdata-migration`: Migrate the USGS connector to the Water Data APIs and release it
 - `hydro-basin-unit`: Add basin delineation as the unit of analysis
@@ -105,6 +104,7 @@ Proposed, waiting on a dependency, in priority order.
 - `observations-round-three`: Groundwater, lake, vertical land motion and National Water Model tools on the observations server
 - `ice-sheet-firn-root`: Firn air content and surface mass balance data root for the ice sheet closure
 - `energy-budget-closure`: Energy budget closure of CERES EBAF against ocean heat content as an attested computation
+- `ice-sheet-balance-closure`: Ice sheet mass balance closure as an attested computation
 - `basin-balance-groundwater`: Basin water balance with a groundwater term, and the National Water Model confrontation recipe
 
 </details>
@@ -868,7 +868,7 @@ The ocean heat content, the Earth energy imbalance, the ice sheet mass balance a
 | `observations-round-three`: Groundwater, lake, vertical land motion and National Water Model tools on the observations server | `core` | done | P2 | needs-context | [#43](https://github.com/open-science-pillars/core/issues/43) |
 | `ice-sheet-firn-root`: Firn air content and surface mass balance data root for the ice sheet closure | `nasa-daac-knowledge` | done | P2 | needs-context | [#156](https://github.com/open-science-pillars/nasa-daac-knowledge/issues/156) |
 | `energy-budget-closure`: Energy budget closure of CERES EBAF against ocean heat content as an attested computation | `nasa-daac-knowledge` | done | P2 | needs-context | [#157](https://github.com/open-science-pillars/nasa-daac-knowledge/issues/157) |
-| `ice-sheet-balance-closure`: Ice sheet mass balance closure as an attested computation | `nasa-daac-knowledge` | active | P2 | needs-context | [#158](https://github.com/open-science-pillars/nasa-daac-knowledge/issues/158) |
+| `ice-sheet-balance-closure`: Ice sheet mass balance closure as an attested computation | `nasa-daac-knowledge` | done | P2 | needs-context | [#158](https://github.com/open-science-pillars/nasa-daac-knowledge/issues/158) |
 | `basin-balance-groundwater`: Basin water balance with a groundwater term, and the National Water Model confrontation recipe | `hydrology` | done | P2 | needs-context | [#65](https://github.com/open-science-pillars/hydrology/issues/65) |
 
 #### Acceptance details
@@ -902,7 +902,7 @@ The ocean heat content, the Earth energy imbalance, the ice sheet mass balance a
 - [ ] An executor closes, per ice sheet, the mascon mass change against the ATL15 volume change corrected with the firn root and, where the inputs allow, the input-output balance from the root's surface mass balance and flux-gate discharge, states the residuals with uncertainties, refuses outside the overlap, and is attested and registered; the check chain runs in run_checks.sh.
 - [ ] The computation concept, its recipe and its run skill merge on the coordinator's review and reach stable on the maintainer's; the numbers are anchored to the published intercomparison with sources.
 - Depends on: `ice-sheet-firn-root`, `seed-nsidc-bedmachine-atl10`
-- Evidence: `Round three of seeding (build-kit roadmap/seeds/round-3.yaml), issue #158 in nasa-daac-knowledge, opened 2026-09-15`
+- Evidence: `Round three of seeding (build-kit roadmap/seeds/round-3.yaml), issue #158 in nasa-daac-knowledge, opened 2026-09-15`, `nasa-daac-knowledge PR #176, built 2026-09-15: the attested ice sheet mass balance closure in the nsidc bundle, JPL mascon gravimetry (a 25 percent ice-fraction selection with a stated selection systematic) against the ITS_LIVE altimetric volume change with the GEMB firn term, per ice sheet, with fixture and data-root modes, the mass and volume terms loaded beside the firn root of PR #165, an ATL15 loader awaiting a fetchable granule, and six refusals (Antarctica refuses for want of a grounded firn term); coordinator review ran the chain, determinism and tamper tests; fix round corrected the provider comparison sign, stated the window-dependent closure and the spike attribution, bound the data root to its RECORD manifest and moved the registry runs under the nsidc bundle key; merged 2026-09-16`, `nasa-daac-knowledge PR #180: the check chain wired into run_checks.sh, the computation concept, recipe and run skill stable and signed; the Greenland anchor over 2003 to 2016 gives gravimetry -281 and altimetry -283 Gt per year, a residual of -25 inside a bar of 141, both about 55 Gt per year more negative than the IMBIE reconciled rate, a product property the concept states`
 
 **`basin-balance-groundwater`**
 
