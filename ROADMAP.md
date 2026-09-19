@@ -14,9 +14,7 @@
 - `federated-governance-baseline`: Declare repository-level roadmap authority (`.github`)
 - `reconcile-project-record`: Reconcile specifications, progress, limitations, and counts (`marketplace`)
 - `roadmap-harness-v1`: Build the federated roadmap harness (`build-kit`)
-- `atmos-physics-promotion`: Promote atmospheric-physics out of planned as a wrap-only release (`atmospheric-physics`)
 - `landice-grace-knowledge`: GRACE-FO mass change knowledge for land ice, reviewed and offered for confirmation (`nasa-daac-knowledge`)
-- `landice-promotion`: Promote land-ice out of planned as a wrap-only release (`land-ice`)
 - `r2-core-reference`: Qualify core as the reference capability on Claude Code, Cowork and Codex from one SKILL.md (`core`)
 - `landice-nsidc-knowledge`: ICESat-2 height change and ice velocity knowledge in a new NSIDC bundle (`nasa-daac-knowledge`)
 - `seed-argo-gridded-steric`: Roemmich and Gilson gridded Argo knowledge, seeded and reviewed (`ocean-science`)
@@ -74,10 +72,10 @@ Proposed, waiting on a dependency, in priority order.
 - P1 `r3-dependency-reference`: Validate dependency realization on ocean-science across runtimes (`ocean-science`)
 - P1 `tutorial-nonauthor-validation`: Complete non-author Tutorial 2 validation (`tutorials`)
 
-### Done (41)
+### Done (43)
 
 <details>
-<summary>41 done deliverables</summary>
+<summary>43 done deliverables</summary>
 
 - `hydro-usgs-waterdata-migration`: Migrate the USGS connector to the Water Data APIs and release it
 - `hydro-basin-unit`: Add basin delineation as the unit of analysis
@@ -109,8 +107,10 @@ Proposed, waiting on a dependency, in priority order.
 - `sea-level-budget-closure`: Close the global sea level budget as an attested computation
 - `landice-imbie-knowledge`: The published ice sheet assessment and the firn model as reference concepts
 - `landice-input-output`: Ice sheet mass balance by the input-output method, as a third independent attested computation
+- `landice-promotion`: Promote land-ice out of planned as a wrap-only release
 - `atmos-syn1deg-knowledge`: The synoptic radiation product and the surface flux caveat as concepts
 - `atmos-cloud-radiative-effect`: Cloud radiative effect at the top of the atmosphere, as an attested computation
+- `atmos-physics-promotion`: Promote atmospheric-physics out of planned as a wrap-only release
 - `seed-regional-sea-level`: Regional sea level recipe with GIA and land motion for ocean-science, seeded and reviewed
 - `seed-lpdaac-vegetation`: MODIS vegetation knowledge for the lpdaac bundle, seeded and reviewed
 - `seed-gesdisc-oco2-subsetter`: OCO-2 SIF knowledge and the GES DISC subsetter connector concept, seeded and reviewed
@@ -717,7 +717,7 @@ land-ice is an installable capability whose first attested computation closes th
 | `landice-atl15-altimetry`: Run the ice sheet balance on ICESat-2 gridded height change beside the velocity-era altimetry | `nasa-daac-knowledge` | blocked | P1 | needs-context | [#185](https://github.com/open-science-pillars/nasa-daac-knowledge/issues/185) |
 | `landice-imbie-knowledge`: The published ice sheet assessment and the firn model as reference concepts | `nasa-daac-knowledge` | done | P1 | ready | [#186](https://github.com/open-science-pillars/nasa-daac-knowledge/issues/186) |
 | `landice-input-output`: Ice sheet mass balance by the input-output method, as a third independent attested computation | `nasa-daac-knowledge` | done | P1 | needs-context | [#189](https://github.com/open-science-pillars/nasa-daac-knowledge/issues/189) |
-| `landice-promotion`: Promote land-ice out of planned as a wrap-only release | `land-ice` | active | P1 | needs-context | [#4](https://github.com/open-science-pillars/land-ice/issues/4) |
+| `landice-promotion`: Promote land-ice out of planned as a wrap-only release | `land-ice` | done | P1 | needs-context | [#4](https://github.com/open-science-pillars/land-ice/issues/4) |
 | `landice-nsidc-knowledge`: ICESat-2 height change and ice velocity knowledge in a new NSIDC bundle | `nasa-daac-knowledge` | active | P2 | needs-context | [#131](https://github.com/open-science-pillars/nasa-daac-knowledge/issues/131) |
 | `landice-nsidc-elevation`: Reconcile mass change and elevation change for one ice sheet, in the land-ice capability | `land-ice` | blocked | P2 | needs-context | none |
 
@@ -779,6 +779,7 @@ land-ice is an installable capability whose first attested computation closes th
 - [ ] A first release is cut through the candidate flow and qualified on Claude Code; the catalog lists it.
 - Depends on: `landice-grace-knowledge`, `sea-level-budget-closure`, `landice-imbie-knowledge`
 - Gate: The promotion-to-host-a-wrap decision and its dated pre-registration entry authorize this release, which adds no number of its own; the rest of the promotion rule is satisfied in full, including an invited provider contact. A skill that computes something new waits on the powered ablation.
+- Evidence: `land-ice PR #5 with nasa-daac-knowledge PR #201: promoted from planned to developing at 0.1.0, with a wrapping skill for each of the two nsidc attested computations, ice-mass-change and ice-sheet-input-output. The release adds no number of its own`, `The release carries the honesty the two computations turn on rather than smoothing it: the closure's verdict is window dependent on the committed root, so the skill reports the window it ran and never a headline rate for the ice sheet; the Antarctic case refuses for want of a grounded firn air content term and the skill reports that as a finding about the data; the input-output skill says plainly that no real-data estimate exists yet and separates the two reasons, an environment block and a distribution gap`, `The sea level boundary holds: nothing here converts an ice sheet mass rate to a sea level equivalent, and both the README and the closure skill send that reader to the podaac recipe and the ocean-science sea-level-budget skill. Two capabilities never quote the same number`, `verification/wrapped_computations.py exercises both chains offline, asserting each rate with its interval, both fixture refusals and both record refusals; at the coordinator's review it also reads the concept's own status and asserts the provider executor's digest, so a status that goes stale or an executor edit that changes no number fails the gate`, `marketplace PR #104: the catalog lists land-ice 0.1.0`, `land-ice PR #6: qualified on Claude Code for 0.1.0, the full matrix run headless from a release-candidate catalog against the release lock; Claude Cowork and OpenAI Codex waived in writing and not advertised`, `The release tag is the maintainer's to push: this session's credentials are refused on tag refs while branch pushes to the same repository succeed`
 
 **`landice-nsidc-knowledge`**
 
@@ -806,7 +807,7 @@ atmospheric-physics is an installable capability whose skills run the attested c
 |---|---|---|---|---|---|
 | `atmos-syn1deg-knowledge`: The synoptic radiation product and the surface flux caveat as concepts | `nasa-daac-knowledge` | done | P1 | ready | [#187](https://github.com/open-science-pillars/nasa-daac-knowledge/issues/187) |
 | `atmos-cloud-radiative-effect`: Cloud radiative effect at the top of the atmosphere, as an attested computation | `nasa-daac-knowledge` | done | P1 | needs-context | [#188](https://github.com/open-science-pillars/nasa-daac-knowledge/issues/188) |
-| `atmos-physics-promotion`: Promote atmospheric-physics out of planned as a wrap-only release | `atmospheric-physics` | active | P1 | needs-context | [#4](https://github.com/open-science-pillars/atmospheric-physics/issues/4) |
+| `atmos-physics-promotion`: Promote atmospheric-physics out of planned as a wrap-only release | `atmospheric-physics` | done | P1 | needs-context | [#4](https://github.com/open-science-pillars/atmospheric-physics/issues/4) |
 | `atmos-workflow-skills`: Atmospheric-physics workflow skills that compute a number of their own | `atmospheric-physics` | blocked | P2 | owner-only | none |
 
 #### Acceptance details
@@ -836,6 +837,7 @@ atmospheric-physics is an installable capability whose skills run the attested c
 - [ ] A first release is cut through the candidate flow and qualified on Claude Code; the catalog lists it.
 - Depends on: `atmos-syn1deg-knowledge`
 - Gate: The promotion-to-host-a-wrap decision and its dated pre-registration entry authorize this release, which adds no number of its own; the rest of the promotion rule is satisfied in full, including an invited provider contact.
+- Evidence: `atmospheric-physics PR #5 with nasa-daac-knowledge PR #199: promoted from planned to developing at 0.1.0 with package.yaml, surfaces.yaml and governance.yaml, both projections rendered, and a wrapping skill for each of the two asdc attested computations, energy-budget-closure and cloud-radiative-effect. The release adds no number of its own: every number a skill here can report is owned by a concept already signed stable in the asdc bundle`, `Each skill binds every parameter its concept declares, reaches the executor by the installed bundle's path, runs the attester before quoting a number, and carries the concept's caveats into every report. The cloud radiative effect skill refuses to settle the clear-sky convention on the user's behalf, states what turns on the choice and reports the other convention's terms beside the bound one; the energy budget skill states that the ocean side is read from an attested Argo receipt another capability produced and never recomputed`, `verification/wrapped_computations.py exercises both chains offline on committed fixtures, and the goldens workflow runs it against the provider bundle on every push`, `marketplace PR #103: the catalog lists atmospheric-physics 0.1.0, and the knowledge bundle's entry is corrected to name every archive it now carries`, `atmospheric-physics PR #6: qualified on Claude Code for 0.1.0, the full matrix run headless from a release-candidate catalog against the release lock, with both dependencies resolving, both skills discovered and invoked, the golden green on the installed tree and the prove receipt attested; Claude Cowork and OpenAI Codex waived in writing and not advertised`, `The qualification found two things worth the round: the skill-invocation probe expected the package's own name, which is what a wrapping skill must never claim, and both skills said to cite the concept by bundle path while spelling out only the gotchas' paths, so a run cited the gotchas and left the concept that owns the numbers unnamed. Both are fixed; three defects in the candidate qualification path itself are fixed in build-kit PR #72`, `The release tag is the maintainer's to push: this session's credentials are refused on tag refs while branch pushes to the same repository succeed`
 
 **`atmos-workflow-skills`**
 
