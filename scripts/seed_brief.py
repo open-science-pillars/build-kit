@@ -189,6 +189,8 @@ def concept_lines(seed: dict) -> str:
         out.append(f"- dataset `{b}/datasets/{d['slug']}.md`")
     for r in seed.get("requirements") or []:
         out.append(f"- requirement `{b}/requirements/{r['slug']}.md`, class {r['class']}")
+    for r in seed.get("references") or []:
+        out.append(f"- reference `{b}/references/{r['slug']}.md`: {r['states']}")
     for g in seed.get("gotchas") or []:
         out.append(f"- gotcha `{b}/gotchas/{g['slug']}.md`, severity {g['severity']}")
     for r in seed.get("recipes") or []:

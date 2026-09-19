@@ -109,6 +109,9 @@ seeds:
       dominant uncertainty and crosses zero, and that an assessment's method
       groups are not independent measurements of the same thing.
     datasets: []
+    references:
+      - {slug: imbie-ice-sheet-assessment, states: "what the published multi-method assessment reports per ice sheet and period, its uncertainties, its method groups and what it says about their independence"}
+      - {slug: firn-model-air-content, states: "the firn model product whose air content term the closure subtracts: version, domain, forcing, what the air content variable is and what its uncertainty rests on"}
     gotchas:
       - {slug: firn-air-content-spread-dominates-the-altimetric-mass-rate, severity: high}
       - {slug: assessment-method-groups-are-not-independent, severity: medium}
@@ -155,6 +158,8 @@ seeds:
       trap.
     datasets:
       - {slug: ceres-syn1deg}
+    references:
+      - {slug: ceres-clear-sky-conventions, states: "the clear-sky conventions the radiation products carry, which one each field uses, and why mixing them changes a cloud radiative effect"}
     gotchas:
       - {slug: syn1deg-surface-fluxes-are-modelled-not-measured, severity: high}
       - {slug: syn1deg-refuses-long-term-trend-use, severity: high}
