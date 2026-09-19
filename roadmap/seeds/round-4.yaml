@@ -1,0 +1,422 @@
+# Round four of seeding: three waves. Wave A closes the gaps the two signed
+# closures name in their own boundaries and captures the concepts the capabilities
+# will consult. Wave B builds two new attested computations in the provider
+# bundles, which is knowledge intake and not domain expansion. Wave C promotes
+# atmospheric-physics and land-ice out of planned as wrap-only releases under the
+# promotion-to-host-a-wrap decision, so that every attested computation in the
+# atmosphere and cryosphere bundles is reachable through a skill. Kinds:
+# knowledge (concepts), data-root (a stamped root and its loaders, no concepts),
+# computation (an attested computation in the sea level budget's shape),
+# capability (a planned repository promoted to developing to host wraps).
+# Rendered into briefs by scripts/seed_brief.py; the roadmap carries one
+# deliverable per seed.
+round: 4
+opened: 2026-09-19
+coordinator_rules:
+  - One seed per bundle per wave; a wave starts after the previous wave merges.
+  - A seed never merges, never signs, never sets a status other than draft, and
+    never edits tools/run_checks.sh or a plugin's check routine; the coordinator
+    adds a computation's check chain at merge and re-signs what an edit touched.
+  - A seed never edits an executor or attester whose digest a signed concept
+    quotes. A pointer inside such a file that names a retired path stays until a
+    scientific change to that file requires a fresh reference run.
+  - The Earthdata token in the environment is used only as a bearer header on a
+    download, never printed, logged, stored or committed.
+  - A source that cannot be reached is named as unreachable in the pull request
+    body, and the claim it would have supported is cited on the registry record
+    or dropped; no number is carried over from memory.
+  - Seed sessions are dispatched on the model the coordinator records in its
+    dispatch notes; repository content names no model.
+seeds:
+  - id: r4-nsidc-antarctic-firn
+    wave: A
+    kind: data-root
+    title: A grounded Antarctic firn air content term for the ice sheet closure
+    repo: nasa-daac-knowledge
+    bundle: knowledge/nsidc/references
+    branch: claude/r4-nsidc-antarctic-firn
+    issue: 184
+    spheres: [cryosphere]
+    scope: >-
+      The ice sheet mass balance closure refuses Antarctica for want of a
+      grounded firn air content term: the firn product the committed root
+      carries covers the floating shelves only, and the concept names the
+      regional climate model alternates as not read. This seed reads one of
+      those alternates for the grounded Antarctic sheet and extends the
+      committed root with it, so the executor runs Antarctica without any
+      change to the executor. A loader with a selftest on a synthetic grid
+      aggregates the model's firn air content over the grounded area with the
+      mask the product carries or the published basin set, writes the term CSV
+      and a stamp naming the product, its version, its forcing, its grid, the
+      mask, the aggregation and the uncertainty basis, and leaves no product
+      file in the tree; the data-root tool rewrites RECORD.json and SOURCES.json.
+      The existing Greenland terms are untouched. Report in the pull request
+      body what the executor now produces for Antarctica over the windows the
+      concept already names for Greenland, as a number the coordinator reviews,
+      not as a concept edit.
+    deliverables:
+      - "knowledge/nsidc/references/loaders/isb_firn_<model>.py with --selftest, writing the grounded Antarctic firn air content term and its stamp into the existing root's layout"
+      - "the committed root at knowledge/nsidc/references/retrieval/ice-sheet-balance-root/ extended with the term, its stamp, an updated SOURCES.json and a rewritten RECORD.json that the data-root tool's --check passes"
+      - "in the pull request body: the Antarctic executor run and its attestation over at least two windows, with the terms, the residual, the bar and the verdict, and the model spread stated"
+    pattern:
+      - knowledge/nsidc/references/loaders/isb_firn_gemb.py
+      - knowledge/nsidc/references/loaders/isb_data_root.py
+      - knowledge/nsidc/references/retrieval/ice-sheet-balance-root/RECORD.json
+    sources:
+      - domain: doi.org and api.crossref.org
+        read: "the regional climate model's own papers on the registry records, for the version, the domain, the forcing and what the firn air content variable is; the journal page may be unreachable, in which case the registry record and the abstract are the citation and the pull request body says so"
+      - domain: nsidc.org
+        read: "the ice sheet mask or basin definitions used for the grounded aggregation, and the existing product documentation the root already cites"
+      - domain: its-live.jpl.nasa.gov
+        read: "the firn product the root already carries, to keep the term's units, sign convention and stamp keys identical"
+      - domain: cmr.earthdata.nasa.gov
+        read: "the collection record of whichever product is fetched, for its identity and version"
+    do_not_repeat:
+      - The Greenland firn and surface mass balance terms; they stay as they are.
+    boundary: "Edit only under knowledge/nsidc/references/loaders/ and knowledge/nsidc/references/retrieval/ice-sheet-balance-root/. No concept, index, log or DIGEST edits; no executor, attester or run_checks.sh edits."
+
+  - id: r4-nsidc-atl15-altimetry
+    wave: A
+    kind: data-root
+    title: The gridded height change altimetry term, fetched and run beside the velocity-era term
+    repo: nasa-daac-knowledge
+    bundle: knowledge/nsidc/references
+    branch: claude/r4-nsidc-atl15-altimetry
+    issue: 185
+    spheres: [cryosphere]
+    scope: >-
+      The ice sheet closure carries two altimetry paths and only one has data:
+      the gridded height change loader was built and awaits a fetchable
+      granule, so the committed root holds the velocity-era elevation change
+      only and RECORD.json says why. This seed fetches the gridded height
+      change granules for the root's domains with the Earthdata token, runs the
+      existing loader, and extends the root with the term and its stamp, so the
+      executor runs both altimetry sources over the same windows. The loader is
+      used as it stands where it works; a change to it is a fix with the reason
+      in the pull request body, never a rewrite. The point of the seed is the
+      comparison: the concept's boundaries say the velocity-era term drifts
+      after 2019 and is the suspect, and a second altimetry source is what
+      tests that. Report both runs over the same windows in the pull request
+      body, with the terms, residuals, bars and verdicts side by side, and say
+      plainly where they agree and where they do not; write no concept.
+    deliverables:
+      - "the gridded height change term and its stamp in knowledge/nsidc/references/retrieval/ice-sheet-balance-root/, with SOURCES.json naming every granule fetched with its hash and time, and a rewritten RECORD.json whose --check passes"
+      - "any minimal fix to knowledge/nsidc/references/loaders/isb_volume_atl15.py the real granules require, each with its reason"
+      - "in the pull request body: the executor run and attestation on each altimetry source over the same windows, side by side, and a plain statement of where the two disagree beyond their stated uncertainties"
+    pattern:
+      - knowledge/nsidc/references/loaders/isb_volume_itslive.py
+      - knowledge/nsidc/references/loaders/isb_data_root.py
+      - knowledge/nsidc/references/retrieval/ice-sheet-balance-root/RECORD.json
+    sources:
+      - domain: nsidc.org
+        read: "the gridded land ice height change user guide and data dictionary for the current version: the variables, the reference epoch, the quadrants, the resolutions and the version history"
+      - domain: cmr.earthdata.nasa.gov
+        read: "the collection and granule records for the current version, to resolve what is fetchable and from where"
+      - domain: data.nsidc.earthdatacloud.nasa.gov
+        read: "the granules themselves, with the Earthdata token as a bearer header"
+      - domain: doi.org and api.crossref.org
+        read: "the product DOI and the algorithm references on the registry records"
+    do_not_repeat:
+      - The dataset concept for the product and its reference epoch gotcha; they exist, link them.
+    boundary: "Edit only under knowledge/nsidc/references/loaders/isb_volume_atl15.py and knowledge/nsidc/references/retrieval/ice-sheet-balance-root/. No concept, index, log or DIGEST edits; no executor, attester or run_checks.sh edits."
+
+  - id: r4-nsidc-landice-anchors
+    wave: A
+    kind: knowledge
+    title: The published ice sheet assessment and the firn model as reference concepts
+    repo: nasa-daac-knowledge
+    bundle: knowledge/nsidc
+    branch: claude/r4-nsidc-landice-anchors
+    issue: 186
+    spheres: [cryosphere]
+    scope: >-
+      Two reference concepts and the gotchas that go with them, for the
+      capability that will wrap the ice sheet closure to consult. The first
+      states what the published multi-method assessment of ice sheet mass
+      balance reports for each ice sheet over each period, with its own
+      uncertainties and its method groups, as the anchor every run of the
+      closure is read against. The second states the firn model product whose
+      air content term the closure subtracts before a height change becomes a
+      mass change: its version, its domain, its forcing, what the air content
+      variable is and what its uncertainty rests on. The gotchas state, with
+      sources, that a height change is not a mass change without a firn and a
+      density statement (the existing concept covers this and is linked, not
+      restated), that the firn air content spread across models is the term's
+      dominant uncertainty and crosses zero, and that an assessment's method
+      groups are not independent measurements of the same thing.
+    datasets: []
+    gotchas:
+      - {slug: firn-air-content-spread-dominates-the-altimetric-mass-rate, severity: high}
+      - {slug: assessment-method-groups-are-not-independent, severity: medium}
+    recipes: []
+    eval: {repo: agent-evals, subtree: nsidc/cases, branch: claude/r4-nsidc-landice-anchors}
+    sources:
+      - domain: essd.copernicus.org
+        read: "the published multi-method ice sheet mass balance assessment: the per-sheet and per-period rates, the uncertainties, the method groups and what the assessment says about their independence"
+      - domain: doi.org and api.crossref.org
+        read: "every DOI verified on the registry record for title, authors, journal and year, including the regional climate model and firn references whose journal pages may be unreachable"
+      - domain: nsidc.org
+        read: "the product documentation for the elevation change and velocity products the closure already cites"
+      - domain: its-live.jpl.nasa.gov
+        read: "the firn product the committed root carries, for its version and domain"
+    models:
+      - knowledge/nsidc/datasets/icesat2-atl15.md
+      - knowledge/nsidc/gotchas/atl15-height-change-is-not-mass-change.md
+    do_not_repeat:
+      - The height change is not mass change gotcha, the reference epoch gotcha and the elevation and velocity dataset concepts; link them where the new concepts depend on them.
+
+  - id: r4-asdc-syn1deg-knowledge
+    wave: A
+    kind: knowledge
+    title: The synoptic radiation product and the surface flux caveat
+    repo: nasa-daac-knowledge
+    bundle: knowledge/asdc
+    branch: claude/r4-asdc-syn1deg-knowledge
+    issue: 187
+    spheres: [atmosphere]
+    scope: >-
+      A dataset concept for the synoptic one-degree radiation product that sits
+      beside the energy balanced product this bundle already carries: what it
+      is, its editions, its temporal and spatial resolution, what it adds
+      (surface and in-atmosphere fluxes, and a synoptic rather than a monthly
+      view) and what it is not for. Its gotchas state, with sources from the
+      product's own data quality summary, that the surface and in-atmosphere
+      fluxes are computed by a radiative transfer model rather than measured,
+      that the product's own documentation refuses long-term trend use and
+      says it is not of climate quality, and that artifacts from the
+      geostationary inputs appear in the surface and in-atmosphere
+      irradiances. A reference concept states the clear-sky conventions the
+      radiation products use, because the cloud radiative effect computation of
+      wave B binds one as a parameter and the difference between them is the
+      trap.
+    datasets:
+      - {slug: ceres-syn1deg}
+    gotchas:
+      - {slug: syn1deg-surface-fluxes-are-modelled-not-measured, severity: high}
+      - {slug: syn1deg-refuses-long-term-trend-use, severity: high}
+      - {slug: syn1deg-geostationary-artifacts, severity: medium}
+    recipes: []
+    eval: {repo: agent-evals, subtree: ceres/cases, branch: claude/r4-asdc-syn1deg-knowledge}
+    sources:
+      - domain: ceres.larc.nasa.gov
+        read: "the synoptic product's data quality summary in the versioned summaries directory: the product description, the cautions, the editions and the statement about trend use and climate quality; and the energy balanced summary for the clear-sky conventions"
+      - domain: asdc.larc.nasa.gov
+        read: "the collection pages and the ordering and subsetting services for the products"
+      - domain: cmr.earthdata.nasa.gov
+        read: "the collection concept identifiers and versions"
+      - domain: doi.org and api.crossref.org
+        read: "the product DOIs and the instrument and algorithm references on the registry records"
+    models:
+      - knowledge/asdc/datasets/ceres-ebaf-ed4-2.md
+      - knowledge/asdc/gotchas/ebaf-versus-syn1deg-versus-ssf.md
+    do_not_repeat:
+      - The five energy balanced gotchas, including the one that already distinguishes the products and the one that says its surface fluxes are modelled; link them and state only what is new about this product.
+
+  - id: r4-asdc-cloud-radiative-effect
+    wave: B
+    kind: computation
+    title: Cloud radiative effect at the top of the atmosphere, as an attested computation
+    repo: nasa-daac-knowledge
+    bundle: knowledge/asdc
+    branch: claude/r4-asdc-cloud-radiative-effect
+    issue: 188
+    depends_on: [r4-asdc-syn1deg-knowledge]
+    spheres: [atmosphere]
+    scope: >-
+      An attested computation in the energy budget's shape: the shortwave,
+      longwave and net cloud radiative effect at the top of the atmosphere over
+      a stated window and region, as the difference between the all-sky and the
+      clear-sky fluxes of the energy balanced product, with the clear-sky
+      convention bound as a declared parameter because the product carries more
+      than one and mixing them is the trap this bundle already records. The
+      executor has fixture and data-root modes, area weights the fields the way
+      the product's own global mean is defined, states each term with its
+      uncertainty, and refuses (exit 3, never a number) a clear-sky convention
+      the product does not carry, a window the record does not cover, and a
+      region whose mask it cannot resolve. The attester recomputes every term
+      from the receipt and verifies the root's digests. The real-data run is
+      anchored to the published global mean cloud radiative effect with its
+      source and the distance from it stated.
+    deliverables:
+      - "knowledge/asdc/references/computations/cloud_radiative_effect.py (--fixture --seed N | --data-root DIR, --window, --region, --clear-sky CONVENTION, --runtime, --receipt; refusal exit 3 with a code per refusal)"
+      - "knowledge/asdc/references/attesters/cloud_radiative_effect_check.py with --selftest"
+      - "knowledge/asdc/references/loaders/cre_ceres_fluxes.py (selftest, --fetch through the archive's subsetting service with the Earthdata token as a bearer header) and cre_data_root.py; the committed root under knowledge/asdc/references/retrieval/"
+      - "knowledge/asdc/computations/cloud-radiative-effect.md and knowledge/asdc/recipes/cloud-radiative-effect.md, and the registry entry in tools/reference_runs.yaml"
+    pattern:
+      - knowledge/asdc/references/computations/energy_budget.py
+      - knowledge/asdc/references/attesters/energy_budget_check.py
+      - knowledge/asdc/references/loaders/eb_ceres_ebaf.py
+      - knowledge/asdc/computations/energy-budget.md
+    sources:
+      - domain: ceres.larc.nasa.gov
+        read: "the energy balanced product's data quality summary for the clear-sky conventions, the fields and the geodetic weighting; the zone weights file"
+      - domain: opendap.earthdata.nasa.gov
+        read: "the granule subset the loader reads, with the Earthdata token as a bearer header"
+      - domain: cmr.earthdata.nasa.gov
+        read: "the collection and granule records for the current edition"
+      - domain: doi.org and api.crossref.org
+        read: "the published global mean cloud radiative effect and the product's algorithm references, every DOI verified on the registry record"
+    context:
+      - "The syn1deg seed of wave A writes the clear-sky convention reference this computation binds; read it and cite it rather than restating the conventions."
+      - "The energy budget computation in this bundle is the shape to follow exactly: the same receipt discipline, the same refusal style, the same bookkeeping keys in RECORD.json."
+    do_not_repeat:
+      - The clear-sky definition gotcha and the product concepts; link them.
+    boundary: "Edit only under knowledge/asdc/ and tools/reference_runs.yaml. Do not edit tools/run_checks.sh; the coordinator adds the chain. Do not edit the energy budget executor or attester."
+    wrap: atmospheric-physics/cloud-radiative-effect
+
+  - id: r4-nsidc-input-output
+    wave: B
+    kind: computation
+    title: Ice sheet mass balance by the input-output method, a third independent estimate
+    repo: nasa-daac-knowledge
+    bundle: knowledge/nsidc
+    branch: claude/r4-nsidc-input-output
+    issue: 189
+    depends_on: [r4-nsidc-antarctic-firn, r4-nsidc-landice-anchors]
+    spheres: [cryosphere]
+    scope: >-
+      The ice sheet closure's own boundaries name the input-output balance as
+      not made: surface mass balance in, discharge out across flux gates on
+      grounded ice, the difference a third estimate of the same mass rate the
+      gravimetric and altimetric methods already give. This seed builds it as
+      an attested computation for one ice sheet, with the second ice sheet
+      refusing until its terms exist. Discharge is the velocity mosaics
+      sampled across gates upstream of the grounding line with the thickness
+      product's thickness; the thickness product states per cell whether the
+      thickness is mass conservation or an interpolation, and a gate placed
+      where it is interpolated is a refusal, not a number. The executor has
+      fixture and data-root modes, declares the gate set, the velocity epoch
+      and the ice density as parameters, and refuses a gate configuration the
+      thickness product does not support, a window the velocity epochs do not
+      cover, and an ice sheet whose surface mass balance term is absent. The
+      attester recomputes every term. The concept reads the result against the
+      gravimetric and altimetric estimates over the same windows and against
+      the published assessment, and states plainly where the three disagree.
+    deliverables:
+      - "knowledge/nsidc/references/computations/ice_sheet_input_output.py (--fixture --seed N | --data-root DIR, --ice-sheet, --window, --gates, --velocity-epoch, --ice-density, --runtime, --receipt; refusal exit 3 with a code per refusal)"
+      - "knowledge/nsidc/references/attesters/ice_sheet_input_output_check.py with --selftest"
+      - "loaders for the discharge terms (velocity across the gate set, thickness and its provenance flag per gate) and for the surface mass balance term, each with --selftest and a stamp, and the data-root tool that writes RECORD.json"
+      - "the committed root under knowledge/nsidc/references/retrieval/, knowledge/nsidc/computations/ice-sheet-input-output.md, knowledge/nsidc/recipes/ice-sheet-input-output.md, and the registry entry in tools/reference_runs.yaml"
+    pattern:
+      - knowledge/nsidc/references/computations/ice_sheet_balance.py
+      - knowledge/nsidc/references/attesters/ice_sheet_balance_check.py
+      - knowledge/nsidc/references/loaders/isb_data_root.py
+      - knowledge/nsidc/computations/ice-sheet-balance.md
+    sources:
+      - domain: its-live.jpl.nasa.gov
+        read: "the velocity mosaics: their epochs, their gaps, their uncertainties and the access layout"
+      - domain: nsidc.org
+        read: "the bed and thickness product's user guide, in particular the per-cell source mask that says where the thickness is mass conservation and where it is interpolated, and the grounding line definition"
+      - domain: essd.copernicus.org
+        read: "the published assessment's input-output group, for what this method reports for the ice sheet and period and what its spread is"
+      - domain: cmr.earthdata.nasa.gov
+        read: "the collection records and versions of every product read"
+      - domain: doi.org and api.crossref.org
+        read: "every DOI verified on the registry record"
+    context:
+      - "The Antarctic firn seed of wave A extends the closure's root; this computation's surface mass balance term reads the same model product, so keep the stamp keys and the aggregation identical."
+      - "The anchors seed of wave A writes the assessment reference; cite it for the comparison rather than restating the published numbers."
+    do_not_repeat:
+      - The thickness interpolation gotcha, the grounding line gotcha, the velocity epoch gotcha and the basin definition gotcha; they exist, link them.
+    boundary: "Edit only under knowledge/nsidc/ and tools/reference_runs.yaml. Do not edit tools/run_checks.sh; the coordinator adds the chain. Do not edit the ice sheet balance executor or attester."
+    wrap: land-ice/ice-sheet-input-output
+
+  - id: r4-atmospheric-physics-capability
+    wave: C
+    kind: capability
+    title: Promote atmospheric-physics and wrap the asdc computations
+    repo: atmospheric-physics
+    bundle: knowledge/asdc
+    branch: claude/r4-atmospheric-physics-capability
+    issue: 4
+    depends_on: [r4-asdc-cloud-radiative-effect]
+    spheres: [atmosphere]
+    scope: >-
+      Promote the planned atmospheric-physics repository to developing and give
+      it the skills that wrap every attested computation signed in the asdc
+      bundle. The release adds no number of its own: each skill names its
+      concept, invokes that concept's executor at the path the installed bundle
+      puts it, binds every declared parameter, passes the runtime name, runs the
+      attester on the receipt before any number is quoted, and reports the
+      verdict, the run identifier, the runtime and the caveats the concept
+      states. On the second branch, each wrapped concept in the provider bundle
+      gains its executor.skill key naming the skill; nothing else in that bundle
+      changes and no executor is edited.
+    wraps:
+      - {concept: "knowledge/asdc/computations/energy-budget.md", executor: "knowledge/asdc/references/computations/energy_budget.py", attester: "knowledge/asdc/references/attesters/energy_budget_check.py", skill: energy-budget-closure}
+      - {concept: "knowledge/asdc/computations/cloud-radiative-effect.md", executor: "knowledge/asdc/references/computations/cloud_radiative_effect.py", attester: "knowledge/asdc/references/attesters/cloud_radiative_effect_check.py", skill: cloud-radiative-effect}
+    deliverables:
+      - ".osp/repository.yaml at status developing, and .osp/package.yaml, .osp/surfaces.yaml and .osp/governance.yaml in the shape ocean-science and hydrology carry, declaring core and the provider bundle with a version floor"
+      - "the rendered projections (.claude-plugin/plugin.json, plugin.json, and mcp.json only if REACH is declared), written by the renderer and never by hand"
+      - "one skill per wrapped computation under skills/, each with Agent Skills frontmatter and the attested-run discipline above"
+      - "knowledge/index.md and knowledge/log.md for the capability's own bundle, holding the capability's own conventions only"
+      - "a golden at the top of verification/ that exercises each wrapping skill's chain offline on a committed fixture, with its fixtures under verification/fixtures/, plus .github/workflows/goldens.yml and the plugin gate workflow with the placement-check step"
+      - "eval cases for every high-severity gotcha the release relies on, in the declared eval repository, and README.md in the shared skeleton whose first paragraph says the capability computes nothing of its own"
+      - "on the second branch in nasa-daac-knowledge: executor.skill added to each wrapped concept, and the bundle log recording it"
+    pattern:
+      - ocean-science/skills/sea-level-budget/SKILL.md
+      - ocean-science/skills/receipt-figures/SKILL.md
+      - hydrology/skills/basin-water-balance/SKILL.md
+      - plugin-template/
+    sources:
+      - domain: ceres.larc.nasa.gov
+        read: "the data quality summaries for the caveats each skill reports; nothing new is claimed, the skill reports what the concept states"
+      - domain: doi.org and api.crossref.org
+        read: "only to verify a citation the skill repeats from a concept"
+    context:
+      - "The wrap-only release is specified in the marketplace specification's section on the first wrap-only releases and decided in ADR D there; read both before writing a skill."
+      - "A skill reaches a provider bundle the way ocean-science's receipt-figures skill does: through the installer's record of installed plugins, with an explicit checkout root as the only override."
+    do_not_repeat:
+      - Any scientific claim a concept already owns; the skill cites it.
+    boundary: "The capability branch touches only the atmospheric-physics repository; the provider branch touches only the concepts named in wraps and the bundle log in knowledge/asdc/. No executor, attester, loader, root or run_checks.sh edits anywhere."
+
+  - id: r4-land-ice-capability
+    wave: C
+    kind: capability
+    title: Promote land-ice and wrap the nsidc computations
+    repo: land-ice
+    bundle: knowledge/nsidc
+    branch: claude/r4-land-ice-capability
+    issue: 4
+    depends_on: [r4-nsidc-input-output]
+    spheres: [cryosphere]
+    scope: >-
+      Promote the planned land-ice repository to developing and give it the
+      skills that wrap every attested computation signed in the nsidc bundle.
+      The release adds no number of its own, on the same terms as the
+      atmospheric-physics seed. The sea level contribution of an ice sheet mass
+      rate is a conversion the podaac bundle's recipe owns and the ocean-science
+      sea level budget skill already reports: land-ice cites that route in
+      words and does not re-wrap that computation, so that two capabilities
+      never quote the same number. The ice mass change skill reports the
+      concept's boundaries rather than smoothing them, including that the
+      closure is window dependent, that an ice sheet without a grounded firn
+      term refuses, and that a window crossing the gap between the gravimetry
+      missions needs a bridge citation.
+    wraps:
+      - {concept: "knowledge/nsidc/computations/ice-sheet-balance.md", executor: "knowledge/nsidc/references/computations/ice_sheet_balance.py", attester: "knowledge/nsidc/references/attesters/ice_sheet_balance_check.py", skill: ice-mass-change}
+      - {concept: "knowledge/nsidc/computations/ice-sheet-input-output.md", executor: "knowledge/nsidc/references/computations/ice_sheet_input_output.py", attester: "knowledge/nsidc/references/attesters/ice_sheet_input_output_check.py", skill: ice-sheet-input-output}
+    deliverables:
+      - ".osp/repository.yaml at status developing, and .osp/package.yaml, .osp/surfaces.yaml and .osp/governance.yaml in the shape ocean-science and hydrology carry, declaring core and the provider bundle with a version floor"
+      - "the rendered projections (.claude-plugin/plugin.json, plugin.json, and mcp.json only if REACH is declared), written by the renderer and never by hand"
+      - "one skill per wrapped computation under skills/, each with Agent Skills frontmatter and the attested-run discipline above"
+      - "knowledge/index.md and knowledge/log.md for the capability's own bundle, holding the capability's own conventions only"
+      - "a golden at the top of verification/ that exercises each wrapping skill's chain offline on a committed fixture, with its fixtures under verification/fixtures/, plus .github/workflows/goldens.yml and the plugin gate workflow with the placement-check step"
+      - "eval cases for every high-severity gotcha the release relies on, in the declared eval repository, and README.md in the shared skeleton whose first paragraph says the capability computes nothing of its own"
+      - "on the second branch in nasa-daac-knowledge: executor.skill added to each wrapped concept, and the bundle log recording it"
+    pattern:
+      - ocean-science/skills/sea-level-budget/SKILL.md
+      - ocean-science/skills/receipt-figures/SKILL.md
+      - hydrology/skills/basin-water-balance/SKILL.md
+      - plugin-template/
+    sources:
+      - domain: nsidc.org
+        read: "the product user guides for the caveats each skill reports; nothing new is claimed, the skill reports what the concept states"
+      - domain: doi.org and api.crossref.org
+        read: "only to verify a citation the skill repeats from a concept"
+    context:
+      - "The wrap-only release is specified in the marketplace specification's section on the first wrap-only releases and decided in ADR D there; read both before writing a skill."
+      - "The sea level route is ocean-science's sea-level-budget skill and the podaac bundle's mass to sea level recipe; cite them, wrap neither."
+    do_not_repeat:
+      - Any scientific claim a concept already owns; the skill cites it.
+    boundary: "The capability branch touches only the land-ice repository; the provider branch touches only the concepts named in wraps and the bundle log in knowledge/nsidc/. No executor, attester, loader, root or run_checks.sh edits anywhere."

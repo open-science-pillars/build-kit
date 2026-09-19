@@ -34,7 +34,7 @@ from pathlib import Path
 import yaml
 
 ORG = "open-science-pillars"
-KINDS = ("knowledge", "computation", "connector", "data-root")
+KINDS = ("knowledge", "computation", "connector", "data-root", "capability")
 
 PLUGIN_CHECKS = (
     "`uv run ../build-kit/scripts/osp.py validate . --standalone`, "
@@ -474,11 +474,91 @@ COMMIT, PUSH, PR. `git commit -s` (DCO sign-off) with the attribution lines your
 """
 
 
+CAPABILITY_RULES = (
+    "The release adds no number of its own (the wrap-only release rule of the "
+    "specification, decided in ADR D): every number a skill reports is owned by a "
+    "concept already signed stable in the provider bundle, and a skill that would "
+    "compute something new belongs to a later release that waits on the "
+    "domain-expansion decision. Each wrapping skill names its concept by bundle path, "
+    "invokes that concept's executor at the path the installed bundle puts it, binds "
+    "every parameter the concept declares, passes the runtime name, runs the attester "
+    "on the receipt before any number is quoted, and reports the verdict, the run "
+    "identifier, the runtime and the caveats the concept states, including its "
+    "refusals. Never copy an executor, an attester or a fixture into this repository, "
+    "and never name a path under verification/ in a SKILL.md; a script a skill runs at "
+    "runtime lives in that skill's scripts/ directory (the placement rule). Skill "
+    "frontmatter follows the Agent Skills rules: `name` equals the directory and is "
+    "lowercase words joined by single hyphens, `description` is one sentence under "
+    "1024 characters, and the body stays under 500 lines.")
+
+CAPABILITY_METADATA = (
+    "Write `.osp/` by hand and let the renderer write every manifest: `repository.yaml` "
+    "moves to status developing and keeps its spheres, primary sphere and discipline; "
+    "`package.yaml` names the package, a first version, type capability, the content "
+    "paths and the dependencies (core, and the provider bundle with the version floor "
+    "the coordinator states in the pull request thread); `surfaces.yaml` declares the "
+    "required runtimes, and no surface says supported without a qualification record, "
+    "so the development runtime is declared tested until the release is qualified; "
+    "`governance.yaml` keeps the sphere team already in the repository. Then "
+    "`osp.py render .` writes the projections; a hand edit to any of them fails the "
+    "gate. Copy the gate and goldens workflows from plugin-template, keeping the pinned "
+    "action digests, and include the placement-check step.")
+
+
+def wraps_text(seed: dict) -> str:
+    rows = seed.get("wraps") or []
+    if not rows:
+        return ""
+    lines = "\n".join(
+        f"- `{w['skill']}` wraps {w['concept']}; executor {w['executor']}; attester {w['attester']}"
+        for w in rows)
+    return ("WRAPS, one skill per computation, each named for the workflow and not for the "
+            f"product (a path is in the provider bundle's repository, {seed['bundle']} is its "
+            f"bundle):\n{lines}\n\nRead each concept's frontmatter and body first, and each "
+            "executor's and attester's usage text, so that the parameters a skill binds, the "
+            "refusals it reports and the receipt fields it quotes are exactly what the concept "
+            "declares. A parameter the concept declares and the skill does not bind is a gap the "
+            "pull request body names.\n")
+
+
+def render_capability(round_: dict, seed: dict) -> str:
+    repo, bundle, branch = seed["repo"], seed["bundle"], seed["branch"]
+    spheres = ", ".join(seed.get("spheres") or [])
+    checks = (CHECKS["plugin"] + " Then the golden must pass headless and offline "
+              "(`uv run verification/<golden>.py`), and `uv run ../build-kit/scripts/osp.py "
+              "placement-check . --strict` must report no error and no warning. In the provider "
+              "bundle's clone, `SIGNATURE_DEBT=report bash tools/run_checks.sh` must end in ALL "
+              "GREEN with your concept edits in place.")
+    return f"""You are promoting a planned capability out of planned for the Open Science Pillars organization (github.com/{ORG}): the repository {repo}, on a new branch `{branch}` created from main, and a second branch of the same name in nasa-daac-knowledge for the provider-bundle edit. A coordinator session dispatched you and will review, merge, re-sign the concepts your edit touches and reconcile the roadmap; you build, check, push and open one pull request per repository. Do not merge anything, do not sign anything, never promote a concept's status. {others_text(round_, seed)}BOUNDARY: {seed['boundary']} This seed is issue #{seed['issue']} in {repo}; reference it in the PR body. Spheres: {spheres}.
+
+WHAT TO BUILD ({seed['title']}). {seed['scope'].strip()}
+
+{wraps_text(seed)}
+{deliverables_text(seed)}
+
+{pattern_text(seed)}
+{context_text(seed)}
+SOURCES, and what to read on each:
+{sources_text(seed)}
+
+HOW TO READ THEM. {FETCH} {NO_DOWNLOAD}
+{dnr_text(seed)}
+FORMAT. Clone read-only beside the repository: `git clone https://github.com/{ORG}/marketplace ../marketplace`, likewise ../nasa-daac-knowledge, ../build-kit, ../ocean-science, ../hydrology and ../plugin-template. Read the marketplace specification's section on the first wrap-only releases and ADR D in its decisions directory before writing a skill, then marketplace/docs/contributing-a-skill.md and docs/package-authoring-guide.md. The provider-bundle branch adds one key, `executor.skill`, to each concept named above under `executor:`, and one entry at the top of that bundle's log naming the wrap; nothing else there changes, and the concept's status and signature block are left exactly as they are.
+
+RULES. {CONTENT_RULES} {CAPABILITY_RULES} {CAPABILITY_METADATA}
+
+CHECKS BEFORE PUSHING: {checks}
+
+COMMIT, PUSH, PR. `git commit -s` (DCO sign-off) with the attribution lines your session instructions give you. Push both branches and open one pull request against main in {repo} and one in nasa-daac-knowledge, with bodies listing every file added, each skill with the computation it wraps and the parameters it binds, the golden's output, the eval cases and what they grade, the check results, {pr_body_common()}, and the line "Capability PR: merges on the coordinator's review of the wrap discipline, on the maintainer's behalf" (the provider PR carries "Knowledge PR: merges on the maintainer's review; the edited concepts owe a re-sign" instead). {report_text()}
+"""
+
+
 RENDERERS = {
     "knowledge": render_knowledge,
     "computation": render_computation,
     "connector": render_connector,
     "data-root": render_data_root,
+    "capability": render_capability,
 }
 
 
