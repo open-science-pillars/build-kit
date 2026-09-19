@@ -16,11 +16,7 @@
 - `roadmap-harness-v1`: Build the federated roadmap harness (`build-kit`)
 - `atmos-cloud-radiative-effect`: Cloud radiative effect at the top of the atmosphere, as an attested computation (`nasa-daac-knowledge`)
 - `atmos-physics-promotion`: Promote atmospheric-physics out of planned as a wrap-only release (`atmospheric-physics`)
-- `atmos-syn1deg-knowledge`: The synoptic radiation product and the surface flux caveat as concepts (`nasa-daac-knowledge`)
-- `landice-antarctic-firn`: A grounded Antarctic firn air content term, so the ice sheet balance stops refusing Antarctica (`nasa-daac-knowledge`)
-- `landice-atl15-altimetry`: Run the ice sheet balance on ICESat-2 gridded height change beside the velocity-era altimetry (`nasa-daac-knowledge`)
 - `landice-grace-knowledge`: GRACE-FO mass change knowledge for land ice, reviewed and offered for confirmation (`nasa-daac-knowledge`)
-- `landice-imbie-knowledge`: The published ice sheet assessment and the firn model as reference concepts (`nasa-daac-knowledge`)
 - `landice-input-output`: Ice sheet mass balance by the input-output method, as a third independent attested computation (`nasa-daac-knowledge`)
 - `landice-promotion`: Promote land-ice out of planned as a wrap-only release (`land-ice`)
 - `r2-core-reference`: Qualify core as the reference capability on Claude Code, Cowork and Codex from one SKILL.md (`core`)
@@ -48,6 +44,8 @@
 ### Blocked
 
 - `c6-unwrapped-computations`: Wrap the energy budget and ice sheet balance computations when their sphere capabilities exist (`nasa-daac-knowledge`): Unblocked by the promotion-to-host-a-wrap decision: each capability promotes as a wrap-only release and the wrap is a deliverable of that release. Until those releases land, the placement gate reports the two computations as unwrapped (P6), reachable through consult-knowledge and their concepts.
+- `landice-antarctic-firn`: A grounded Antarctic firn air content term, so the ice sheet balance stops refusing Antarctica (`nasa-daac-knowledge`): Blocked on a finding, not on effort: round four established that no gridded grounded Antarctic firn air content field is distributed by any NASA archive. The only registered Antarctic firn air content product is the ice shelf one the root already reads, and opening it showed the variable finite on all 413719 shelf cells and none of the 3276620 land cells. The field exists only in the modelling groups' own distributions, which makes this a scope question for the maintainer (may a bundle keyed to NASA archives take a term from a modelling group) and a question for the archive contact (is there a grounded distribution the search could not see). Until it is answered the closure refuses Antarctica with its own refusal code and the check routine asserts that refusal.
+- `landice-atl15-altimetry`: Run the ice sheet balance on ICESat-2 gridded height change beside the velocity-era altimetry (`nasa-daac-knowledge`): Blocked on network egress, not on the product, the version or the credential. Every path the archive serves for these granules redirects to a distribution host this organization's policy refuses at the connection, with or without the Earthdata token, and the documented direct-access alternative issues credentials whose role is same-region only, so a caller outside the archive's cloud region is denied. Allowing that distribution host in the environment's network policy unblocks it and the existing loader then runs unchanged; so does running the fetch from compute inside the archive's region.
 - `atmos-workflow-skills`: Atmospheric-physics workflow skills that compute a number of their own (`atmospheric-physics`): Domain expansion: do not start until the powered-ablation decision authorizes new domains and a dated entry exists in the pre-registration. The wrap-only release deliberately carries no such skill.
 - `hydro-deferred-connectors`: Model context, the PeakFQ fixture, ECOSTRESS, and the SWOT hydrology move (`hydrology`): depends on `hydro-w2-w5-workflows`, `hydro-stewards-and-releases`
 - `landice-nsidc-elevation`: Reconcile mass change and elevation change for one ice sheet, in the land-ice capability (`land-ice`): Domain expansion: a skill that reconciles two estimates computes a number the provider bundles do not own, so it waits on the powered-ablation decision and its own dated pre-registration entry, which the wrap-only promotion deliberately does not cover. The concepts themselves are captured first in the provider bundle.
@@ -79,10 +77,10 @@ Proposed, waiting on a dependency, in priority order.
 - P1 `r3-dependency-reference`: Validate dependency realization on ocean-science across runtimes (`ocean-science`)
 - P1 `tutorial-nonauthor-validation`: Complete non-author Tutorial 2 validation (`tutorials`)
 
-### Done (36)
+### Done (38)
 
 <details>
-<summary>36 done deliverables</summary>
+<summary>38 done deliverables</summary>
 
 - `hydro-usgs-waterdata-migration`: Migrate the USGS connector to the Water Data APIs and release it
 - `hydro-basin-unit`: Add basin delineation as the unit of analysis
@@ -111,6 +109,8 @@ Proposed, waiting on a dependency, in priority order.
 - `c4-nasa-daac-placement`: Retire the run-skill references in nasa-daac-knowledge and point every computation at its executor and wrap
 - `c5-template-placement`: Ship the templates in the shape the placement gate expects
 - `sea-level-budget-closure`: Close the global sea level budget as an attested computation
+- `landice-imbie-knowledge`: The published ice sheet assessment and the firn model as reference concepts
+- `atmos-syn1deg-knowledge`: The synoptic radiation product and the surface flux caveat as concepts
 - `seed-regional-sea-level`: Regional sea level recipe with GIA and land motion for ocean-science, seeded and reviewed
 - `seed-lpdaac-vegetation`: MODIS vegetation knowledge for the lpdaac bundle, seeded and reviewed
 - `seed-gesdisc-oco2-subsetter`: OCO-2 SIF knowledge and the GES DISC subsetter connector concept, seeded and reviewed
@@ -712,9 +712,9 @@ land-ice is an installable capability whose first attested computation closes th
 |---|---|---|---|---|---|
 | `landice-grace-knowledge`: GRACE-FO mass change knowledge for land ice, reviewed and offered for confirmation | `nasa-daac-knowledge` | active | P1 | ready | [#123](https://github.com/open-science-pillars/nasa-daac-knowledge/issues/123) |
 | `sea-level-budget-closure`: Close the global sea level budget as an attested computation | `ocean-science` | done | P1 | needs-context | [#45](https://github.com/open-science-pillars/ocean-science/issues/45) |
-| `landice-antarctic-firn`: A grounded Antarctic firn air content term, so the ice sheet balance stops refusing Antarctica | `nasa-daac-knowledge` | active | P1 | needs-context | [#184](https://github.com/open-science-pillars/nasa-daac-knowledge/issues/184) |
-| `landice-atl15-altimetry`: Run the ice sheet balance on ICESat-2 gridded height change beside the velocity-era altimetry | `nasa-daac-knowledge` | active | P1 | needs-context | [#185](https://github.com/open-science-pillars/nasa-daac-knowledge/issues/185) |
-| `landice-imbie-knowledge`: The published ice sheet assessment and the firn model as reference concepts | `nasa-daac-knowledge` | active | P1 | ready | [#186](https://github.com/open-science-pillars/nasa-daac-knowledge/issues/186) |
+| `landice-antarctic-firn`: A grounded Antarctic firn air content term, so the ice sheet balance stops refusing Antarctica | `nasa-daac-knowledge` | blocked | P1 | needs-context | [#184](https://github.com/open-science-pillars/nasa-daac-knowledge/issues/184) |
+| `landice-atl15-altimetry`: Run the ice sheet balance on ICESat-2 gridded height change beside the velocity-era altimetry | `nasa-daac-knowledge` | blocked | P1 | needs-context | [#185](https://github.com/open-science-pillars/nasa-daac-knowledge/issues/185) |
+| `landice-imbie-knowledge`: The published ice sheet assessment and the firn model as reference concepts | `nasa-daac-knowledge` | done | P1 | ready | [#186](https://github.com/open-science-pillars/nasa-daac-knowledge/issues/186) |
 | `landice-input-output`: Ice sheet mass balance by the input-output method, as a third independent attested computation | `nasa-daac-knowledge` | active | P1 | needs-context | [#189](https://github.com/open-science-pillars/nasa-daac-knowledge/issues/189) |
 | `landice-promotion`: Promote land-ice out of planned as a wrap-only release | `land-ice` | active | P1 | needs-context | [#4](https://github.com/open-science-pillars/land-ice/issues/4) |
 | `landice-nsidc-knowledge`: ICESat-2 height change and ice velocity knowledge in a new NSIDC bundle | `nasa-daac-knowledge` | active | P2 | needs-context | [#131](https://github.com/open-science-pillars/nasa-daac-knowledge/issues/131) |
@@ -742,28 +742,31 @@ land-ice is an installable capability whose first attested computation closes th
 - [ ] A loader under the nsidc bundle's references builds a grounded Antarctic firn air content series from a documented model product, with a selftest, a stamp naming what was read and the model version, and no product file left in the tree.
 - [ ] The committed ice sheet balance data root carries the Antarctic firn term and its stamp, the record check passes, and the executor runs `--ice-sheet antarctica` to a receipt that the attester passes, where before it refused.
 - [ ] The concept records the Antarctic run beside the Greenland anchor, with the published assessment it is read against, and the model spread stated as an uncertainty rather than hidden.
-- Gate: Provider-bundle work inside the knowledge intake loop, not domain expansion; the executor is not edited, only the loaders and the committed root.
+- Gate: Blocked on a finding, not on effort: round four established that no gridded grounded Antarctic firn air content field is distributed by any NASA archive. The only registered Antarctic firn air content product is the ice shelf one the root already reads, and opening it showed the variable finite on all 413719 shelf cells and none of the 3276620 land cells. The field exists only in the modelling groups' own distributions, which makes this a scope question for the maintainer (may a bundle keyed to NASA archives take a term from a modelling group) and a question for the archive contact (is there a grounded distribution the search could not see). Until it is answered the closure refuses Antarctica with its own refusal code and the check routine asserts that refusal.
+- Evidence: `nasa-daac-knowledge PR #190: the search recorded in the committed root's SOURCES.json so it is not repeated, covering the registry by keyword (a pattern query whose 184 hits were all read), the named regional climate and firn models, all 77 Antarctic collections at the NSIDC cloud provider, and the ice velocity project's full bucket listing; and the empirical test of the one registered product, which carries no grounded field`
 
 **`landice-atl15-altimetry`**
 
 - [ ] The gridded height change granules are fetched for the committed root's domains, the loader writes its term file and stamp, and the record check passes.
 - [ ] The executor runs both altimetry sources over the same windows, and the concept states what the two agree and disagree on, with the window dependence measured rather than asserted.
 - [ ] Where the two disagree beyond their stated uncertainties, the concept says so plainly and names what would settle it; no verdict is smoothed.
-- Gate: Provider-bundle work inside the knowledge intake loop; the loader exists and awaits granules, so this deliverable is a data acquisition and a reference run, not a new method.
+- Gate: Blocked on network egress, not on the product, the version or the credential. Every path the archive serves for these granules redirects to a distribution host this organization's policy refuses at the connection, with or without the Earthdata token, and the documented direct-access alternative issues credentials whose role is same-region only, so a caller outside the archive's cloud region is denied. Allowing that distribution host in the environment's network policy unblocks it and the existing loader then runs unchanged; so does running the fetch from compute inside the archive's region.
+- Evidence: `nasa-daac-knowledge PR #190: the registry resolved to the current version and the one after it, the loader's archive constant and file names confirmed to match the current 10 km granules exactly, every fetch route tried and its status recorded in the committed root's SOURCES.json, and the documentation read and found to agree with the loader's documented choices`
 
 **`landice-imbie-knowledge`**
 
 - [ ] A reference concept states what the published multi-method ice sheet assessment reports for each ice sheet and period, with its own uncertainties, as the anchor the computation's runs are read against.
 - [ ] A reference concept states the firn model product the Antarctic term uses, its version, its domain and its uncertainty basis.
 - [ ] The gotcha that a height change is not a mass change without a firn and density statement carries an eval case; every new high-severity gotcha does.
+- Evidence: `nasa-daac-knowledge PR #192: the published multi-method assessment and the firn model air content product as dataset concepts, with the gotchas that the firn spread dominates the altimetric mass rate and crosses zero (high) and that an assessment's method groups are not independent (medium)`, `nasa-daac-knowledge PR #193: the maintainer's review, two datasets and the medium gotcha promoted to stable and signed, the high-severity gotcha carrying a first review and left draft for a second; agent-evals PR #32 and evals PR #41 carry and register its eval case`
 
 **`landice-input-output`**
 
 - [ ] An executor computes surface mass balance minus discharge across flux gates on grounded ice, from the velocity mosaics and a bed and thickness product, with fixture and data-root modes, a receipt, and a refusal for a gate configuration the thickness product does not support.
 - [ ] An attester with a selftest recomputes every term from the receipt and verifies the data root's digests; loaders build each term with stamps; the registry and the check routine carry the chain.
 - [ ] The concept states the method's own traps by name (mass conservation against interpolation in the thickness product, the grounding line, the gate placement, the velocity epochs) and reads its result against the gravimetric and altimetric methods and the published assessment.
-- Depends on: `landice-antarctic-firn`
-- Gate: Provider-bundle work inside the knowledge intake loop. The boundaries of the existing closure name this method as not made; it is built in the bundle where its numbers live, and only wrapped afterwards.
+- Depends on: `landice-imbie-knowledge`
+- Gate: Provider-bundle work inside the knowledge intake loop. The boundaries of the existing closure name this method as not made; it is built in the bundle where its numbers live, and only wrapped afterwards. It is built for Greenland and refuses the second ice sheet on the terms it lacks, since the Antarctic firn finding blocks that side of the existing closure too.
 
 **`landice-promotion`**
 
@@ -799,7 +802,7 @@ atmospheric-physics is an installable capability whose skills run the attested c
 
 | Deliverable | Repository | Status | Priority | Contributor | Issue |
 |---|---|---|---|---|---|
-| `atmos-syn1deg-knowledge`: The synoptic radiation product and the surface flux caveat as concepts | `nasa-daac-knowledge` | active | P1 | ready | [#187](https://github.com/open-science-pillars/nasa-daac-knowledge/issues/187) |
+| `atmos-syn1deg-knowledge`: The synoptic radiation product and the surface flux caveat as concepts | `nasa-daac-knowledge` | done | P1 | ready | [#187](https://github.com/open-science-pillars/nasa-daac-knowledge/issues/187) |
 | `atmos-cloud-radiative-effect`: Cloud radiative effect at the top of the atmosphere, as an attested computation | `nasa-daac-knowledge` | active | P1 | needs-context | [#188](https://github.com/open-science-pillars/nasa-daac-knowledge/issues/188) |
 | `atmos-physics-promotion`: Promote atmospheric-physics out of planned as a wrap-only release | `atmospheric-physics` | active | P1 | needs-context | [#4](https://github.com/open-science-pillars/atmospheric-physics/issues/4) |
 | `atmos-workflow-skills`: Atmospheric-physics workflow skills that compute a number of their own | `atmospheric-physics` | blocked | P2 | owner-only | none |
@@ -811,6 +814,7 @@ atmospheric-physics is an installable capability whose skills run the attested c
 - [ ] A dataset concept states the synoptic one-degree radiation product: what it is, how it differs from the energy balanced product the bundle already carries, its editions and its intended use.
 - [ ] Its gotchas state, with sources, that the surface and in-atmosphere fluxes are computed by a radiative transfer model rather than measured, and that the product's own documentation refuses long-term trend use; the high-severity one carries an eval case.
 - [ ] The existing energy balanced concepts are linked, not restated.
+- Evidence: `nasa-daac-knowledge PR #191: the synoptic radiation dataset concept, the clear-sky conventions concept and three gotchas, every claim cited to the product's own quality summaries and validation companions read in full`, `nasa-daac-knowledge PR #193: the maintainer's review, the convention concept moved out of the sanctioned code tree into conventions, the dataset, the convention and the medium gotcha promoted to stable and signed, the two high-severity gotchas carrying a first review and left draft for a second; agent-evals PR #31 and evals PR #41 carry and register their eval cases`, `Three provider-facing discrepancies stand for the archive contact rather than being resolved in the bundle: the two quality summaries disagree on the product's net imbalance, two attribution DOIs do not resolve while the four current ones do, and the registry carries no three-hourly collection although the documentation describes one`
 
 **`atmos-cloud-radiative-effect`**
 

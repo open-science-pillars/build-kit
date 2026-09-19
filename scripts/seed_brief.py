@@ -265,7 +265,13 @@ def dnr_text(seed: dict) -> str:
 
 
 def report_text() -> str:
-    return ("Then report, as your final message: the PR URLs, what was built, any source "
+    return ("You never merge a pull request and never sign a concept, here or in any other "
+            "repository, and there is no approval to ask for: the coordinator merges and the "
+            "maintainer signs, after you have finished. A concept you believe is ready is named "
+            "as ready in your report, with your reason, and left at `status: draft` with no "
+            "verified event. If you find yourself waiting for a verdict before you can finish, "
+            "that is the signal to finish instead: push the branch, open the pull request and "
+            "report. Then report, as your final message: the PR URLs, what was built, any source "
             "you could not reach, and anything you decided differently from this brief and why.")
 
 
