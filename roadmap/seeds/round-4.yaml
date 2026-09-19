@@ -28,97 +28,61 @@ coordinator_rules:
   - Seed sessions are dispatched on the model the coordinator records in its
     dispatch notes; repository content names no model.
 seeds:
-  - id: r4-nsidc-antarctic-firn
+  - id: r4-nsidc-ice-sheet-root
     wave: A
     kind: data-root
-    title: A grounded Antarctic firn air content term for the ice sheet closure
+    title: Close the two gaps in the ice sheet balance root, the grounded Antarctic firn term and the gridded height change altimetry
     repo: nasa-daac-knowledge
     bundle: knowledge/nsidc/references
-    branch: claude/r4-nsidc-antarctic-firn
+    branch: claude/r4-nsidc-ice-sheet-root
     issue: 184
     spheres: [cryosphere]
     scope: >-
-      The ice sheet mass balance closure refuses Antarctica for want of a
-      grounded firn air content term: the firn product the committed root
-      carries covers the floating shelves only, and the concept names the
-      regional climate model alternates as not read. This seed reads one of
-      those alternates for the grounded Antarctic sheet and extends the
-      committed root with it, so the executor runs Antarctica without any
-      change to the executor. A loader with a selftest on a synthetic grid
-      aggregates the model's firn air content over the grounded area with the
-      mask the product carries or the published basin set, writes the term CSV
-      and a stamp naming the product, its version, its forcing, its grid, the
-      mask, the aggregation and the uncertainty basis, and leaves no product
-      file in the tree; the data-root tool rewrites RECORD.json and SOURCES.json.
-      The existing Greenland terms are untouched. Report in the pull request
-      body what the executor now produces for Antarctica over the windows the
-      concept already names for Greenland, as a number the coordinator reviews,
-      not as a concept edit.
+      The ice sheet mass balance closure names two gaps in its own boundaries,
+      and both are gaps in the committed data root rather than in the method,
+      so one seed closes both in the same root without touching the executor.
+      First, Antarctica refuses for want of a grounded firn air content term:
+      the firn product the root carries covers the floating shelves only, and
+      the concept names the regional climate model alternates as not read. Read
+      one of those alternates for the grounded Antarctic sheet, aggregate its
+      firn air content over the grounded area with the mask the product carries
+      or the published basin set, and add the term with a stamp naming the
+      product, its version, its forcing, its grid, the mask, the aggregation
+      and the uncertainty basis. Second, the gridded height change altimetry
+      path has a loader and no data, because no granule was fetchable when it
+      was written: fetch the granules for the root's domains with the Earthdata
+      token, run that loader as it stands (a change to it is a fix with its
+      reason, never a rewrite), and add the term. Then rewrite RECORD.json and
+      SOURCES.json once, with both terms in the manifest. The point of the
+      second gap is the comparison the concept asks for: its boundaries say the
+      velocity-era altimetry term drifts after 2019 and is the suspect, and a
+      second altimetry source is what tests that. Write no concept; report the
+      runs in the pull request body as numbers the coordinator reviews.
     deliverables:
       - "knowledge/nsidc/references/loaders/isb_firn_<model>.py with --selftest, writing the grounded Antarctic firn air content term and its stamp into the existing root's layout"
-      - "the committed root at knowledge/nsidc/references/retrieval/ice-sheet-balance-root/ extended with the term, its stamp, an updated SOURCES.json and a rewritten RECORD.json that the data-root tool's --check passes"
-      - "in the pull request body: the Antarctic executor run and its attestation over at least two windows, with the terms, the residual, the bar and the verdict, and the model spread stated"
+      - "the gridded height change term and its stamp from the existing isb_volume_atl15.py loader, with any minimal fix the real granules require and its reason"
+      - "the committed root at knowledge/nsidc/references/retrieval/ice-sheet-balance-root/ extended with both terms, one rewritten SOURCES.json naming every file fetched with its hash and time, and one rewritten RECORD.json that the data-root tool's --check passes"
+      - "in the pull request body: the Antarctic executor run and its attestation over at least two windows with the terms, residual, bar, verdict and the model spread; and the executor run and attestation on each altimetry source over the same windows, side by side, with a plain statement of where the two disagree beyond their stated uncertainties"
     pattern:
       - knowledge/nsidc/references/loaders/isb_firn_gemb.py
-      - knowledge/nsidc/references/loaders/isb_data_root.py
-      - knowledge/nsidc/references/retrieval/ice-sheet-balance-root/RECORD.json
-    sources:
-      - domain: doi.org and api.crossref.org
-        read: "the regional climate model's own papers on the registry records, for the version, the domain, the forcing and what the firn air content variable is; the journal page may be unreachable, in which case the registry record and the abstract are the citation and the pull request body says so"
-      - domain: nsidc.org
-        read: "the ice sheet mask or basin definitions used for the grounded aggregation, and the existing product documentation the root already cites"
-      - domain: its-live.jpl.nasa.gov
-        read: "the firn product the root already carries, to keep the term's units, sign convention and stamp keys identical"
-      - domain: cmr.earthdata.nasa.gov
-        read: "the collection record of whichever product is fetched, for its identity and version"
-    do_not_repeat:
-      - The Greenland firn and surface mass balance terms; they stay as they are.
-    boundary: "Edit only under knowledge/nsidc/references/loaders/ and knowledge/nsidc/references/retrieval/ice-sheet-balance-root/. No concept, index, log or DIGEST edits; no executor, attester or run_checks.sh edits."
-
-  - id: r4-nsidc-atl15-altimetry
-    wave: A
-    kind: data-root
-    title: The gridded height change altimetry term, fetched and run beside the velocity-era term
-    repo: nasa-daac-knowledge
-    bundle: knowledge/nsidc/references
-    branch: claude/r4-nsidc-atl15-altimetry
-    issue: 185
-    spheres: [cryosphere]
-    scope: >-
-      The ice sheet closure carries two altimetry paths and only one has data:
-      the gridded height change loader was built and awaits a fetchable
-      granule, so the committed root holds the velocity-era elevation change
-      only and RECORD.json says why. This seed fetches the gridded height
-      change granules for the root's domains with the Earthdata token, runs the
-      existing loader, and extends the root with the term and its stamp, so the
-      executor runs both altimetry sources over the same windows. The loader is
-      used as it stands where it works; a change to it is a fix with the reason
-      in the pull request body, never a rewrite. The point of the seed is the
-      comparison: the concept's boundaries say the velocity-era term drifts
-      after 2019 and is the suspect, and a second altimetry source is what
-      tests that. Report both runs over the same windows in the pull request
-      body, with the terms, residuals, bars and verdicts side by side, and say
-      plainly where they agree and where they do not; write no concept.
-    deliverables:
-      - "the gridded height change term and its stamp in knowledge/nsidc/references/retrieval/ice-sheet-balance-root/, with SOURCES.json naming every granule fetched with its hash and time, and a rewritten RECORD.json whose --check passes"
-      - "any minimal fix to knowledge/nsidc/references/loaders/isb_volume_atl15.py the real granules require, each with its reason"
-      - "in the pull request body: the executor run and attestation on each altimetry source over the same windows, side by side, and a plain statement of where the two disagree beyond their stated uncertainties"
-    pattern:
       - knowledge/nsidc/references/loaders/isb_volume_itslive.py
       - knowledge/nsidc/references/loaders/isb_data_root.py
       - knowledge/nsidc/references/retrieval/ice-sheet-balance-root/RECORD.json
     sources:
       - domain: nsidc.org
-        read: "the gridded land ice height change user guide and data dictionary for the current version: the variables, the reference epoch, the quadrants, the resolutions and the version history"
+        read: "the gridded land ice height change user guide and data dictionary for the current version (the variables, the reference epoch, the quadrants, the resolutions, the version history), and the ice sheet mask or basin definitions used for the grounded aggregation"
       - domain: cmr.earthdata.nasa.gov
-        read: "the collection and granule records for the current version, to resolve what is fetchable and from where"
+        read: "the collection and granule records for every product read, to resolve identity, version and what is fetchable"
       - domain: data.nsidc.earthdatacloud.nasa.gov
-        read: "the granules themselves, with the Earthdata token as a bearer header"
+        read: "the height change granules themselves, with the Earthdata token as a bearer header"
+      - domain: its-live.jpl.nasa.gov
+        read: "the firn product the root already carries, to keep the new term's units, sign convention and stamp keys identical"
       - domain: doi.org and api.crossref.org
-        read: "the product DOI and the algorithm references on the registry records"
+        read: "the product DOIs and the regional climate model's own papers on the registry records, for the version, the domain, the forcing and what the firn air content variable is; a journal page may be unreachable, in which case the registry record and the abstract are the citation and the pull request body says so"
     do_not_repeat:
-      - The dataset concept for the product and its reference epoch gotcha; they exist, link them.
-    boundary: "Edit only under knowledge/nsidc/references/loaders/isb_volume_atl15.py and knowledge/nsidc/references/retrieval/ice-sheet-balance-root/. No concept, index, log or DIGEST edits; no executor, attester or run_checks.sh edits."
+      - The Greenland firn and surface mass balance terms; they stay as they are.
+      - The dataset concepts and the reference epoch gotcha; they exist, and this seed writes no concept.
+    boundary: "Edit only under knowledge/nsidc/references/loaders/ and knowledge/nsidc/references/retrieval/ice-sheet-balance-root/. No concept, index, log or DIGEST edits; no executor, attester or run_checks.sh edits. This seed closes issues 184 and 185; reference both."
 
   - id: r4-nsidc-landice-anchors
     wave: A
