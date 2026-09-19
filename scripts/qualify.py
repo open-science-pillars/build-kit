@@ -360,9 +360,24 @@ def headless(prompt: str, tools: str, max_turns: int, model: str | None, timeout
             "turns": turns, "raw": r.stdout or "", "stderr": r.stderr or ""}
 
 
-def expect_all(text: str, patterns: list[str]) -> list[str]:
-    """The patterns that did not match."""
-    return [p for p in patterns if not re.search(p, text, re.I | re.S)]
+def expect_all(text: str, patterns: list[Any]) -> list[str]:
+    """The patterns that did not match.
+
+    A pattern comes from a probe's expect list in surfaces.yaml, where a
+    bare number (a window, a year, a count) is read by YAML as an int and
+    would otherwise fail here with a TypeError from re, which tells a
+    maintainer nothing about the file they wrote. Each is read as the
+    text it stands for."""
+    out = []
+    for p in patterns:
+        pattern = p if isinstance(p, str) else str(p)
+        try:
+            hit = re.search(pattern, text, re.I | re.S)
+        except re.error as bad:
+            raise QualifyError(f"probe expectation {pattern!r} is not a regular expression: {bad}") from bad
+        if not hit:
+            out.append(pattern)
+    return out
 
 
 def keep(evidence: Path | None, name: str, reply: dict[str, Any]) -> str:

@@ -128,6 +128,12 @@ class QualifyTests(unittest.TestCase):
         self.assertEqual([], q.expect_all("see knowledge/podaac/datasets/ecco-v4r4.md, status stable",
                                           [q.KNOWLEDGE_PATH.pattern, q.CONCEPT_STATUS.pattern]))
         self.assertEqual([q.SIZE_WORDS.pattern], q.expect_all("please confirm first", [q.GATE_WORDS.pattern, q.SIZE_WORDS.pattern]))
+        # a bare year in a probe's expect list is an int by the time YAML is
+        # done with it, and it stands for the text a plan has to contain
+        self.assertEqual([], q.expect_all("the window is 2003-01:2016-12", [2003]))
+        self.assertEqual(["2019"], q.expect_all("the window is 2003-01:2016-12", [2019]))
+        with self.assertRaises(q.QualifyError):
+            q.expect_all("x", ["ice-sheet["])
 
     def test_probes_merge_capability_overrides_with_defaults(self):
         cap = q.load_capability(capability(self.root))
