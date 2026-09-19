@@ -241,7 +241,7 @@ seeds:
     bundle: knowledge/nsidc
     branch: claude/r4-nsidc-input-output
     issue: 189
-    depends_on: [r4-nsidc-antarctic-firn, r4-nsidc-landice-anchors]
+    depends_on: [r4-nsidc-ice-sheet-root, r4-nsidc-landice-anchors]
     spheres: [cryosphere]
     scope: >-
       The ice sheet closure's own boundaries name the input-output balance as
@@ -283,7 +283,7 @@ seeds:
       - domain: doi.org and api.crossref.org
         read: "every DOI verified on the registry record"
     context:
-      - "The Antarctic firn seed of wave A extends the closure's root; this computation's surface mass balance term reads the same model product, so keep the stamp keys and the aggregation identical."
+      - "Wave A established that no grounded Antarctic firn air content field is distributed by any NASA archive, and that the height change granules are unreachable from this environment's network policy; both findings are recorded in the closure's committed root. So build this computation for Greenland, and let the second ice sheet refuse on the terms it lacks, the way the existing closure already refuses it. Read that root's stamp keys and aggregation and keep them identical."
       - "The anchors seed of wave A writes the assessment reference; cite it for the comparison rather than restating the published numbers."
     do_not_repeat:
       - The thickness interpolation gotcha, the grounding line gotcha, the velocity epoch gotcha and the basin definition gotcha; they exist, link them.
