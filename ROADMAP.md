@@ -14,7 +14,6 @@
 - `federated-governance-baseline`: Declare repository-level roadmap authority (`.github`)
 - `reconcile-project-record`: Reconcile specifications, progress, limitations, and counts (`marketplace`)
 - `roadmap-harness-v1`: Build the federated roadmap harness (`build-kit`)
-- `atmos-cloud-radiative-effect`: Cloud radiative effect at the top of the atmosphere, as an attested computation (`nasa-daac-knowledge`)
 - `atmos-physics-promotion`: Promote atmospheric-physics out of planned as a wrap-only release (`atmospheric-physics`)
 - `landice-grace-knowledge`: GRACE-FO mass change knowledge for land ice, reviewed and offered for confirmation (`nasa-daac-knowledge`)
 - `landice-input-output`: Ice sheet mass balance by the input-output method, as a third independent attested computation (`nasa-daac-knowledge`)
@@ -77,10 +76,10 @@ Proposed, waiting on a dependency, in priority order.
 - P1 `r3-dependency-reference`: Validate dependency realization on ocean-science across runtimes (`ocean-science`)
 - P1 `tutorial-nonauthor-validation`: Complete non-author Tutorial 2 validation (`tutorials`)
 
-### Done (38)
+### Done (39)
 
 <details>
-<summary>38 done deliverables</summary>
+<summary>39 done deliverables</summary>
 
 - `hydro-usgs-waterdata-migration`: Migrate the USGS connector to the Water Data APIs and release it
 - `hydro-basin-unit`: Add basin delineation as the unit of analysis
@@ -111,6 +110,7 @@ Proposed, waiting on a dependency, in priority order.
 - `sea-level-budget-closure`: Close the global sea level budget as an attested computation
 - `landice-imbie-knowledge`: The published ice sheet assessment and the firn model as reference concepts
 - `atmos-syn1deg-knowledge`: The synoptic radiation product and the surface flux caveat as concepts
+- `atmos-cloud-radiative-effect`: Cloud radiative effect at the top of the atmosphere, as an attested computation
 - `seed-regional-sea-level`: Regional sea level recipe with GIA and land motion for ocean-science, seeded and reviewed
 - `seed-lpdaac-vegetation`: MODIS vegetation knowledge for the lpdaac bundle, seeded and reviewed
 - `seed-gesdisc-oco2-subsetter`: OCO-2 SIF knowledge and the GES DISC subsetter connector concept, seeded and reviewed
@@ -803,7 +803,7 @@ atmospheric-physics is an installable capability whose skills run the attested c
 | Deliverable | Repository | Status | Priority | Contributor | Issue |
 |---|---|---|---|---|---|
 | `atmos-syn1deg-knowledge`: The synoptic radiation product and the surface flux caveat as concepts | `nasa-daac-knowledge` | done | P1 | ready | [#187](https://github.com/open-science-pillars/nasa-daac-knowledge/issues/187) |
-| `atmos-cloud-radiative-effect`: Cloud radiative effect at the top of the atmosphere, as an attested computation | `nasa-daac-knowledge` | active | P1 | needs-context | [#188](https://github.com/open-science-pillars/nasa-daac-knowledge/issues/188) |
+| `atmos-cloud-radiative-effect`: Cloud radiative effect at the top of the atmosphere, as an attested computation | `nasa-daac-knowledge` | done | P1 | needs-context | [#188](https://github.com/open-science-pillars/nasa-daac-knowledge/issues/188) |
 | `atmos-physics-promotion`: Promote atmospheric-physics out of planned as a wrap-only release | `atmospheric-physics` | active | P1 | needs-context | [#4](https://github.com/open-science-pillars/atmospheric-physics/issues/4) |
 | `atmos-workflow-skills`: Atmospheric-physics workflow skills that compute a number of their own | `atmospheric-physics` | blocked | P2 | owner-only | none |
 
@@ -823,6 +823,7 @@ atmospheric-physics is an installable capability whose skills run the attested c
 - [ ] The concept states the clear-sky definition trap by name, anchors its run on the published global mean cloud radiative effect with the source, and states what the product's own documentation refuses.
 - Depends on: `atmos-syn1deg-knowledge`
 - Gate: Provider-bundle work inside the knowledge intake loop; it reads the product the bundle already carries and the clear-sky convention the bundle already records.
+- Evidence: `nasa-daac-knowledge PR #196: the executor with five refusals at exit 3, the attester with eleven checks, both loaders, the committed data root, the concept and recipe, and the registry entries; the clear-sky convention is a declared parameter bound to the two the product carries and the receipt carries the other convention's answer beside its own`, `The anchored run over July 2005 through June 2015 lands 0.011 watts per square metre from the published global mean net effect, inside the rounding of the published table, and the receipt states the distance carries that rounding and the edition change rather than measuring either; the same run on the other convention states no distance, because the published number is not of that convention`, `The convention costs 1.75 watts per square metre globally and reverses sign over the Antarctic band, so the trap the bundle's clear-sky gotcha names is now carried as a number; the loader's weights reproduce the product's own global means to 4.5e-4 watts per square metre`, `nasa-daac-knowledge PR #197: the coordinator reproduced the whole chain on the maintainer's behalf, every headline number and both run identifiers matching, and rejected a tampered receipt value and an edited executor with nonzero exits; the chain is wired into run_checks.sh and the concept and recipe are stable and signed`
 
 **`atmos-physics-promotion`**
 
