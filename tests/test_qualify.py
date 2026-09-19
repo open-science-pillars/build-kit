@@ -4,8 +4,10 @@ import importlib.util
 import json
 import sys
 import tempfile
+import types
 import unittest
 from pathlib import Path
+from unittest import mock
 
 import yaml
 
@@ -68,6 +70,57 @@ class QualifyTests(unittest.TestCase):
                    "  > local-rc\n    Source: Local path (/tmp/rc/marketplace)\n")
         self.assertEqual({"open-science-pillars": "GitHub (open-science-pillars/marketplace)",
                           "local-rc": "Local path (/tmp/rc/marketplace)"}, q.parse_marketplace_list(listing))
+
+    def test_a_candidate_catalog_registered_from_elsewhere_is_stale(self):
+        """The candidate catalog's name outlives its directory.
+
+        Every candidate run writes osp-candidate to a fresh directory, so
+        the registration from the previous capability's run is still there
+        under the same name. Taking that name would install the previous
+        capability, or fail with "not found in marketplace", which reads
+        like a broken package. The name must be re-pointed instead."""
+        here = Path(self.tmp.name) / "candidate-marketplace"
+        (here / ".claude-plugin").mkdir(parents=True)
+        (here / ".claude-plugin" / "marketplace.json").write_text(
+            json.dumps({"name": "osp-candidate", "plugins": []}), encoding="utf-8")
+        listing = ("Configured marketplaces:\n\n  > osp-candidate\n"
+                   "    Source: Directory (/tmp/some-older-run/candidate-marketplace)\n")
+        with mock.patch.object(q, "run", return_value=types.SimpleNamespace(
+                returncode=0, stdout=listing, stderr="")):
+            with self.assertRaises(q.StaleMarketplace) as bad:
+                q.marketplace_name(str(here))
+        self.assertEqual("osp-candidate", bad.exception.name)
+
+        # registered from this run's own directory, so it is this run's
+        mine = ("Configured marketplaces:\n\n  > osp-candidate\n"
+                f"    Source: Directory ({here})\n")
+        with mock.patch.object(q, "run", return_value=types.SimpleNamespace(
+                returncode=0, stdout=mine, stderr="")):
+            self.assertEqual("osp-candidate", q.marketplace_name(str(here)))
+
+    def test_register_marketplace_repoints_a_stale_name(self):
+        here = Path(self.tmp.name) / "candidate-marketplace"
+        (here / ".claude-plugin").mkdir(parents=True)
+        (here / ".claude-plugin" / "marketplace.json").write_text(
+            json.dumps({"name": "osp-candidate", "plugins": []}), encoding="utf-8")
+        stale = ("Configured marketplaces:\n\n  > osp-candidate\n"
+                 "    Source: Directory (/tmp/some-older-run/candidate-marketplace)\n")
+        fresh = ("Configured marketplaces:\n\n  > osp-candidate\n"
+                 f"    Source: Directory ({here})\n")
+        calls = []
+
+        def fake(cmd, **kw):
+            calls.append(cmd)
+            if cmd[:4] == ["claude", "plugin", "marketplace", "list"]:
+                out = stale if len([c for c in calls if c[3] == "add"]) == 0 else fresh
+                return types.SimpleNamespace(returncode=0, stdout=out, stderr="")
+            return types.SimpleNamespace(returncode=0, stdout="", stderr="")
+
+        with mock.patch.object(q, "run", side_effect=fake):
+            self.assertEqual("osp-candidate", q.register_marketplace(str(here)))
+        verbs = [c[3] for c in calls if c[:3] == ["claude", "plugin", "marketplace"]]
+        self.assertEqual(["list", "remove", "add", "list"], verbs)
+
         self.assertTrue(q.floor_satisfied("0.5.0", ">=0.5.0"))
         self.assertTrue(q.floor_satisfied("2026.9.3", ">=2026.9.2"))
         self.assertFalse(q.floor_satisfied("2026.9.1", ">=2026.9.2"))
@@ -188,9 +241,30 @@ class WaiverAndCandidateTests(unittest.TestCase):
         self.assertTrue(rec["waived"])
 
     def test_candidate_catalog_is_a_marketplace_over_the_checkout(self):
+        capability(self.root, name="core", deps=False, reach=False)
         root = q.candidate_catalog(self.cap, self.root / "work")
         cat = json.loads((root / ".claude-plugin" / "marketplace.json").read_text())
         self.assertEqual("osp-candidate", cat["name"])
         self.assertEqual("./plugins/ocean-science", cat["plugins"][0]["source"])
         self.assertTrue((root / "plugins" / "ocean-science" / ".osp" / "package.yaml").is_file())
         self.assertTrue((root / "plugins" / "ocean-science" / "skills" / "ecco" / "SKILL.md").is_file())
+
+    def test_candidate_catalog_carries_the_declared_dependencies(self):
+        """The installed manifest addresses a dependency at the marketplace
+        it came from, so a candidate catalog holding only the capability
+        installs a package whose dependencies cannot resolve. The published
+        catalog cannot stand in: a candidate's floor is usually the release
+        being cut beside it, whose tag does not exist until after the
+        candidate merges."""
+        capability(self.root, name="core", deps=False, reach=False)
+        root = q.candidate_catalog(self.cap, self.root / "work")
+        cat = json.loads((root / ".claude-plugin" / "marketplace.json").read_text())
+        self.assertEqual(["ocean-science", "core"], [p["name"] for p in cat["plugins"]])
+        self.assertEqual("./plugins/core", cat["plugins"][1]["source"])
+        self.assertTrue((root / "plugins" / "core" / ".osp" / "package.yaml").is_file())
+
+    def test_candidate_catalog_refuses_a_dependency_that_is_not_beside_it(self):
+        with self.assertRaises(q.QualifyError) as bad:
+            q.candidate_catalog(self.cap, self.root / "work")
+        self.assertIn("core", str(bad.exception))
+        self.assertIn("is not there", str(bad.exception))

@@ -1177,14 +1177,20 @@ initiatives:
           url: https://github.com/open-science-pillars/nasa-daac-knowledge/issues/182
         title: Wrap the energy budget and ice sheet balance computations when their sphere capabilities exist
         repo: nasa-daac-knowledge
-        status: blocked
+        status: done
         priority: P1
         depends_on: [c4-nasa-daac-placement, atmos-physics-promotion, landice-promotion]
         gate: "Unblocked by the promotion-to-host-a-wrap decision: each capability promotes as a wrap-only release and the wrap is a deliverable of that release. Until those releases land, the placement gate reports the two computations as unwrapped (P6), reachable through consult-knowledge and their concepts."
         acceptance:
           - "asdc energy-budget carries executor.skill naming a skill in atmospheric-physics that runs its executor and attester."
           - "nsidc ice-sheet-balance carries executor.skill naming a skill in land-ice that runs its executor and attester."
-        evidence: []
+        evidence:
+          - "nasa-daac-knowledge PR #199 with atmospheric-physics PR #5: the asdc energy budget closure carries executor.skill naming atmospheric-physics/energy-budget-closure, and the cloud radiative effect names atmospheric-physics/cloud-radiative-effect, which was signed the same round and would otherwise have been a second unwrapped computation"
+          - "nasa-daac-knowledge PR #201 with land-ice PR #5: the nsidc ice sheet closure carries executor.skill naming land-ice/ice-mass-change, and the input-output balance names land-ice/ice-sheet-input-output, likewise signed the same round"
+          - "Four computations rather than the two this deliverable names, because the round signed two more while the capabilities were being built, and a wrap-only release carries every computation signed when it is cut rather than only the one that blocked it"
+          - "The measure of done is mechanical: osp.py placement-check --strict --workspace over nasa-daac-knowledge with both capabilities beside it reports 0 errors and 0 warnings, where before it reported each computation as unwrapped (P6). No bundle in the organization now carries an unwrapped attested computation"
+          - "nasa-daac-knowledge PR #200 and #201: the four concepts the keys touch were stable and signed, so each took a re-sign, and the paragraph in each that said its capability was planned and the computation unwrapped now names the skill that runs it"
+          - "The wraps are exercised, not only declared: each capability's golden runs both of its chains offline against the provider bundle's executors and attesters, and the eval cases that rest on the concepts those chains use now target the skills (agent-evals PR #33 and #34, evals PR #42 and #43)"
         contributor:
           readiness: needs-context
           champion: PaulMRamirez
@@ -1335,7 +1341,7 @@ initiatives:
           url: https://github.com/open-science-pillars/nasa-daac-knowledge/issues/189
         title: Ice sheet mass balance by the input-output method, as a third independent attested computation
         repo: nasa-daac-knowledge
-        status: active
+        status: done
         priority: P1
         depends_on: [landice-imbie-knowledge]
         gate: "Provider-bundle work inside the knowledge intake loop. The boundaries of the existing closure name this method as not made; it is built in the bundle where its numbers live, and only wrapped afterwards. It is built for Greenland and refuses the second ice sheet on the terms it lacks, since the Antarctic firn finding blocks that side of the existing closure too."
@@ -1343,7 +1349,11 @@ initiatives:
           - "An executor computes surface mass balance minus discharge across flux gates on grounded ice, from the velocity mosaics and a bed and thickness product, with fixture and data-root modes, a receipt, and a refusal for a gate configuration the thickness product does not support."
           - "An attester with a selftest recomputes every term from the receipt and verifies the data root's digests; loaders build each term with stamps; the registry and the check routine carry the chain."
           - "The concept states the method's own traps by name (mass conservation against interpolation in the thickness product, the grounding line, the gate placement, the velocity epochs) and reads its result against the gravimetric and altimetric methods and the published assessment."
-        evidence: []
+        evidence:
+          - "nasa-daac-knowledge PR #198: the executor differencing a grounded surface mass balance against a gate discharge formed node by node from a velocity and a thickness, with fixture and data-root modes, a receipt and its refusals at exit 3; the attester with its selftest; four loaders with stamps; the stamped data root; the concept and recipe. The gate set was derived from the mosaics by a rule the stamp records, nothing placed by hand: twelve gates, 286 nodes, over eleven annual epochs"
+          - "The record run refuses, and that is the result: the thickness term sits behind a distribution host this environment's egress policy refuses at the connection, and no NASA archive distributes a gridded surface mass balance over grounded ice. The concept states both gaps rather than quoting a fixture as an anchor, so it is promoted on the fixture chain alone, as the sea level budget was before its real-data run; the record function in the check routine is written to require the refusal and becomes an ordinary attested run when the thickness term lands"
+          - "Two provider findings are carried in the concept and the stamp rather than invented as gotchas: the Greenland velocity mosaics carry no floating ice cell at all, so a gate on that mask sits at the ice margin and not the grounding line and the computation settles grounding from the thickness product instead; and the velocity user guide's flux gate sentence cannot be reconciled with the geometry, so the executor divides by the projection's areal scale, states the ground flux, and carries the scale per node so the guide's reading can be recovered"
+          - "nasa-daac-knowledge PR #200: the coordinator reproduced the whole chain on the maintainer's behalf, every headline number and the run identifier matching, and rejected a tampered discharge rate and an edited executor with nonzero exits; the chain is wired into run_checks.sh as its own functions and the concept and recipe are stable and signed"
         contributor:
           readiness: needs-context
           champion: PaulMRamirez
