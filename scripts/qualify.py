@@ -241,6 +241,22 @@ def parse_marketplace_list(text: str) -> dict[str, str]:
     return out
 
 
+class StaleMarketplace(QualifyError):
+    """The catalog's name is registered, from somewhere else.
+
+    A candidate catalog is always called osp-candidate and is written to a
+    fresh directory for every run, so the name outlives the directory: the
+    registration from the last capability's run is still there, pointing at
+    a tree that holds the last capability. Installing against it fails with
+    "not found in marketplace", which reads like a broken package and is
+    not one. The caller re-points the registration; this carries the name
+    to remove."""
+
+    def __init__(self, name: str, source: str):
+        super().__init__(f"marketplace {name} is registered from {source}, not from this run")
+        self.name = name
+
+
 def marketplace_name(marketplace: str) -> str:
     """The name the runtime registered the marketplace under (the catalog's
     own name, which is what `plugin@name` addresses), found from the
@@ -256,9 +272,26 @@ def marketplace_name(marketplace: str) -> str:
         if catalog.is_file():
             name = osp.read_json(catalog).get("name")
             if name in known:
-                return name
+                raise StaleMarketplace(name, known[name])
     raise QualifyError(f"marketplace {marketplace} is not registered by the runtime; known: "
                        + (", ".join(f"{n} ({s})" for n, s in known.items()) or "none"))
+
+
+def register_marketplace(marketplace: str) -> str:
+    """The name to address `plugin@name` by, with the registration made to
+    agree with this run: added when it is absent, re-pointed when the name
+    is registered from another directory."""
+    try:
+        return marketplace_name(marketplace)
+    except StaleMarketplace as stale:
+        gone = run(["claude", "plugin", "marketplace", "remove", stale.name], timeout=600)
+        if gone.returncode != 0:
+            raise QualifyError(f"marketplace remove {stale.name} failed: "
+                               f"{(gone.stderr or gone.stdout)[-300:]}") from stale
+    add = run(["claude", "plugin", "marketplace", "add", marketplace], timeout=600)
+    if add.returncode != 0:
+        raise QualifyError(f"marketplace add {marketplace} failed: {(add.stderr or add.stdout)[-300:]}")
+    return marketplace_name(marketplace)
 
 
 def version_tuple(v: str) -> tuple[int, ...]:
@@ -327,9 +360,24 @@ def headless(prompt: str, tools: str, max_turns: int, model: str | None, timeout
             "turns": turns, "raw": r.stdout or "", "stderr": r.stderr or ""}
 
 
-def expect_all(text: str, patterns: list[str]) -> list[str]:
-    """The patterns that did not match."""
-    return [p for p in patterns if not re.search(p, text, re.I | re.S)]
+def expect_all(text: str, patterns: list[Any]) -> list[str]:
+    """The patterns that did not match.
+
+    A pattern comes from a probe's expect list in surfaces.yaml, where a
+    bare number (a window, a year, a count) is read by YAML as an int and
+    would otherwise fail here with a TypeError from re, which tells a
+    maintainer nothing about the file they wrote. Each is read as the
+    text it stands for."""
+    out = []
+    for p in patterns:
+        pattern = p if isinstance(p, str) else str(p)
+        try:
+            hit = re.search(pattern, text, re.I | re.S)
+        except re.error as bad:
+            raise QualifyError(f"probe expectation {pattern!r} is not a regular expression: {bad}") from bad
+        if not hit:
+            out.append(pattern)
+    return out
 
 
 def keep(evidence: Path | None, name: str, reply: dict[str, Any]) -> str:
@@ -371,13 +419,7 @@ def qualify_claude_code(cap: dict[str, Any], marketplace: str, model: str | None
         print(f"  {test}: {status.upper()}  {evidence_text[:160]}", flush=True)
 
     # install: from the marketplace, one action, dependencies with it
-    try:
-        mp_name = marketplace_name(marketplace)
-    except QualifyError:
-        add = run(["claude", "plugin", "marketplace", "add", marketplace], timeout=600)
-        if add.returncode != 0:
-            raise QualifyError(f"marketplace add {marketplace} failed: {(add.stderr or add.stdout)[-300:]}")
-        mp_name = marketplace_name(marketplace)
+    mp_name = register_marketplace(marketplace)
     inst = run(["claude", "plugin", "install", f"{name}@{mp_name}", "--json", "-y"], timeout=900)
     entries = plugin_list()
     entry = installed_entry(name, entries, mp_name)
@@ -648,19 +690,46 @@ def waive(cap: dict[str, Any], runtime: str, reason: str, by: str, record_dir: P
 
 
 def candidate_catalog(cap: dict[str, Any], where: Path) -> Path:
-    """A local marketplace whose one entry is this checkout, so the
-    candidate installs the way a release will, from a catalog."""
+    """A local marketplace holding this checkout and every dependency it
+    declares, so the candidate installs the way a release will.
+
+    The dependencies belong in it for a reason the published catalog
+    cannot cover: a candidate's floor is usually the release being cut
+    beside it, whose tag does not exist until after the candidate merges,
+    so the published entry would resolve to the previous release or to
+    nothing. A dependency is taken from its sibling checkout in the
+    workspace when one is there, which is the tree the candidate was
+    written against; the installed manifest addresses dependencies at the
+    marketplace it came from, so one missing here fails the install
+    outright rather than falling back."""
     root = where / "candidate-marketplace"
-    plugin = root / "plugins" / cap["name"]
     if root.exists():
         shutil.rmtree(root)
-    shutil.copytree(cap["dir"], plugin, ignore=shutil.ignore_patterns(".git", "dist", "__pycache__", "*.pyc"))
+    ignore = shutil.ignore_patterns(".git", "dist", "__pycache__", "*.pyc")
+    entries = [{"name": cap["name"], "description": f"{cap['name']} {cap['version']} release candidate",
+                "source": f"./plugins/{cap['name']}"}]
+    shutil.copytree(cap["dir"], root / "plugins" / cap["name"], ignore=ignore)
+    workspace = cap["dir"].parent
+    missing = []
+    for dep in osp.dependency_entries(cap["package"]):
+        beside = workspace / dep["name"]
+        if not (beside / ".osp" / "package.yaml").is_file():
+            missing.append(dep["name"])
+            continue
+        shutil.copytree(beside, root / "plugins" / dep["name"], ignore=ignore)
+        entries.append({"name": dep["name"],
+                        "description": f"{dep['name']} beside the candidate, for its qualification run",
+                        "source": f"./plugins/{dep['name']}"})
+    if missing:
+        raise QualifyError(
+            f"a candidate catalog for {cap['name']} needs every declared dependency beside it in "
+            f"{workspace}, and {', '.join(missing)} is not there; check the workspace out first, "
+            "because the published catalog cannot serve a floor whose tag is cut after this merges")
     (root / ".claude-plugin").mkdir(parents=True)
     catalog = {"name": "osp-candidate", "version": "0.0.0",
                "description": "Release candidate catalog for a qualification run; never published",
                "owner": {"name": "Open Science Pillars Community"},
-               "plugins": [{"name": cap["name"], "description": f"{cap['name']} {cap['version']} release candidate",
-                            "source": f"./plugins/{cap['name']}"}]}
+               "plugins": entries}
     (root / ".claude-plugin" / "marketplace.json").write_text(json.dumps(catalog, indent=1), encoding="utf-8")
     return root
 
