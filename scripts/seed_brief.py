@@ -34,7 +34,7 @@ from pathlib import Path
 import yaml
 
 ORG = "open-science-pillars"
-KINDS = ("knowledge", "computation", "connector", "data-root", "capability")
+KINDS = ("knowledge", "computation", "connector", "data-root", "capability", "skill")
 
 PLUGIN_CHECKS = (
     "`uv run ../build-kit/scripts/osp.py validate . --standalone`, "
@@ -513,6 +513,42 @@ CAPABILITY_METADATA = (
     "action digests, and include the placement-check step.")
 
 
+RECEIPT_SKILL_RULES = (
+    "A receipt skill computes nothing of its own: every number it emits is a field of a "
+    "receipt the attester passed, or a table, figure or paragraph made of such fields, and it "
+    "combines no two receipts into a value no receipt carries. That is the whole discipline, and "
+    "the script enforces it rather than the prose: it runs the attester on every receipt before "
+    "reading one and records a receipt that did not pass as a failed row with the attester's own "
+    "line, never as a number; it refuses to emit any aggregate across rows (no mean, no overall "
+    "rate, no count of closures presented as a rate), because that aggregate would be a number no "
+    "concept owns, which is domain expansion under ADR D and waits on the ablation; it refuses to "
+    "mix receipts whose executor digest (code_sha256) or data root manifest differ, so a table is "
+    "one method on one root; and it refuses a parameter the concept does not declare. It reaches "
+    "the executor and attester by the installed bundle's path exactly as the wrapping skill in "
+    "this repository does, and never copies either. The script lives in the skill's scripts/ "
+    "directory (the placement rule), carries a --selftest that runs on the executor's synthetic "
+    "fixture and exercises every refusal, and is named in the goldens workflow through the golden "
+    "that runs it offline. The SKILL.md says in its first paragraph that the skill computes "
+    "nothing and where every number it shows comes from, tells the agent to report the table or "
+    "figure with the run identifiers and the concept's caveats beside it, and forbids in its "
+    "Must NOT list the one sentence a reader will want most, the headline number the rows do not "
+    "carry. Skill frontmatter follows the Agent Skills rules: `name` equals the directory and is "
+    "lowercase words joined by single hyphens, `description` is one sentence under 1024 characters, "
+    "and the body stays under 500 lines.")
+
+
+def skills_text(seed: dict) -> str:
+    out = ["SKILLS TO BUILD, one directory each under skills/:"]
+    for s in seed["skills"]:
+        out.append(f"- `{s['name']}` with `scripts/{s['script']}`: {s['does']} Refuses: {s['refuses']}")
+    out.append("")
+    out.append("THE COMPUTATIONS THEY OPERATE ON, each reached the way the wrapping skill reaches it:")
+    for w in seed["operates_on"]:
+        out.append(f"- concept `{w['concept']}`, executor `{w['executor']}`, attester `{w['attester']}`, "
+                   f"wrapped by `{w['wrapped_by']}`; parameters the concept declares: {w['parameters']}")
+    return "\n".join(out)
+
+
 def wraps_text(seed: dict) -> str:
     rows = seed.get("wraps") or []
     if not rows:
@@ -561,12 +597,51 @@ COMMIT, PUSH, PR. `git commit -s` (DCO sign-off) with the attribution lines your
 """
 
 
+def render_skill(round_: dict, seed: dict) -> str:
+    repo, branch = seed["repo"], seed["branch"]
+    spheres = ", ".join(seed.get("spheres") or [])
+    ev = seed.get("eval")
+    eval_text = (f"\n- One eval case in agent-evals under `{ev['subtree']}/` targeting the skill it names, on a branch "
+                 f"of the same name there with its own pull request: {ev['case'].strip()}" if ev else "")
+    checks = (CHECKS["plugin"] + " Then each script's `--selftest` and the golden named in the deliverables "
+              "(`uv run verification/<golden>.py`) must pass headless and offline with the provider bundle "
+              "checked out beside this repository and named by its environment variable, and "
+              "`uv run ../build-kit/scripts/osp.py placement-check . --strict` must report no error and no warning.")
+    siblings = [s for s in ("marketplace", "nasa-daac-knowledge", "build-kit", "ocean-science") if s != repo]
+    clone_text = (f"`git clone https://github.com/{ORG}/{siblings[0]} ../{siblings[0]}`, likewise "
+                  + " and ".join(f"../{s}" for s in siblings[1:]))
+    return f"""You are building receipt skills for the Open Science Pillars organization (github.com/{ORG}) in the repository {repo}, on a new branch `{branch}` created from main. A coordinator session dispatched you and will review, merge and reconcile the roadmap; you build, check, push and open one pull request per repository you touch. Do not merge anything, do not sign anything, never edit a concept, an executor, an attester or a loader in the provider bundle. {others_text(round_, seed)}BOUNDARY: {seed['boundary']} This seed is issue #{seed['issue']} in {repo}; reference it in the PR body. Spheres: {spheres}.
+
+WHAT TO BUILD ({seed['title']}). {seed['scope'].strip()}
+
+{skills_text(seed)}
+
+{deliverables_text(seed)}{eval_text}
+
+{pattern_text(seed)}
+{context_text(seed)}
+SOURCES, and what to read on each:
+{sources_text(seed)}
+
+HOW TO READ THEM. {FETCH} {NO_DOWNLOAD}
+{dnr_text(seed)}
+FORMAT. Clone read-only beside the repository: {clone_text}. Read the marketplace specification's section on the first wrap-only releases and ADR D in its decisions directory, then marketplace/docs/contributing-a-skill.md and docs/package-authoring-guide.md, before writing a skill. Add one entry at the top of this repository's `knowledge/log.md` naming the skills built; nothing in a provider bundle changes.
+
+RULES. {CONTENT_RULES} {RECEIPT_SKILL_RULES}
+
+CHECKS BEFORE PUSHING: {checks}
+
+COMMIT, PUSH, PR. `git commit -s` (DCO sign-off) with the attribution lines your session instructions give you. Push the branch and open one pull request against main in {repo}, with a body listing every file added, each skill with the computation it operates on and every refusal its script enforces, the selftest and golden output, a worked table or figure from the committed root pasted in, {pr_body_common()}, and the line "Skill PR: merges on the coordinator's review of the receipt discipline, on the maintainer's behalf". {report_text()}
+"""
+
+
 RENDERERS = {
     "knowledge": render_knowledge,
     "computation": render_computation,
     "connector": render_connector,
     "data-root": render_data_root,
     "capability": render_capability,
+    "skill": render_skill,
 }
 
 

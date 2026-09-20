@@ -14,7 +14,9 @@
 - `federated-governance-baseline`: Declare repository-level roadmap authority (`.github`)
 - `reconcile-project-record`: Reconcile specifications, progress, limitations, and counts (`marketplace`)
 - `roadmap-harness-v1`: Build the federated roadmap harness (`build-kit`)
+- `adr-d-receipt-skills`: Amend the promotion-to-host-a-wrap decision to admit receipt skills, with the test that keeps them honest (`marketplace`)
 - `landice-grace-knowledge`: GRACE-FO mass change knowledge for land ice, reviewed and offered for confirmation (`nasa-daac-knowledge`)
+- `ocean-sweep`: A sweep over the sea level budget's declared parameters, the pattern-setter for receipt skills (`ocean-science`)
 - `r2-core-reference`: Qualify core as the reference capability on Claude Code, Cowork and Codex from one SKILL.md (`core`)
 - `landice-nsidc-knowledge`: ICESat-2 height change and ice velocity knowledge in a new NSIDC bundle (`nasa-daac-knowledge`)
 - `seed-argo-gridded-steric`: Roemmich and Gilson gridded Argo knowledge, seeded and reviewed (`ocean-science`)
@@ -63,10 +65,12 @@ Proposed, waiting on a dependency, in priority order.
 - P0 `ablation-runner-calibration`: Calibrate non-obvious probes and release-mixing grading (`evals`)
 - P0 `powered-ablation-run`: Run and publish the powered ablation (`evals`)
 - P1 `activation-eval-runner`: Build and pilot the activation-eval runner (`evals`)
+- P1 `atmos-receipt-skills`: Sweep, figures and methods over the asdc computations, as receipt skills in atmospheric-physics (`atmospheric-physics`)
 - P1 `codex-surface-policy`: Define Codex as a supported distribution and behavior runtime (`marketplace`)
 - P1 `conversational-surface-validation`: Complete Cowork qualification of a release (`marketplace`)
 - P1 `governed-release`: Cut the first governed, citable OSP release (`build-kit`)
 - P1 `hydro-stewards-and-releases`: Steward scaffolds, CODEOWNERS scopes, and the general-availability flip (`nasa-daac-knowledge`)
+- P1 `landice-receipt-skills`: Sweep, figures and methods over the nsidc closures, as receipt skills in land-ice (`land-ice`)
 - P1 `provider-steward-handoff`: Complete or accurately reframe provider stewardship (`nasa-daac-knowledge`)
 - P1 `r3-dependency-reference`: Validate dependency realization on ocean-science across runtimes (`ocean-science`)
 - P1 `tutorial-nonauthor-validation`: Complete non-author Tutorial 2 validation (`tutorials`)
@@ -792,6 +796,57 @@ land-ice is an installable capability whose first attested computation closes th
 - [ ] A workflow skill reconciles the mass-change and the elevation-change estimates for one ice sheet and states the disagreement honestly, consulting the NSIDC and PO.DAAC concepts.
 - Depends on: `landice-promotion`, `landice-nsidc-knowledge`, `powered-ablation-run`
 - Gate: Domain expansion: a skill that reconciles two estimates computes a number the provider bundles do not own, so it waits on the powered-ablation decision and its own dated pre-registration entry, which the wrap-only promotion deliberately does not cover. The concepts themselves are captured first in the provider bundle.
+
+### The postdoc's work as receipt skills over the attested computations
+
+**ID:** `receipt-skills`  
+**Status:** active  
+**Priority:** P1
+
+Every wrapped computation can be swept over its declared parameters, drawn from its receipt and written up from its bookkeeping by a skill whose script enforces that it computes nothing of its own, so the window dependence, the figure and the methods paragraph a scientist hands a postdoc are reproducible and refuse the headline number the rows do not carry.
+
+> **Gate:** A receipt skill emits only fields of receipts the attester passed, or a table, figure or paragraph of such fields, and combines no two receipts into a value no receipt carries; the script refuses the aggregate, so the skill is not domain expansion and does not wait on the ablation. Admitting one to a wrap-only capability is the dated amendment to the promotion-to-host-a-wrap decision that this initiative opens with, and the two sphere seeds wait on it.
+
+| Deliverable | Repository | Status | Priority | Contributor | Issue |
+|---|---|---|---|---|---|
+| `adr-d-receipt-skills`: Amend the promotion-to-host-a-wrap decision to admit receipt skills, with the test that keeps them honest | `marketplace` | active | P1 | owner-only | none |
+| `ocean-sweep`: A sweep over the sea level budget's declared parameters, the pattern-setter for receipt skills | `ocean-science` | active | P1 | needs-context | [#64](https://github.com/open-science-pillars/ocean-science/issues/64) |
+| `landice-receipt-skills`: Sweep, figures and methods over the nsidc closures, as receipt skills in land-ice | `land-ice` | proposed | P1 | needs-context | [#7](https://github.com/open-science-pillars/land-ice/issues/7) |
+| `atmos-receipt-skills`: Sweep, figures and methods over the asdc computations, as receipt skills in atmospheric-physics | `atmospheric-physics` | proposed | P1 | needs-context | [#7](https://github.com/open-science-pillars/atmospheric-physics/issues/7) |
+
+#### Acceptance details
+
+**`adr-d-receipt-skills`**
+
+- [ ] The decision record's point 3 keeps the ablation as the gate for any number of a capability's own, and admits a receipt skill by the test: every number a field of an attested receipt, or a table, figure or paragraph of such fields, combining no two receipts into a value no receipt carries.
+- [ ] The specification's wrap-only section defines a receipt skill by the same test and names a sweep that averages its rows as the number of its own that waits on the ablation.
+- [ ] The pre-registration carries a dated entry reading the amendment against its conditions: a sweep turns a window dependence the concepts already state into a measured table and prejudges nothing.
+- Gate: The decision owner's record. Point 3 of the decision bounds a wrap-only release to the wrapping skills and nothing else, which was written to keep promotion from becoming a back door for workflow skills; a receipt skill is neither a wrap nor a workflow, and the bound needs a gate with a test rather than a relaxation.
+
+**`ocean-sweep`**
+
+- [ ] A sweep skill with a script that runs the wrapped sea level budget executor over a family of values of a declared parameter, attests every receipt before reading it, and tabulates the executor's own headline fields per receipt, refusals included as rows.
+- [ ] The script refuses any aggregate across rows, refuses to mix receipts whose executor digest or data root manifest differ, and refuses a parameter the concept does not declare; each refusal is exercised by its selftest and by a golden the goldens workflow runs offline.
+- [ ] An eval case asks for the overall rate from a sweep and passes only when the agent refuses to average; a worked table from the committed root is in the pull request body.
+- Gate: Built first in ocean-science because it is not under the wrap-only bound and already carries the two sibling patterns, receipt-figures and cite-ecco; the sphere seeds copy its shape.
+
+**`landice-receipt-skills`**
+
+- [ ] A sweep over the window, the altimetry source, the ice density and the gate set, tabulating the executor's own fields and refusing the headline mass rate the ice-mass-change skill already forbids.
+- [ ] A receipt-figures port with ocean-science's discipline intact, drawing only what the closure receipts carry: the term series and the annual-lag differences the concept narrates.
+- [ ] A methods skill writing the paragraph and reference list from the receipt's bookkeeping and the concept's sources and from nothing else.
+- [ ] One golden exercising all three offline; an eval case that passes only on a refusal to average a sweep; the strict placement gate clean.
+- Depends on: `adr-d-receipt-skills`, `ocean-sweep`
+- Gate: Waits on the amendment that admits receipt skills to a wrap-only capability and on the ocean-science sweep that sets the shape.
+
+**`atmos-receipt-skills`**
+
+- [ ] A sweep over the window, the region and the clear-sky convention, tabulating the executor's own fields; the eight regions on both conventions is the table the convention gotcha describes in words.
+- [ ] A receipt-figures port with ocean-science's discipline intact, drawing only what the receipts carry.
+- [ ] A methods skill writing the paragraph and reference list from the receipt's bookkeeping and the concept's sources and from nothing else.
+- [ ] One golden exercising all three offline; an eval case that passes only on a refusal to average across conventions; the strict placement gate clean.
+- Depends on: `adr-d-receipt-skills`, `ocean-sweep`
+- Gate: Waits on the amendment that admits receipt skills to a wrap-only capability and on the ocean-science sweep that sets the shape.
 
 ### Open the Atmosphere through atmospheric-physics and the energy budget
 
