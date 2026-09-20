@@ -245,7 +245,7 @@ def tooling(root: Path, name="build-kit"):
 
 
 def packaged(root: Path, name="ocean-science", **kwargs):
-    """A capability whose package carries metadata and REACH, with one
+    """A capability whose package carries metadata and connectors, with one
     canonical skill, ready to render."""
     repo = capability(root, name=name, **kwargs)
     pkg = yaml.safe_load((repo / ".osp" / "package.yaml").read_text())
@@ -624,128 +624,142 @@ class ReleaseCandidateTests(AdvertiseTests):
         self.assertEqual([], osp.advertisement(self.repo)["errors"])
 
 
-class PlacementCheckTests(unittest.TestCase):
-    """The placement gate (ADR C): P1 to P7 on a repository shaped by the
-    placement rule, then each finding provoked on its own."""
+class WhereTheFilesGoTests(unittest.TestCase):
+    """The two findings of `validate` that measure where the files go
+    (ADR E): runnable code under knowledge/, and an attested computation
+    whose code is not in the package beside a golden that names it."""
 
-    TODAY = "2026-09-16"
+    TODAY = "2026-09-20"
 
     def setUp(self):
         self.tmp = tempfile.TemporaryDirectory()
         self.root = Path(self.tmp.name)
         self.repo = packaged(self.root)
-        refs = self.repo / "knowledge" / "references"
-        (refs / "computations").mkdir(parents=True)
-        (refs / "computations" / "ohc.py").write_text("print('executor')\n")
-        (refs / "attesters").mkdir()
-        (refs / "attesters" / "attest_ohc.py").write_text("print('attester')\n")
-        (self.repo / "knowledge" / "computations").mkdir()
-        (self.repo / "knowledge" / "computations" / "ohc.md").write_text(
-            "---\ntype: Attested Computation\ntitle: OHC\ncomputation: references/computations/ohc.py\n"
-            "executor:\n  resource: references/computations/ohc.py\n  receipt: receipts/ohc.json\n"
-            "  skill: ocean-science/load-ecco\nattester:\n  resource: references/attesters/attest_ohc.py\n---\n\nBody.\n")
-        (self.repo / "skills" / "load-ecco" / "scripts").mkdir()
-        (self.repo / "skills" / "load-ecco" / "scripts" / "render.py").write_text("print('render')\n")
-        (self.repo / "verification" / "fixtures").mkdir(parents=True)
-        (self.repo / "verification" / "ohc.py").write_text("print('golden')\n")
-        (self.repo / "verification" / "fixtures" / "freeze_inputs.py").write_text("print('freeze')\n")
-        (self.repo / ".github" / "workflows").mkdir(parents=True)
-        (self.repo / ".github" / "workflows" / "goldens.yml").write_text(
-            "jobs:\n  goldens:\n    steps:\n      - run: uv run verification/ohc.py\n")
+        scripts = self.repo / "skills" / "load-ecco" / "scripts"
+        scripts.mkdir(parents=True)
+        (scripts / "ohc.py").write_text("print('executor')\n")
+        (scripts / "attest_ohc.py").write_text("print('attester')\n")
+        (self.repo / "knowledge" / "computations").mkdir(parents=True)
+        self.concept = self.repo / "knowledge" / "computations" / "ohc.md"
+        self.concept.write_text(self.frontmatter())
+        (self.repo / "verification").mkdir()
+        (self.repo / "verification" / "ohc.py").write_text(
+            "# runs skills/load-ecco/scripts/ohc.py and skills/load-ecco/scripts/attest_ohc.py\n")
 
     def tearDown(self):
         self.tmp.cleanup()
 
-    def check(self, **kwargs):
+    def frontmatter(self, attester="skills/load-ecco/scripts/attest_ohc.py", extra=""):
+        return ("---\ntype: Attested Computation\ntitle: OHC\n"
+                "computation: skills/load-ecco/scripts/ohc.py\n"
+                "executor:\n  resource: skills/load-ecco/scripts/ohc.py\n  receipt: receipts/ohc.json\n"
+                + extra +
+                f"attester:\n  resource: {attester}\n---\n\nBody.\n")
+
+    def findings(self, **kwargs):
         kwargs.setdefault("today", self.TODAY)
-        return osp.placement_check(self.repo, **kwargs)
+        return osp.validate_repo(self.repo, **kwargs)
 
-    def test_a_repository_placed_by_plane_is_clean(self):
-        errors, warnings = self.check(strict=True)
-        self.assertEqual(([], []), (errors, warnings))
-
-    def test_orphan_sanctioned_code_is_an_error(self):
-        (self.repo / "knowledge" / "references" / "loaders").mkdir()
-        (self.repo / "knowledge" / "references" / "loaders" / "load_x.py").write_text("pass\n")
-        errors, _ = self.check()
-        self.assertTrue(any("P1" in e and "load_x.py" in e for e in errors), errors)
-
-    def test_migration_findings_warn_now_and_fail_later(self):
-        (self.repo / "knowledge" / "references" / "skills").mkdir()
-        (self.repo / "skills" / "load-ecco" / "helper.py").write_text("pass\n")
-        skill = self.repo / "skills" / "load-ecco" / "SKILL.md"
-        skill.write_text(skill.read_text() + "\nRun `uv run verification/fixtures/freeze_inputs.py` first.\n")
-        (self.repo / "verification" / "salt.py").write_text("print('unrun')\n")
-        codes = ["P2", "P3", "P4", "P5"]
-        errors, warnings = self.check()
+    def test_a_computation_that_is_a_skill_is_clean(self):
+        errors, warnings = self.findings()
         self.assertEqual([], errors, errors)
-        for code in codes:
-            self.assertTrue(any(f" {code}:" in w for w in warnings), (code, warnings))
-        self.assertTrue(any("salt.py" in w and "neither" in w for w in warnings), warnings)
-        self.assertTrue(any("freeze_inputs.py" in w and "fixture script" in w for w in warnings), warnings)
-        errors, _ = self.check(strict=True)
-        for code in codes:
-            self.assertTrue(any(f" {code}:" in e for e in errors), (code, errors))
-        errors, _ = self.check(today=osp.PLACEMENT_ERRORS_FROM)
-        self.assertTrue(any(" P2:" in e for e in errors), errors)
+        self.assertEqual([], [w for w in warnings if "knowledge/" in w], warnings)
 
-    def test_a_qualification_surface_counts_as_running_a_golden(self):
-        (self.repo / "verification" / "budget.py").write_text("print('surface')\n")
-        surfaces = self.repo / ".osp" / "surfaces.yaml"
-        surfaces.write_text(surfaces.read_text() + "  notes:\n    - verification/budget.py\n")
-        _, warnings = self.check()
-        self.assertFalse(any("budget.py" in w for w in warnings), warnings)
+    def test_runnable_code_under_knowledge_is_a_finding(self):
+        loaders = self.repo / "knowledge" / "references" / "loaders"
+        loaders.mkdir(parents=True)
+        (loaders / "load_x.py").write_text("pass\n")
+        (loaders / "fetch.sh").write_text("echo hi\n")
+        notes = self.repo / "knowledge" / "references" / "notes.md"
+        notes.write_text("A note.\n")
+        notes.chmod(0o755)
+        errors, warnings = self.findings()
+        self.assertEqual([], errors, errors)
+        for name in ("load_x.py", "fetch.sh", "notes.md"):
+            self.assertTrue(any(name in w and "runnable code under knowledge/" in w for w in warnings),
+                            (name, warnings))
+        # the same findings are errors once the migrations are due
+        errors, warnings = self.findings(today=osp.MIGRATION_ERRORS_FROM)
+        self.assertTrue(any("load_x.py" in e for e in errors), errors)
+        self.assertFalse(any("load_x.py" in w for w in warnings), warnings)
 
-    def test_a_workflow_glob_runs_every_golden(self):
-        (self.repo / "verification" / "salt.py").write_text("print('globbed')\n")
-        (self.repo / ".github" / "workflows" / "goldens.yml").write_text(
-            "jobs:\n  goldens:\n    steps:\n      - run: for g in verification/*.py; do uv run $g; done\n")
-        _, warnings = self.check()
-        self.assertFalse(any(" P5:" in w for w in warnings), warnings)
+    def test_a_computation_outside_the_package_is_a_finding(self):
+        refs = self.repo / "knowledge" / "references" / "attesters"
+        refs.mkdir(parents=True)
+        (refs / "attest_ohc.py").write_text("print('attester')\n")
+        self.concept.write_text(self.frontmatter(attester="references/attesters/attest_ohc.py"))
+        _, warnings = self.findings()
+        self.assertTrue(any("attester.resource" in w and "no file of this package outside knowledge/" in w
+                            for w in warnings), warnings)
+        # a path that resolves nowhere at all is the same finding
+        self.concept.write_text(self.frontmatter(attester="skills/load-ecco/scripts/nope.py"))
+        _, warnings = self.findings()
+        self.assertTrue(any("nope.py" in w and "no file of this package" in w for w in warnings), warnings)
 
-    def concept(self, wrap_line: str) -> None:
-        (self.repo / "knowledge" / "computations" / "ohc.md").write_text(
-            "---\ntype: Attested Computation\ntitle: OHC\ncomputation: references/computations/ohc.py\n"
-            "executor:\n  resource: references/computations/ohc.py\n  receipt: receipts/ohc.json\n"
-            + wrap_line + "attester:\n  resource: references/attesters/attest_ohc.py\n---\n\nBody.\n")
+    def test_a_computation_no_golden_names_is_a_finding(self):
+        (self.repo / "verification" / "ohc.py").write_text("# runs skills/load-ecco/scripts/ohc.py\n")
+        errors, warnings = self.findings()
+        self.assertEqual([], errors, errors)
+        self.assertTrue(any("attest_ohc.py" in w and "no file directly under" in w
+                            for w in warnings), warnings)
+        # a file in a subdirectory of verification/ is not the golden
+        (self.repo / "verification" / "fixtures").mkdir()
+        (self.repo / "verification" / "fixtures" / "notes.md").write_text("attest_ohc.py\n")
+        _, warnings = self.findings()
+        self.assertTrue(any("attest_ohc.py" in w for w in warnings), warnings)
+        errors, _ = self.findings(today="2026-12-01")
+        self.assertTrue(any("attest_ohc.py" in e for e in errors), errors)
 
-    def test_wrapping(self):
-        self.concept("")
-        errors, warnings = self.check()
-        self.assertEqual([], errors)
-        self.assertTrue(any(" P6:" in w and "unwrapped" in w for w in warnings), warnings)
-        self.concept("  skill: ocean-science/nope\n")
-        errors, _ = self.check()
-        self.assertTrue(any(" P6:" in e and "resolves to no skill" in e for e in errors), errors)
-        self.concept("  skill: Ocean Science\n")
-        errors, _ = self.check()
-        self.assertTrue(any(" P6:" in e and "<capability>/<skill>" in e for e in errors), errors)
-        self.concept("  skill: hydrology/basin-water-balance\n")
-        errors, warnings = self.check()
-        self.assertEqual([], errors)
-        self.assertTrue(any(" P6:" in w and "not checked out" in w for w in warnings), warnings)
-        other = capability(self.root, name="hydrology")
-        (other / "skills" / "basin-water-balance").mkdir(parents=True)
-        (other / "skills" / "basin-water-balance" / "SKILL.md").write_text("---\nname: basin-water-balance\n---\n")
-        errors, warnings = self.check(workspace=self.root)
-        self.assertEqual(([], []), (errors, warnings))
+    def test_the_retired_wrap_key_is_reported(self):
+        self.concept.write_text(self.frontmatter(extra="  skill: ocean-science/load-ecco\n"))
+        _, warnings = self.findings()
+        self.assertTrue(any("a key retired with the wrap it named" in w for w in warnings), warnings)
 
-    def test_a_copied_script_needs_a_pin(self):
-        source = self.repo / "knowledge" / "references" / "computations" / "ohc.py"
-        copy = self.repo / "skills" / "load-ecco" / "scripts" / "ohc.py"
-        copy.write_text(source.read_text())
-        _, warnings = self.check()
-        self.assertTrue(any(" P7:" in w and "pinned_from" in w for w in warnings), warnings)
-        copy.write_text("# pinned_from: knowledge/references/computations/ohc.py\n" + source.read_text())
-        _, warnings = self.check()
-        self.assertFalse(any(" P7:" in w for w in warnings), warnings)
+    def test_the_findings_are_reported_in_the_workspace_mode_too(self):
+        (self.repo / "knowledge" / "references").mkdir(parents=True)
+        (self.repo / "knowledge" / "references" / "load_x.py").write_text("pass\n")
+        _, warnings = self.findings(workspace=self.root)
+        self.assertTrue(any("load_x.py" in w for w in warnings), warnings)
 
-    def test_the_command_measures_a_bundle_repository_without_a_package(self):
-        bundle = capability(self.root, name="nasa-daac-knowledge", status="planned")
-        (bundle / "knowledge" / "podaac" / "references" / "skills").mkdir(parents=True)
-        args = argparse.Namespace(repos=[str(bundle)], strict=True, workspace=None, workspace_dir=None, standalone=True)
+
+class ReattestTests(unittest.TestCase):
+    """The ported ritual and the receipt identity check, each on its own
+    selftest: they run in a capability, reading the reference runs from
+    the package's verification/reference_runs.yaml."""
+
+    def test_reattest_selftest(self):
         buf = io.StringIO()
         with contextlib.redirect_stdout(buf):
-            rc = osp.command_placement_check(args)
-        self.assertEqual(1, rc)
-        self.assertIn("P2", buf.getvalue())
+            self.assertEqual(0, osp.reattest_selftest())
+        self.assertIn("ok", buf.getvalue())
+
+    def test_receipt_identity_selftest(self):
+        buf = io.StringIO()
+        with contextlib.redirect_stdout(buf):
+            self.assertEqual(0, osp.receipt_identity_selftest())
+        self.assertIn("ok", buf.getvalue())
+
+    def test_reference_runs_resolve_against_the_package_root(self):
+        with tempfile.TemporaryDirectory() as tmp:
+            root = Path(tmp)
+            scripts = root / "skills" / "ohc" / "scripts"
+            scripts.mkdir(parents=True)
+            (scripts / "ohc.py").write_text("pass\n")
+            (root / "verification").mkdir()
+            (root / "verification" / "reference_runs.yaml").write_text(
+                "data_roots:\n  ohc: knowledge/references/retrieval/ohc-root\n"
+                "runs:\n  ohc:\n    computation: skills/ohc/scripts/ohc.py\n"
+                "    args: [--months, \"2010-01\"]\n    data_root: ohc\n")
+            reg = osp.load_reference_runs(root)
+            spec = reg["runs"]["ohc"]
+            self.assertEqual(scripts / "ohc.py", osp.run_computation(root, spec))
+            args = osp.reference_run_args(root, spec, reg, {}, None)
+            self.assertEqual(["--months", "2010-01", "--data-root",
+                              root / "knowledge" / "references" / "retrieval" / "ohc-root"], args)
+            # a bare file name finds the executor under skills/*/scripts/
+            spec = dict(spec, computation="ohc.py")
+            self.assertEqual(scripts / "ohc.py", osp.run_computation(root, spec))
+
+
+if __name__ == "__main__":
+    unittest.main()

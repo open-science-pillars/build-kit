@@ -75,7 +75,7 @@ SIZE_WORDS = re.compile(r"\b(?:gb|tb|mb|gigabyte|terabyte|size|estimate)\b", re.
 DEFAULT_TURNS = 30
 DEFAULT_TOOLS = "Read,Glob,Grep,Skill,Bash(claude plugin list*)"
 GATE_TOOLS = "Read,Glob,Grep,Skill"
-PROVE_TOOLS = "Read,Glob,Grep,Skill,Bash(uv run*)"
+EVIDENCE_TOOLS = "Read,Glob,Grep,Skill,Bash(uv run*)"
 
 
 class QualifyError(RuntimeError):
@@ -513,7 +513,7 @@ def qualify_claude_code(cap: dict[str, Any], marketplace: str, model: str | None
     if skip("connector-invocation"):
         pass
     elif not servers:
-        record("connector-invocation", "skip", "no REACH declared")
+        record("connector-invocation", "skip", "no connector declared")
     else:
         health = parse_mcp_list(run(["claude", "mcp", "list"], timeout=300).stdout, name)
         missing = sorted(set(servers) - set(health))
@@ -567,7 +567,7 @@ def qualify_claude_code(cap: dict[str, Any], marketplace: str, model: str | None
         # The runtime writes only inside its working directory, so the call
         # is launched in the work directory and told to write there.
         prompt = fill(prove["prompt"], work_as=".")
-        reply = headless(prompt, PROVE_TOOLS, max_turns, model, timeout, cwd=work)
+        reply = headless(prompt, EVIDENCE_TOOLS, max_turns, model, timeout, cwd=work)
         if reply["model"]:
             models.add(reply["model"])
         path = keep(evidence, "prove-produce", reply)
@@ -764,7 +764,7 @@ def write_checklist(cap: dict[str, Any], runtime: str, path: Path) -> None:
         if t == "dependency-resolution" and not osp.dependency_entries(cap["package"]):
             item.update(status="skip", evidence="no declared dependencies")
         if t == "connector-invocation" and not osp.reach_servers(cap["package"]):
-            item.update(status="skip", evidence="no REACH declared")
+            item.update(status="skip", evidence="no connector declared")
         prove = cap["probes"].get("prove") or {}
         if t in {"prove", "receipt"} and not (prove.get("command") and prove.get("prompt")):
             item.update(status="blocked", evidence="no attester declared; r4-shared-prove")

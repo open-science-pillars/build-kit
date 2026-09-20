@@ -13,7 +13,7 @@ repository, docs/decisions):
   repository.yaml   kind, status, spheres, primary sphere, discipline
                     (every non-archived repository)
   package.yaml      package identity, version, content, dependencies,
-                    presentation metadata and REACH declarations
+                    presentation metadata and connector declarations
                     (only a repository that publishes a package)
   surfaces.yaml     runtime support policy and qualification requirements
                     (only a repository that exposes runtime capabilities)
@@ -46,6 +46,11 @@ repository, docs/decisions):
   osp.py plugin-check [REPO_DIR ...]  Agent Plugins conformance of the
                                       portable package against the pinned
                                       specification version
+  osp.py reattest [--package DIR]     the re-attestation ritual of one
+                                      computation, from the package's
+                                      verification/reference_runs.yaml
+  osp.py receipt-identity RECEIPT     does a receipt name the capability
+                                      release and the runtime that made it
 
   osp.py advertise [REPO_DIR ...]    what a release may say per runtime: a
                                       surface is supported only on a qualified
@@ -71,12 +76,15 @@ drift; warnings never fail.
 from __future__ import annotations
 
 import argparse
+import datetime as dt
 import hashlib
 import json
 import os
 import re
 import subprocess
 import sys
+import tempfile
+import textwrap
 from pathlib import Path
 from typing import Any
 
@@ -197,11 +205,14 @@ def catalog_entries(workspace: Path) -> dict[str, dict[str, Any]] | None:
     return {p["name"]: p for p in data.get("plugins", []) if isinstance(p, dict) and "name" in p}
 
 
-def validate_repo(repo_dir: Path, workspace: Path | None = None, projections_agree: bool = True) -> tuple[list[str], list[str]]:
+def validate_repo(repo_dir: Path, workspace: Path | None = None, projections_agree: bool = True,
+                  today: str | None = None) -> tuple[list[str], list[str]]:
     """(errors, warnings) for one repository's .osp/ directory. With
     projections_agree=False the Claude manifest is not compared with the
     package file: that is the state just before `render` rewrites it after
-    a version bump, and render is what fixes it."""
+    a version bump, and render is what fixes it. The two findings about
+    where the files go are warnings until MIGRATION_ERRORS_FROM and errors
+    after; `today` is for the tests."""
     errors: list[str] = []
     warnings: list[str] = []
     name = repo_dir.name
@@ -317,6 +328,14 @@ def validate_repo(repo_dir: Path, workspace: Path | None = None, projections_agr
     else:
         warnings.append(f"{name}: no .osp/governance.yaml")
     errors += codeowners_findings(repo_dir, name, teams)
+    # Where the files go: runnable code filed as knowledge, and an
+    # attested computation whose code is not in the package beside a
+    # golden that names it (ADR E). Reported in both modes.
+    where = code_placement_findings(repo_dir, name)
+    if (today or dt.date.today().isoformat()) < MIGRATION_ERRORS_FROM:
+        warnings += where
+    else:
+        errors += where
 
     if workspace is not None and not is_template:
         catalog = catalog_entries(workspace)
@@ -598,7 +617,7 @@ def substitute(value: Any, old: str, new: str) -> Any:
 
 
 def claude_server(server: dict[str, Any]) -> dict[str, Any]:
-    """One REACH declaration as Claude's .mcp.json spells it: `http` for
+    """One connector declaration as Claude's .mcp.json spells it: `http` for
     the streamable transport, and the Claude placeholder for the package
     root."""
     kind = server["type"]
@@ -994,8 +1013,8 @@ def plugin_check(repo_dir: Path) -> tuple[list[str], list[str]]:
                 if mcp != render_portable_mcp(pkg):
                     errors.append(f"{name} {PORTABLE_MCP}: differs from what package.yaml renders; run osp.py render")
     elif render_portable_mcp(pkg) is not None:
-        errors.append(f"{name}: package.yaml declares portable REACH but {PORTABLE_MCP} is missing; run osp.py render")
-    # The declared REACH itself is checked in its canonical form too, so a
+        errors.append(f"{name}: package.yaml declares a portable connector but {PORTABLE_MCP} is missing; run osp.py render")
+    # The declared connector itself is checked in its canonical form too, so a
     # non-portable entry is caught even before it is rendered.
     for label, server in reach_servers(pkg).items():
         if server.get("portable", True):
@@ -1084,185 +1103,633 @@ def command_plugin_check(args: argparse.Namespace) -> int:
 
 
 # ---------------------------------------------------------------------------
-# Code placement (ADR C; the placement rule, the wrapping rule and the
-# placement gate in the specification): every file of code has one home
-# chosen by the plane it serves. Sanctioned code of an Attested
-# Computation stays in the bundle's references tree; a procedure is a
-# skill; a script a skill runs at runtime lives in that skill's scripts
-# directory; nothing a skill invokes lives under verification; every
-# computation is wrapped by a skill in its sphere capability. The gate
-# measures paths and names and never runs a computation or a golden.
+# Where the files go (ADR E, a computation is a skill): what a steward
+# signs is under knowledge/, what an agent runs is under skills/<name>/
+# with its scripts beside it, what proves a script is under verification/,
+# and what reaches a service is under connectors/. Two findings of
+# `validate` measure that one sentence, in both the standalone and the
+# workspace mode: runnable code filed as knowledge, and an attested
+# computation whose code is not in the package beside a golden that names
+# it. Neither finding runs a computation or a golden; both read paths,
+# names and frontmatter. They are warnings until MIGRATION_ERRORS_FROM
+# and errors after, because the capabilities and the bundle are migrated
+# after this lands and their gates stay green meanwhile.
 # ---------------------------------------------------------------------------
 
-PLACEMENT_ERRORS_FROM = "2026-10-01"   # ADR C: P2 to P5 are warnings until the migrations land
+MIGRATION_ERRORS_FROM = "2026-10-15"   # ADR E: warnings while the migrations run, errors after
 COMPUTATION_TYPE = "Attested Computation"
-TEXT_SUFFIXES = {".md", ".yaml", ".yml", ".json", ".sh", ".py", ".toml", ".txt"}
+RUNNABLE_SUFFIXES = {".py", ".sh", ".ipynb"}
+COMPUTATION_KEYS = (("computation",), ("executor", "resource"), ("attester", "resource"))
+SKIP_DIRS = {".git", "__pycache__", "node_modules", "dist"}
 
 
-def _py_files(root: Path) -> list[Path]:
-    if not root.is_dir():
+def _dig(data: dict[str, Any], keys: tuple[str, ...]) -> Any:
+    """The value of a dotted frontmatter key, or None."""
+    for key in keys:
+        if not isinstance(data, dict):
+            return None
+        data = data.get(key)
+    return data
+
+
+def runnable_under_knowledge(repo_dir: Path) -> list[Path]:
+    """Every file under knowledge/ that is code: a .py, .sh or .ipynb, or
+    any file carrying the executable bit."""
+    know = repo_dir / "knowledge"
+    if not know.is_dir():
         return []
-    return sorted(p for p in root.rglob("*.py") if "__pycache__" not in p.parts)
-
-
-def _repo_texts(repo_dir: Path) -> dict[Path, str]:
-    """Every text file of the repository, for name references."""
-    out: dict[Path, str] = {}
-    for p in repo_dir.rglob("*"):
-        if not p.is_file() or p.suffix not in TEXT_SUFFIXES:
+    out = []
+    for path in sorted(know.rglob("*")):
+        if not path.is_file() or any(part in SKIP_DIRS for part in path.parts):
             continue
-        if any(part in {".git", "__pycache__", "node_modules", "dist"} for part in p.parts):
+        if path.suffix in RUNNABLE_SUFFIXES or (path.stat().st_mode & 0o111):
+            out.append(path)
+    return out
+
+
+def computation_concepts(repo_dir: Path) -> list[tuple[Path, dict[str, Any]]]:
+    """Every concept under knowledge/ whose frontmatter is an Attested
+    Computation, with that frontmatter."""
+    know = repo_dir / "knowledge"
+    if not know.is_dir():
+        return []
+    out = []
+    for path in sorted(know.rglob("*.md")):
+        if any(part in SKIP_DIRS for part in path.parts):
             continue
         try:
-            out[p] = p.read_text(encoding="utf-8")
-        except (UnicodeDecodeError, OSError):
+            fm = parse_frontmatter(path.read_text(encoding="utf-8"))
+        except (OSError, UnicodeDecodeError):
+            continue
+        if isinstance(fm, dict) and fm.get("type") == COMPUTATION_TYPE:
+            out.append((path, fm))
+    return out
+
+
+def resolve_concept_path(repo_dir: Path, concept: Path, value: Any) -> Path | None:
+    """A path a computation concept names, resolved the way a reader
+    resolves it: against the package root, against the concept's own
+    bundle root (the directory holding its category), or beside the
+    concept. None when no file is there."""
+    text = str(value).strip()
+    if not text or text.startswith(("http://", "https://")):
+        return None
+    for base in (repo_dir, concept.parent.parent, concept.parent):
+        candidate = (base / text).resolve()
+        if candidate.is_file():
+            return candidate
+    return None
+
+
+def golden_texts(repo_dir: Path) -> dict[Path, str]:
+    """The files directly under verification/: the goldens that prove the
+    scripts a computation names."""
+    ver = repo_dir / "verification"
+    out: dict[Path, str] = {}
+    for path in sorted(ver.iterdir()) if ver.is_dir() else []:
+        if not path.is_file():
+            continue
+        try:
+            out[path] = path.read_text(encoding="utf-8")
+        except (OSError, UnicodeDecodeError):
             continue
     return out
 
 
-def _skill_dirs(repo_dir: Path) -> list[Path]:
-    skills = repo_dir / "skills"
-    if not skills.is_dir():
-        return []
-    return sorted(d for d in skills.iterdir() if d.is_dir() and (d / "SKILL.md").is_file())
+def code_placement_findings(repo_dir: Path, name: str) -> list[str]:
+    """The two findings, one line each, naming the file and the rule."""
+    def rel(path: Path) -> str:
+        try:
+            return path.resolve().relative_to(repo_dir.resolve()).as_posix()
+        except ValueError:
+            return path.as_posix()
 
-
-def _bundle_dirs(repo_dir: Path) -> list[Path]:
-    """Bundles: knowledge/ itself when it holds concepts directly, else
-    each child of knowledge/ that does."""
-    know = repo_dir / "knowledge"
-    if not know.is_dir():
-        return []
-    if any((know / d).is_dir() for d in ("computations", "gotchas", "datasets", "recipes", "references")):
-        return [know]
-    return sorted(d for d in know.iterdir() if d.is_dir() and not d.name.startswith("."))
-
-
-def placement_check(repo_dir: Path, workspace: Path | None = None, strict: bool = False,
-                    today: str | None = None) -> tuple[list[str], list[str]]:
-    """The placement gate: findings P1 to P7 of the specification's
-    placement rule, as (errors, warnings). P2 to P5 are warnings until
-    PLACEMENT_ERRORS_FROM unless strict."""
-    import datetime as _dt
-    errors: list[str] = []
-    warnings: list[str] = []
-    name = repo_dir.name
-    today = today or _dt.date.today().isoformat()
-    migrating = (today < PLACEMENT_ERRORS_FROM) and not strict
-    soft = warnings if migrating else errors
-    texts = _repo_texts(repo_dir)
-
-    def rel(p: Path) -> str:
-        return p.relative_to(repo_dir).as_posix()
-
-    # P1: orphan sanctioned code under knowledge/**/references/
-    for bundle in _bundle_dirs(repo_dir):
-        refs = bundle / "references"
-        for script in _py_files(refs):
-            named = any(script.name in text for path, text in texts.items() if path != script)
-            if not named:
-                errors.append(f"{name} P1: {rel(script)} is sanctioned code no concept, data root, "
-                              "registry entry or check chain names (orphan)")
-        # P2: run instructions filed as knowledge
-        if (refs / "skills").is_dir():
-            soft.append(f"{name} P2: {rel(refs / 'skills')} exists; run instructions are a skill in the "
-                        "sphere capability, not a concept (the placement rule)")
-    # P3: a skill script outside scripts/
-    skill_texts: dict[Path, str] = {}
-    for sd in _skill_dirs(repo_dir):
-        for script in _py_files(sd):
-            if "scripts" not in script.relative_to(sd).parts:
-                soft.append(f"{name} P3: {rel(script)} is a skill script outside {rel(sd)}/scripts/")
-        # P4: a skill that runs the goldens tree
-        text = (sd / "SKILL.md").read_text(encoding="utf-8")
-        skill_texts[sd] = text
-        if re.search(r"(?<![\w/.-])verification/", text):
-            soft.append(f"{name} P4: {rel(sd / 'SKILL.md')} names a path under verification/, which "
-                        "is the goldens' tree; a runtime helper lives in the skill's scripts/")
-    # P5: a golden the workflow does not run, and the reverse, a fixture
-    # script a skill names. A golden a qualification surface runs on a
-    # maintainer's machine (surfaces.yaml names it) counts as run.
-    ver = repo_dir / "verification"
-    goldens = sorted(ver.glob("*.py")) if ver.is_dir() else []
-    if goldens:
-        wf_dir = repo_dir / ".github" / "workflows"
-        wf_text = "\n".join(p.read_text(encoding="utf-8") for p in sorted(wf_dir.glob("*.yml"))) if wf_dir.is_dir() else ""
-        surfaces = repo_dir / ".osp" / "surfaces.yaml"
-        covered = wf_text + ("\n" + surfaces.read_text(encoding="utf-8") if surfaces.is_file() else "")
-        if not wf_text:
-            soft.append(f"{name} P5: verification/ holds goldens but no workflow runs them")
-        elif "verification/*.py" not in wf_text:
-            for g in goldens:
-                if rel(g) not in covered:
-                    soft.append(f"{name} P5: {rel(g)} is a golden that neither the goldens workflow nor a "
-                                "qualification surface runs")
-    for script in _py_files(ver / "fixtures"):
-        namers = [rel(sd / "SKILL.md") for sd, text in skill_texts.items()
-                  if rel(script) in text or script.name in text]
-        if namers:
-            soft.append(f"{name} P5: {rel(script)} is a fixture script that {', '.join(namers)} names; "
-                        "a runtime helper lives in the skill's scripts/")
-    # P6: an unwrapped computation, and a wrap that resolves to nothing
-    for bundle in _bundle_dirs(repo_dir):
-        comps = bundle / "computations"
-        for concept in sorted(comps.glob("*.md")) if comps.is_dir() else []:
-            fm = parse_frontmatter(concept.read_text(encoding="utf-8")) or {}
-            if fm.get("type") != COMPUTATION_TYPE:
+    out = [f"{name}: {rel(path)} is runnable code under knowledge/; a knowledge bundle holds no code, "
+           "and what an agent runs lives under skills/<name>/scripts/"
+           for path in runnable_under_knowledge(repo_dir)]
+    goldens = golden_texts(repo_dir)
+    know = (repo_dir / "knowledge").resolve()
+    for concept, fm in computation_concepts(repo_dir):
+        if _dig(fm, ("executor", "skill")) is not None:
+            out.append(f"{name}: {rel(concept)} carries executor.skill, a key retired with the wrap it named; "
+                       "the concept names its files and the skill that runs them is beside them")
+        for keys in COMPUTATION_KEYS:
+            value = _dig(fm, keys)
+            if value is None:
                 continue
-            executor = fm.get("executor") if isinstance(fm.get("executor"), dict) else {}
-            wrap = executor.get("skill")
-            if not wrap:
-                warnings.append(f"{name} P6: {rel(concept)} is unwrapped (no executor.skill); the wrapping "
-                                "skill lives in the sphere capability that depends on this bundle")
+            key = ".".join(keys)
+            target = resolve_concept_path(repo_dir, concept, value)
+            if target is None or not target.is_relative_to(repo_dir.resolve()) or target.is_relative_to(know):
+                out.append(f"{name}: {rel(concept)} names {key} {str(value)!r}, which is no file of this package "
+                           "outside knowledge/; the code of a computation lives in the skill that runs it")
                 continue
-            m = re.fullmatch(r"([a-z0-9][a-z0-9-]*)/([a-z0-9][a-z0-9-]*)", str(wrap))
-            if not m:
-                errors.append(f"{name} P6: {rel(concept)} executor.skill {wrap!r} is not <capability>/<skill>")
-                continue
-            cap, skill = m.groups()
-            cap_dir = (repo_dir if cap == name else (workspace or repo_dir.parent) / cap)
-            if not (cap_dir / ".osp" / "package.yaml").is_file():
-                warnings.append(f"{name} P6: {rel(concept)} names {wrap}; {cap} is not checked out beside this "
-                                "repository, so the wrap is unresolved here")
-            elif not (cap_dir / "skills" / skill / "SKILL.md").is_file():
-                errors.append(f"{name} P6: {rel(concept)} names {wrap}, which resolves to no skill in {cap}")
-    # P7: a copied script without a pin
-    by_digest: dict[str, list[Path]] = {}
-    for script in _py_files(repo_dir):
-        if any(part in {".git", "dist", "node_modules"} for part in script.parts):
+            named = rel(target)
+            if not any(named in text or target.name in text for text in goldens.values()):
+                out.append(f"{name}: {rel(concept)} names {key} {named}, which no file directly under "
+                           "verification/ mentions; a golden proves every script a computation names")
+    return out
+
+
+# ---------------------------------------------------------------------------
+# Re-attestation (ADR E): the ritual an edited computation owes, run in
+# the capability that holds it. Every receipt carries the sha256 of the
+# file that produced it and the attester hashes that file before it reads
+# a number, so any edit to a computation invalidates every earlier
+# receipt by construction. The ritual proves that in order:
+#
+#   1. NEW PASS      a fresh run of the working-tree file, with the
+#                    reference arguments, attests PASS;
+#   2. OLD PASS      the previous version of the file (HEAD, or --old
+#                    REF) is run on the same data and attests PASS
+#                    against itself: the edit did not start from a
+#                    broken file;
+#   3. OLD vs NEW    the previous version's receipt attests FAIL against
+#                    the new file, on code_sha256;
+#   4. TAMPER FAIL   the fresh receipt attests FAIL against a one-byte
+#                    tamper of the new file.
+#
+# Steps 2 and 3 are skipped, and said to be skipped, when the working
+# tree matches the reference version (a re-verification, not a
+# re-attestation). The reference arguments come from the package's
+# verification/reference_runs.yaml by run name, with every path in it
+# relative to the package root: an executor and an attester under
+# skills/<name>/scripts/, a data root under knowledge/references/retrieval.
+# The attester is read from the concept whose frontmatter names the
+# computation unless --attester says otherwise. The receipts, the old
+# file and the tampered file are kept under --keep so they can be cited;
+# the printed log entry is a draft, and the tool writes nothing into the
+# package.
+# ---------------------------------------------------------------------------
+
+REFERENCE_RUNS = Path("verification") / "reference_runs.yaml"
+
+
+def package_paths(package: Path) -> tuple[Path, Path]:
+    """(the package root, the repository that holds it). The ritual runs
+    a computation in its own package so that its relative paths resolve,
+    and reads the previous version of a file from the repository that
+    holds the package, which is derived rather than assumed."""
+    package = package.resolve()
+    if not package.is_dir():
+        raise OspError(f"no such package directory: {package}")
+    try:
+        top = subprocess.run(["git", "-C", str(package), "rev-parse", "--show-toplevel"],
+                             capture_output=True, text=True, check=True).stdout.strip()
+        repo = Path(top)
+    except (subprocess.CalledProcessError, FileNotFoundError):
+        repo = package
+    return package, repo
+
+
+def file_digest(path: Path) -> str:
+    return hashlib.sha256(path.read_bytes()).hexdigest()
+
+
+def load_reference_runs(package: Path) -> dict[str, Any]:
+    path = package / REFERENCE_RUNS
+    if not path.is_file():
+        raise OspError(f"{package.name}: no {REFERENCE_RUNS.as_posix()}; a capability keeps its reference runs there")
+    reg = load_yaml(path) or {}
+    reg.setdefault("data_roots", {})
+    reg.setdefault("runs", {})
+    return reg
+
+
+def run_computation(package: Path, spec: dict[str, Any]) -> Path:
+    """The executor a run names, relative to the package root. A bare
+    file name is looked up under skills/*/scripts/, where an executor
+    lives."""
+    value = str(spec["computation"])
+    candidate = package / value
+    if candidate.is_file():
+        return candidate.resolve()
+    if "/" not in value:
+        hits = sorted(package.glob(f"skills/*/scripts/{value}"))
+        if len(hits) == 1:
+            return hits[0].resolve()
+    return candidate
+
+
+def attester_for(computation: Path, package: Path) -> Path | None:
+    """The attester the concept names for this computation; None when no
+    concept in the package names it."""
+    target = computation.resolve()
+    for concept, fm in computation_concepts(package):
+        named = resolve_concept_path(package, concept, _dig(fm, ("computation",)) or "")
+        if named != target:
             continue
-        by_digest.setdefault(hashlib.sha256(script.read_bytes()).hexdigest(), []).append(script)
-    for paths in by_digest.values():
-        if len(paths) < 2:
-            continue
-        pinned = any("pinned_from:" in "\n".join(p.read_text(encoding="utf-8").splitlines()[:40]) for p in paths)
-        if not pinned:
-            warnings.append(f"{name} P7: byte-identical scripts {', '.join(rel(p) for p in paths)}; the copy "
-                            "carries a pinned_from: line naming its source")
-    return errors, warnings
+        attester = _dig(fm, ("attester", "resource"))
+        if attester:
+            return resolve_concept_path(package, concept, attester)
+    return None
 
 
-def command_placement_check(args: argparse.Namespace) -> int:
-    total = 0
-    warned = 0
-    workspace = Path(args.workspace).resolve() if getattr(args, "workspace", None) else None
-    # A knowledge package carries repository.yaml and no package.yaml until
-    # it ships as a plugin; the placement rule applies to it all the same.
-    dirs = [d for d in resolve_dirs(args) if (d / ".osp" / "repository.yaml").is_file()]
-    if not dirs:
-        raise OspError("no repository carries .osp/repository.yaml")
-    for repo_dir in dirs:
-        errors, warnings = placement_check(repo_dir, workspace=workspace, strict=args.strict)
-        for w in warnings:
-            print(f"warning: {w}")
-        for e in errors:
-            print(f"error: {e}")
-        total += len(errors)
-        warned += len(warnings)
-        print(f"{repo_dir.name}: {'FAILED' if errors else 'placed by plane'}")
-    print(f"osp placement-check: {'FAILED' if total else 'PASSED'} ({total} errors, {warned} warnings"
-          f"{'; strict' if args.strict else ''})")
-    return 1 if total else 0
+def run_cmd(argv: list[Any], cwd: Path) -> tuple[int, str]:
+    """Run argv, return (returncode, combined output)."""
+    p = subprocess.run([str(a) for a in argv], cwd=str(cwd), capture_output=True, text=True)
+    return p.returncode, (p.stdout + p.stderr).strip()
+
+
+def tamper(src: Path, dst: Path) -> None:
+    """A one-byte edit that leaves the file runnable: one more newline at
+    the end. The receipt's hash no longer matches, which is the point."""
+    dst.write_bytes(src.read_bytes() + b"\n")
+
+
+def old_version(path: Path, ref: str, repo: Path, dst: Path) -> Path | None:
+    """The file as of REF, written to dst; None when git has no such
+    version."""
+    try:
+        rel = path.resolve().relative_to(repo.resolve()).as_posix()
+    except ValueError:
+        return None
+    rc, out = run_cmd(["git", "show", f"{ref}:{rel}"], repo)
+    if rc != 0:
+        return None
+    dst.write_text(out + "\n", encoding="utf-8")
+    return dst
+
+
+def receipt_summary(path: Path) -> dict[str, Any]:
+    try:
+        r = json.loads(path.read_text(encoding="utf-8"))
+    except (OSError, ValueError):
+        return {}
+    data = r.get("data") if isinstance(r.get("data"), dict) else {}
+    record = data.get("record") if isinstance(data.get("record"), dict) else {}
+    return {"run_id": r.get("run_id"), "code_sha256": r.get("code_sha256"),
+            "record": record.get("record")}
+
+
+class Ritual:
+    """The four steps, each recorded as (name, required, got, detail)."""
+
+    def __init__(self, computation: Path, attester: Path, args, keep: Path,
+                 package: Path, repo: Path | None = None, runner=None):
+        self.computation, self.attester, self.args = computation, attester, list(args)
+        self.keep, self.package = keep, package
+        self.repo = repo or package
+        self.run = runner or run_cmd
+        self.steps: list[tuple[str, str, str, str]] = []
+        self.new_receipt = keep / "receipt_new.json"
+        self.old_receipt = keep / "receipt_old.json"
+        self.old_file = keep / ("old_" + computation.name)
+        self.tampered = keep / ("tampered_" + computation.name)
+        self.skipped: list[str] = []
+
+    def compute(self, script: Path, receipt: Path):
+        return self.run(["uv", "run", script, *self.args, "--receipt", receipt], self.package)
+
+    def attest(self, receipt: Path, against: Path):
+        return self.run(["uv", "run", self.attester, receipt, "--computation", against], self.package)
+
+    def record(self, name: str, required: str, rc: int, out: str) -> bool:
+        got = "PASS" if rc == 0 else "FAIL"
+        self.steps.append((name, required, got, out.splitlines()[-1] if out else ""))
+        return got == required
+
+    def perform(self, old_ref: str) -> bool:
+        ok = True
+        rc, out = self.compute(self.computation, self.new_receipt)
+        if rc != 0:
+            self.steps.append(("NEW RUN", "PASS", "FAIL", out[-400:]))
+            return False
+        rc, out = self.attest(self.new_receipt, self.computation)
+        ok &= self.record("NEW PASS", "PASS", rc, out)
+
+        old = old_version(self.computation, old_ref, self.repo, self.old_file)
+        if old is None:
+            self.skipped.append(f"no version of the file at {old_ref}; OLD steps skipped")
+        elif file_digest(old) == file_digest(self.computation):
+            self.skipped.append(f"working tree matches {old_ref} (sha256 "
+                                f"{file_digest(old)[:12]}); a re-verification, OLD steps skipped")
+        else:
+            rc, out = self.compute(old, self.old_receipt)
+            if rc != 0:
+                self.steps.append(("OLD RUN", "PASS", "FAIL", out[-400:]))
+                ok = False
+            else:
+                rc, out = self.attest(self.old_receipt, old)
+                ok &= self.record("OLD PASS", "PASS", rc, out)
+                rc, out = self.attest(self.old_receipt, self.computation)
+                ok &= self.record("OLD vs NEW", "FAIL", rc, out)
+
+        tamper(self.computation, self.tampered)
+        rc, out = self.attest(self.new_receipt, self.tampered)
+        ok &= self.record("TAMPER FAIL", "FAIL", rc, out)
+        return ok
+
+    def report(self, note: str, rel: str) -> str:
+        lines = []
+        for name, required, got, detail in self.steps:
+            mark = "ok " if got == required else "BAD"
+            lines.append(f"  {mark} {name:<12} required {required}, got {got}: {detail[:100]}")
+        for s in self.skipped:
+            lines.append(f"  --  {s}")
+        new = receipt_summary(self.new_receipt)
+        old = receipt_summary(self.old_receipt) if self.old_receipt.exists() else {}
+        lines.append(f"  new sha256 {file_digest(self.computation)}")
+        if self.old_file.exists():
+            lines.append(f"  old sha256 {file_digest(self.old_file)}")
+        lines.append(f"  receipts under {self.keep}")
+        return "\n".join(lines) + "\n\n" + self.log_entry(note, rel, new, old)
+
+    def log_entry(self, note: str, rel: str, new: dict, old: dict) -> str:
+        day = dt.date.today().isoformat()
+        new_sha = file_digest(self.computation)[:12]
+        old_sha = old.get("code_sha256", "")[:12] if old else None
+        shas = f"(sha256 {old_sha} -> {new_sha})" if old_sha else f"(sha256 {new_sha}, unchanged)"
+        head = "RE-ATTESTATION" if old_sha else "RE-VERIFICATION"
+        args = " ".join(str(a) for a in self.args)
+        where = f"on the verified tree {new['record']}" if new.get("record") else "on the data given"
+        evidence = [f"a fresh run ({args}) attests PASS, run {new.get('run_id')}"]
+        if old_sha:
+            evidence.insert(0, "a receipt from the previous file FAILS against the new one on code_sha256, "
+                               "as the contract requires")
+            evidence.insert(0, f"the previous file attests PASS against itself, run {old.get('run_id')}")
+        evidence.append("a one-byte tamper of the new file FAILS")
+        body = (f"{day} · {head} of {rel} {shas}: {note or '<why the file changed, and what did not>'} "
+                f"Evidence, {where}: " + "; ".join(evidence) + ". (<who>)")
+        # break_on_hyphens=False keeps a path in one piece: a path broken
+        # across lines at one of its hyphens is no longer a path.
+        return textwrap.fill(body, width=72, initial_indent="- ", subsequent_indent="  ",
+                             break_on_hyphens=False, break_long_words=False)
+
+
+def data_root_path(package: Path, value: Any) -> Path:
+    """A data root of the registry: a path relative to the package root
+    (knowledge/references/retrieval/<name>), or an absolute path."""
+    raw = os.path.expanduser(str(value))
+    root = Path(raw)
+    return root if root.is_absolute() else package / root
+
+
+def reference_run_args(package: Path, spec: dict[str, Any], reg: dict[str, Any],
+                       receipts: dict[str, Path], data_root_override: Path | None) -> list[Any]:
+    """A registry run's argv, with {receipt:NAME} filled in and the data
+    root appended unless the run reads none."""
+    args: list[Any] = []
+    for a in spec.get("args", []):
+        m = re.fullmatch(r"\{receipt:([^}]+)\}", str(a))
+        args.append(receipts[m.group(1)] if m else a)
+    root_key = spec.get("data_root", "fixtures")
+    if root_key != "none":
+        if root_key not in reg["data_roots"]:
+            raise OspError(f"unknown data root {root_key!r}; verification/reference_runs.yaml declares "
+                           f"{', '.join(sorted(reg['data_roots'])) or 'none'}")
+        args += ["--data-root", data_root_override or data_root_path(package, reg["data_roots"][root_key])]
+    return args
+
+
+def reattest_selftest() -> int:
+    """An offline ritual on stub scripts in a stub capability: the
+    executor writes a receipt carrying its own sha256, the attester
+    checks it, and the registry of the stub package resolves."""
+    with tempfile.TemporaryDirectory() as d:
+        root = Path(d)
+        subprocess.run(["git", "init", "-q", str(root)], check=True)
+        subprocess.run(["git", "-C", str(root), "config", "user.email", "t@example.org"], check=True)
+        subprocess.run(["git", "-C", str(root), "config", "user.name", "T"], check=True)
+        scripts = root / "skills" / "stub" / "scripts"
+        scripts.mkdir(parents=True)
+        (root / "knowledge" / "computations").mkdir(parents=True)
+        (root / "verification").mkdir()
+        comp = scripts / "stub.py"
+        comp.write_text(
+            "import hashlib, json, sys\n"
+            "args = sys.argv[1:]\nout = args[args.index('--receipt') + 1]\n"
+            "json.dump({'run_id': 'r-' + hashlib.sha256(__file__.encode()).hexdigest()[:6],\n"
+            "           'code_sha256': hashlib.sha256(open(__file__, 'rb').read()).hexdigest(),\n"
+            "           'data': {'record': {'record': 'stub-tree'}}, 'value': 1.0}, open(out, 'w'))\n",
+            encoding="utf-8")
+        att = scripts / "stub_check.py"
+        att.write_text(
+            "import hashlib, json, sys\n"
+            "r = json.load(open(sys.argv[1]))\n"
+            "want = hashlib.sha256(open(sys.argv[3], 'rb').read()).hexdigest()\n"
+            "ok = r['code_sha256'] == want\nprint('PASS' if ok else 'FAIL: code_sha256')\n"
+            "sys.exit(0 if ok else 1)\n", encoding="utf-8")
+        (root / "knowledge" / "computations" / "stub.md").write_text(
+            "---\ntype: Attested Computation\ncomputation: skills/stub/scripts/stub.py\n"
+            "attester:\n  resource: skills/stub/scripts/stub_check.py\nstatus: draft\n---\nBody\n",
+            encoding="utf-8")
+        (root / "verification" / "stub_golden.py").write_text(
+            "# runs skills/stub/scripts/stub.py and skills/stub/scripts/stub_check.py\n", encoding="utf-8")
+        (root / REFERENCE_RUNS).write_text(
+            "data_roots:\n  stub: knowledge/references/retrieval/stub-root\n"
+            "runs:\n  stub:\n    computation: skills/stub/scripts/stub.py\n"
+            "    data_root: none\n    args: [--x, \"1\"]\n", encoding="utf-8")
+        assert attester_for(comp, root) == att
+        assert attester_for(scripts / "other.py", root) is None
+        assert code_placement_findings(root, "stub") == []
+        subprocess.run(["git", "-C", str(root), "add", "-A"], check=True)
+        subprocess.run(["git", "-C", str(root), "commit", "-q", "-m", "stub"], check=True)
+
+        # Stubs run under plain python; the real ritual runs `uv run`.
+        def runner(argv, cwd):
+            argv = [str(a) for a in argv]
+            if argv[:2] == ["uv", "run"]:
+                argv = [sys.executable] + argv[2:]
+            return run_cmd(argv, cwd)
+
+        keep = root / "keep"; keep.mkdir()
+        r = Ritual(comp, att, ["--x", "1"], keep, package=root, runner=runner)
+        assert r.perform("HEAD") is True, r.steps
+        assert [s[0] for s in r.steps] == ["NEW PASS", "TAMPER FAIL"], r.steps
+        assert r.skipped and "re-verification" in r.skipped[0]
+        text = r.report("", "skills/stub/scripts/stub.py")
+        assert "RE-VERIFICATION" in text and "unchanged" in text and "stub-tree" in text
+
+        comp.write_text(comp.read_text(encoding="utf-8") + "# edited\n", encoding="utf-8")
+        keep2 = root / "keep2"; keep2.mkdir()
+        r = Ritual(comp, att, [], keep2, package=root, runner=runner)
+        assert r.perform("HEAD") is True, r.steps
+        assert [s[0] for s in r.steps] == ["NEW PASS", "OLD PASS", "OLD vs NEW", "TAMPER FAIL"], r.steps
+        assert not r.skipped
+        text = r.report("A test edit.", "skills/stub/scripts/stub.py")
+        assert "RE-ATTESTATION" in text and " -> " in text and "A test edit." in text
+        assert "BAD" not in text
+
+        # An attester that always passes must make the ritual fail: the
+        # tamper and the old-versus-new steps are required to FAIL.
+        att.write_text("import sys\nprint('PASS')\nsys.exit(0)\n", encoding="utf-8")
+        keep3 = root / "keep3"; keep3.mkdir()
+        r = Ritual(comp, att, [], keep3, package=root, runner=runner)
+        assert r.perform("HEAD") is False
+        bad = [s for s in r.steps if s[1] != s[2]]
+        assert {s[0] for s in bad} == {"OLD vs NEW", "TAMPER FAIL"}, r.steps
+
+        reg = load_reference_runs(root)
+        for name, spec in reg["runs"].items():
+            assert run_computation(root, spec).is_file(), name
+            assert isinstance(spec.get("args"), list), name
+            if spec.get("needs"):
+                assert spec["needs"] in reg["runs"], name
+            assert spec.get("data_root", "fixtures") in ("none", *reg["data_roots"]), name
+            assert reference_run_args(root, spec, reg, {}, None) == ["--x", "1"], name
+    print("osp reattest selftest: ok")
+    return 0
+
+
+def command_reattest(args: argparse.Namespace) -> int:
+    if args.selftest:
+        return reattest_selftest()
+    package, repo = package_paths(Path(args.package))
+    if args.list:
+        reg = load_reference_runs(package)
+        for name, spec in reg["runs"].items():
+            print(f"{name:<32} {str(spec['computation']):<46} {' '.join(map(str, spec.get('args', [])))}")
+        return 0
+    keep = Path(args.keep) if args.keep else Path(tempfile.mkdtemp(prefix="reattest-"))
+    keep.mkdir(parents=True, exist_ok=True)
+    receipts: dict[str, Path] = {}
+    if args.run:
+        reg = load_reference_runs(package)
+        if args.run not in reg["runs"]:
+            raise OspError(f"unknown run {args.run}; --list shows them")
+        order = []
+        name = args.run
+        while name:
+            order.insert(0, name)
+            name = reg["runs"][name].get("needs")
+        # Runs this one needs are produced first, from the working tree,
+        # and their receipts substituted; only the named run is attested.
+        for dep in order[:-1]:
+            spec = reg["runs"][dep]
+            out = keep / f"receipt_{dep}.json"
+            rc, text = run_cmd(["uv", "run", run_computation(package, spec),
+                                *reference_run_args(package, spec, reg, receipts, args.data_root),
+                                "--receipt", out], package)
+            if rc != 0:
+                print(f"needed run {dep} failed:\n{text[-600:]}")
+                return 1
+            receipts[dep] = out
+            print(f"needed run {dep}: receipt {out}")
+        spec = reg["runs"][args.run]
+        computation = run_computation(package, spec)
+        run_args = reference_run_args(package, spec, reg, receipts, args.data_root)
+        attester = (Path(args.attester) if args.attester else
+                    (package / spec["attester"] if spec.get("attester") else None))
+    else:
+        if not args.computation:
+            raise OspError("give --run NAME or a COMPUTATION.py")
+        computation = Path(args.computation)
+        run_args = list(args.args)
+        if args.data_root:
+            run_args += ["--data-root", args.data_root]
+        attester = Path(args.attester) if args.attester else None
+    if not computation.is_file():
+        raise OspError(f"no such computation: {computation}")
+    attester = attester or attester_for(computation, package)
+    if attester is None or not attester.is_file():
+        raise OspError("no attester: no concept in this package names this computation; give --attester")
+
+    def rel(path: Path) -> str:
+        p = path.resolve()
+        return p.relative_to(package).as_posix() if p.is_relative_to(package) else p.as_posix()
+
+    print(f"re-attesting {rel(computation)} with {rel(attester)}")
+    print(f"  package: {package}")
+    print(f"  args: {' '.join(str(x) for x in run_args)}")
+    ritual = Ritual(computation, attester, run_args, keep, package=package, repo=repo)
+    ok = ritual.perform(args.old)
+    print(ritual.report(args.note, rel(computation)))
+    print()
+    print("osp reattest: " + ("every step landed as the contract requires"
+                             if ok else "FAILED, see the BAD lines above"))
+    return 0 if ok else 1
+
+
+# ---------------------------------------------------------------------------
+# Receipt identity (ADR B): does a receipt (or an attestation) identify
+# the capability release and the runtime that produced it, so that a
+# result produced on one runtime can be shown to belong to one release
+# and be verified under one attester?
+#
+#   capability: { name, version, release_lock }   release_lock is the
+#                                                  sha256 of the package's
+#                                                  .osp/release-lock.json as
+#                                                  a value, or null where the
+#                                                  tree carries none
+#   runtime:    { name, version }                  version may be null
+# ---------------------------------------------------------------------------
+
+
+def package_identity(package: Path) -> dict[str, Any]:
+    """name, version and lock digest of a package tree."""
+    pkg = (load_yaml(package / ".osp" / "package.yaml") or {}).get("package") or {}
+    lock_path = package / ".osp" / "release-lock.json"
+    lock = json.loads(lock_path.read_text(encoding="utf-8")) if lock_path.is_file() else None
+    version = pkg.get("version")
+    return {"name": pkg.get("name"), "version": str(version) if version is not None else None,
+            "release_lock": value_digest(lock) if lock is not None else None}
+
+
+def identity_findings(doc: dict[str, Any], package: dict[str, Any] | None = None) -> list[str]:
+    out = []
+    cap = doc.get("capability")
+    if not isinstance(cap, dict):
+        out.append("capability block missing")
+    else:
+        for k in ("name", "version"):
+            if not isinstance(cap.get(k), str) or not cap.get(k):
+                out.append(f"capability.{k} missing")
+        if "release_lock" not in cap:
+            out.append("capability.release_lock missing (null where the tree carries no lock)")
+        elif cap["release_lock"] is not None and not re.match(r"^sha256:[0-9a-f]{64}$", str(cap["release_lock"])):
+            out.append("capability.release_lock is not a sha256 digest")
+    rt = doc.get("runtime")
+    if not isinstance(rt, dict) or not isinstance(rt.get("name"), str) or not rt.get("name"):
+        out.append("runtime.name missing")
+    if package and isinstance(cap, dict):
+        for k in ("name", "version", "release_lock"):
+            if cap.get(k) != package.get(k):
+                out.append(f"capability.{k} {cap.get(k)!r} is not the package's {package.get(k)!r}")
+    return out
+
+
+def receipt_identity_selftest() -> int:
+    good = {"capability": {"name": "core", "version": "0.5.1", "release_lock": "sha256:" + "0" * 64},
+            "runtime": {"name": "openai-codex", "version": None}}
+    assert identity_findings(good) == []
+    assert "capability block missing" in identity_findings({"runtime": {"name": "x"}})
+    assert any("release_lock missing" in f
+               for f in identity_findings({"capability": {"name": "a", "version": "1"}, "runtime": {"name": "x"}}))
+    assert any("runtime.name" in f for f in identity_findings({"capability": good["capability"]}))
+    with tempfile.TemporaryDirectory() as tmp:
+        root = Path(tmp)
+        (root / ".osp").mkdir()
+        (root / ".osp" / "package.yaml").write_text(
+            "schema_version: 1\npackage:\n  name: core\n  version: 0.5.1\n  type: foundation\n")
+        pkg = package_identity(root)
+        assert pkg == {"name": "core", "version": "0.5.1", "release_lock": None}, pkg
+        assert any("release_lock" in f for f in identity_findings(good, pkg))
+        lock = {"package": "core", "version": "0.5.1"}
+        (root / ".osp" / "release-lock.json").write_text(json.dumps(lock))
+        pkg = package_identity(root)
+        assert identity_findings(dict(good, capability=dict(good["capability"],
+                                                            release_lock=value_digest(lock))), pkg) == []
+    print("osp receipt-identity selftest: ok")
+    return 0
+
+
+def command_receipt_identity(args: argparse.Namespace) -> int:
+    if args.selftest:
+        return receipt_identity_selftest()
+    if not args.receipt:
+        raise OspError("a receipt path or --selftest")
+    doc = json.loads(Path(args.receipt).read_text(encoding="utf-8"))
+    package = package_identity(Path(args.package)) if args.package else None
+    out = identity_findings(doc, package)
+    cap, rt = doc.get("capability") or {}, doc.get("runtime") or {}
+    if out:
+        for f in out:
+            print(f"  {f}")
+        print(f"FAIL: {args.receipt} does not identify a capability release")
+        return 1
+    print(f"PASS: {args.receipt} is {cap.get('name')} {cap.get('version')} "
+          f"(lock {cap.get('release_lock')}) on {rt.get('name')}")
+    return 0
 
 
 # ---------------------------------------------------------------------------
@@ -1653,10 +2120,22 @@ def parser() -> argparse.ArgumentParser:
     lk.add_argument("--report", action="store_true", help="print a stale lock without failing")
     pc = sub.add_parser("plugin-check")
     pc.add_argument("repos", nargs="*")
-    pl = sub.add_parser("placement-check")
-    pl.add_argument("repos", nargs="*")
-    pl.add_argument("--strict", action="store_true", help="P2 to P5 are errors now, not only from the migration date")
-    pl.add_argument("--workspace", help="where sibling capabilities are checked out, to resolve executor.skill")
+    ra = sub.add_parser("reattest")
+    ra.add_argument("computation", nargs="?", help="the executor to re-attest, when no --run names it")
+    ra.add_argument("args", nargs="*", help="the executor's arguments, after --")
+    ra.add_argument("--package", default=".", help="the package the computation lives in (default: here)")
+    ra.add_argument("--run", help="a run name from the package's verification/reference_runs.yaml")
+    ra.add_argument("--attester", help="the attester, when the concept names none")
+    ra.add_argument("--data-root", help="override the registry's data root")
+    ra.add_argument("--old", default="HEAD", help="the reference version, a git ref (default HEAD)")
+    ra.add_argument("--note", default="", help="why the file changed, for the log entry draft")
+    ra.add_argument("--keep", help="directory for the receipts and files (default: a new temporary one)")
+    ra.add_argument("--list", action="store_true", help="list the package's reference runs")
+    ra.add_argument("--selftest", action="store_true")
+    ri = sub.add_parser("receipt-identity")
+    ri.add_argument("receipt", nargs="?", help="the receipt or attestation to read")
+    ri.add_argument("--package", help="package tree whose identity the receipt must match")
+    ri.add_argument("--selftest", action="store_true")
     ad = sub.add_parser("advertise")
     ad.add_argument("repos", nargs="*")
     ad.add_argument("--check", action="store_true", help="fail on a support claim with no qualified record for this release, or a stale README block")
@@ -1672,7 +2151,8 @@ def parser() -> argparse.ArgumentParser:
 
 COMMANDS = {"validate": command_validate, "topics": command_topics, "sphere-view": command_sphere_view,
             "teams": command_teams, "render": command_render, "lock": command_lock,
-            "plugin-check": command_plugin_check, "placement-check": command_placement_check,
+            "plugin-check": command_plugin_check, "reattest": command_reattest,
+            "receipt-identity": command_receipt_identity,
             "advertise": command_advertise, "publish": command_publish}
 
 

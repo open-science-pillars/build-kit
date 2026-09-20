@@ -21,9 +21,13 @@ and comes back here only for the roadmap and release steps.
   into a workspace and links the harness skills for Claude Code and Codex.
   Documented in [DEVELOPING.md](DEVELOPING.md).
 - [scripts/osp.py](scripts/osp.py): validates every repository's canonical
-  `.osp/` metadata, renders the runtime projections, the sphere view and the
-  GitHub topics, checks Agent Plugins conformance, writes the release lock and
-  the `dist/` of a release. Documented in
+  `.osp/` metadata, including the two findings that measure where the files go
+  (runnable code under `knowledge/`, and an attested computation whose code is
+  not in the package beside a golden that names it); renders the runtime
+  projections, the sphere view and the GitHub topics, checks Agent Plugins
+  conformance, writes the release lock and the `dist/` of a release; runs the
+  re-attestation ritual of one computation (`reattest`) and reads a receipt's
+  release and runtime identity (`receipt-identity`). Documented in
   [docs/osp-metadata.md](docs/osp-metadata.md).
 - [scripts/qualify.py](scripts/qualify.py): runs the qualification matrix a
   capability requires per runtime and writes the record, or a waiver.

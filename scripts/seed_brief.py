@@ -15,9 +15,12 @@ place.
 Seed kinds: knowledge (concepts, the round-two shape), computation (an
 attested computation in the sea level budget's shape), connector (tools
 on the observations server plus their connector concepts), data-root (a
-stamped data root and its loaders, no concepts). A seed may carry a
-wave (A or B) and a depends_on list; a wave B brief renders the
-`context` lines the coordinator adds once wave A has merged.
+stamped data root and its loaders, no concepts), skill (one or more
+skills with scripts and a golden in an existing capability), migration
+(code, concepts and roots moved into the package that runs them, in the
+shape ADR E decided). A seed may carry a wave and a depends_on list; a
+later wave's brief renders the `context` lines the coordinator adds once
+the wave it depends on has merged.
 
 Usage:
   seed_brief.py roadmap/seeds/round-3.yaml --seed r3-argo-ohc
@@ -34,13 +37,13 @@ from pathlib import Path
 import yaml
 
 ORG = "open-science-pillars"
-KINDS = ("knowledge", "computation", "connector", "data-root", "capability", "skill")
+PROVIDER = "nasa-daac-knowledge"
+KINDS = ("knowledge", "computation", "connector", "data-root", "migration", "skill")
 
 PLUGIN_CHECKS = (
     "`uv run ../build-kit/scripts/osp.py validate . --standalone`, "
     "`uv run ../build-kit/scripts/osp.py render . --check`, "
     "`uv run ../build-kit/scripts/osp.py plugin-check .`, "
-    "`uv run ../build-kit/scripts/osp.py placement-check .`, "
     "`uv run ../build-kit/scripts/osp.py advertise . --check --into README.md`, "
     "`uv run ../nasa-daac-knowledge/tools/check_okf_v02.py knowledge`, "
     "`uv run ../nasa-daac-knowledge/tools/check_script_deps.py .`, "
@@ -137,13 +140,17 @@ CONCEPT_RULES = (
     "The computation concept has `type: Attested Computation` and names the executor and "
     "the attester in its frontmatter with the keys the pattern concept uses (computation, "
     "executor.resource naming the executor script itself, executor.receipt, "
-    "attester.resource) and, when this seed names a wrapping skill, `executor.skill: "
-    "<capability>/<skill>`; the recipe has `type: Recipe`; both carry `status: draft`, the "
-    "generated block and `stale_after` six months out. The run instructions are a skill "
-    "(a SKILL.md in the sphere capability), never a concept: create no references/skills/ "
-    "directory, and put no script under skills/<name>/ outside its scripts/ directory and "
-    "none under verification/ that a skill runs (the placement rule; `uv run "
-    "../build-kit/scripts/osp.py placement-check .` reports a violation with its code). "
+    "attester.resource); the recipe has `type: Recipe`; both carry `status: draft`, the "
+    "generated block and `stale_after` six months out. Where the files go is one sentence: "
+    "what a steward signs is under knowledge/, what an agent runs is under skills/<name>/ "
+    "with its scripts beside it, what proves a script is under verification/, and what "
+    "reaches a service is under connectors/. So the concept lives under "
+    "knowledge/computations/, the executor and the attester it names live in the scripts "
+    "directory of the skill that runs them, the run instructions are that skill's SKILL.md "
+    "and never a concept, the stamped root the executor reads is data under "
+    "knowledge/references/retrieval/, and a golden under verification/ names every script "
+    "the concept names (`uv run ../build-kit/scripts/osp.py validate . --standalone` reports "
+    "both findings, with the file and the rule on one line). "
     "Every number in the concept names the receipt it came from, and the real-data run is "
     "anchored to the published value with its source and the distance from it.")
 
@@ -222,7 +229,7 @@ def others_text(round_: dict, seed: dict) -> str:
     """The concurrency and boundary sentence. A knowledge seed's boundary is
     its bundle (plus an in-repository eval subtree); the other kinds carry an
     explicit boundary field, so only the concurrency part is rendered here."""
-    repo, bundle = seed["repo"], seed["bundle"]
+    repo, bundle = seed["repo"], seed.get("bundle")
     provider = repo == "nasa-daac-knowledge"
     knowledge = seed.get("kind", "knowledge") == "knowledge"
     wave = seed.get("wave")
@@ -234,7 +241,7 @@ def others_text(round_: dict, seed: dict) -> str:
         allowed += f" and `{ev['subtree']}/`"
     concurrency = (
         "Other seed sessions are working on this repository at the same time on their own "
-        "branches and areas (" + ", ".join(f"`{o['bundle']}`" for o in others) + "); "
+        "branches and areas (" + ", ".join(f"`{o.get('bundle') or o['id']}`" for o in others) + "); "
         if others else "")
     if not knowledge:
         return concurrency.rstrip("; ") + (". " if concurrency else "")
@@ -256,7 +263,13 @@ def context_text(seed: dict) -> str:
 
 
 def sources_text(seed: dict) -> str:
-    return "\n".join(f"- {s['domain']}: {s['read']}" for s in seed["sources"])
+    return "\n".join(f"- {s['domain']}: {s['read']}" for s in seed.get("sources") or [])
+
+
+def issue_text(seed: dict) -> str:
+    """The seed's issue, where the round file records one."""
+    number = seed.get("issue")
+    return f" This seed is issue #{number} in {seed['repo']}; reference it in the PR body." if number else ""
 
 
 def dnr_text(seed: dict) -> str:
@@ -345,31 +358,6 @@ def deliverables_text(seed: dict) -> str:
     return "DELIVERABLES:\n" + "\n".join(f"- {d}" for d in seed["deliverables"])
 
 
-def wrap_text(seed: dict) -> str:
-    """The wrapping rule (ADR C): every attested computation is wrapped by
-    a skill in the capability whose sphere it names. A seed names its wrap
-    as `wrap: <capability>/<skill>`; a seed without one records why."""
-    wrap = seed.get("wrap")
-    if not wrap:
-        return ("WRAP. Every attested computation is wrapped by a skill in the capability whose "
-                "sphere it names, and this seed names none: the capability that would wrap it does "
-                "not yet exist as a package, or the coordinator files the wrap separately. Leave "
-                "`executor.skill` out of the concept, write the run instructions into the PR body "
-                "(the coordinator carries them to the wrapping skill or the roadmap line), and expect "
-                "the placement gate to report the concept as unwrapped (P6); that is the floor, not "
-                "the goal.")
-    cap, _, skill = wrap.partition("/")
-    where = ("in this repository" if cap == seed["repo"] else
-             f"in {cap}: clone it beside this repository, build the skill on a branch named `{seed['branch']}` "
-             f"there, and open a second pull request against its main; the two are reviewed together")
-    return (f"WRAP. The run instructions are the skill `{wrap}` (skills/{skill}/SKILL.md {where}). The "
-            "skill invokes the executor by the installed bundle's path (`${CLAUDE_PLUGIN_ROOT}` for the "
-            "capability's own bundle; the checkout named by the bundle's environment variable for a "
-            "provider bundle, as ocean-science's receipt-figures skill does), states the parameters it "
-            "binds and the runtime name it passes, and tells the agent to run the attester on the receipt "
-            f"before quoting a number from it. The concept carries `executor.skill: {wrap}`.")
-
-
 def render_computation(round_: dict, seed: dict) -> str:
     repo, bundle, branch = seed["repo"], seed["bundle"], seed["branch"]
     provider = repo == "nasa-daac-knowledge"
@@ -408,8 +396,6 @@ WHAT TO BUILD ({seed['title']}). {seed['scope'].strip()}
 {deliverables_text(seed)}
 
 {pattern_text(seed)}
-
-{wrap_text(seed)}
 {context_text(seed)}
 SOURCES, and what to read on each:
 {sources_text(seed)}
@@ -482,59 +468,175 @@ COMMIT, PUSH, PR. `git commit -s` (DCO sign-off) with the attribution lines your
 """
 
 
-CAPABILITY_RULES = (
-    "The release adds no number of its own (the wrap-only release rule of the "
-    "specification, decided in ADR D): every number a skill reports is owned by a "
-    "concept already signed stable in the provider bundle, and a skill that would "
-    "compute something new belongs to a later release that waits on the "
-    "domain-expansion decision. Each wrapping skill names its concept by bundle path, "
-    "invokes that concept's executor at the path the installed bundle puts it, binds "
-    "every parameter the concept declares, passes the runtime name, runs the attester "
-    "on the receipt before any number is quoted, and reports the verdict, the run "
-    "identifier, the runtime and the caveats the concept states, including its "
-    "refusals. Never copy an executor, an attester or a fixture into this repository, "
-    "and never name a path under verification/ in a SKILL.md; a script a skill runs at "
-    "runtime lives in that skill's scripts/ directory (the placement rule). Skill "
-    "frontmatter follows the Agent Skills rules: `name` equals the directory and is "
-    "lowercase words joined by single hyphens, `description` is one sentence under "
-    "1024 characters, and the body stays under 500 lines.")
+MIGRATION_RULES = (
+    "This seed changes no number. A reference value that differs after the move is a "
+    "finding to report in the pull request body, never a value to update, and the seed "
+    "stops on it and says so. It never signs and never promotes a status: a concept it "
+    "moves keeps its signature block exactly as it is, is left at `status: draft` with a "
+    "note naming the reference run it reproduced at the new path, and the maintainer "
+    "re-signs after merge. Where the "
+    "files go is one sentence: what a steward signs is under knowledge/, what an agent "
+    "runs is under skills/<name>/ with its scripts beside it, what proves a script is "
+    "under verification/, and what reaches a service is under connectors/. So every path "
+    "a moved concept names resolves inside this package and outside knowledge/, every "
+    "script it names is named by a golden directly under verification/, and nothing under "
+    "knowledge/ is runnable: a .py, a .sh, a notebook or an executable bit under "
+    "knowledge/ is a finding of `osp.py validate`. A moved script keeps its content, its "
+    "argument names and its usage text; only its imports and the paths it resolves change, "
+    "and the pull request body gives the old and the new sha256 of every file it moved.")
 
-CAPABILITY_METADATA = (
-    "Write `.osp/` by hand and let the renderer write every manifest: `repository.yaml` "
-    "moves to status developing and keeps its spheres, primary sphere and discipline; "
-    "`package.yaml` names the package, a first version, type capability, the content "
-    "paths and the dependencies (core, and the provider bundle with the version floor "
-    "the coordinator states in the pull request thread); `surfaces.yaml` declares the "
-    "required runtimes, and no surface says supported without a qualification record, "
-    "so the development runtime is declared tested until the release is qualified; "
-    "`governance.yaml` keeps the sphere team already in the repository. Then "
-    "`osp.py render .` writes the projections; a hand edit to any of them fails the "
-    "gate. Copy the gate and goldens workflows from plugin-template, keeping the pinned "
-    "action digests, and include the placement-check step.")
+SIDE_RULES = {
+    "capability": (
+        "This seed never edits the provider bundle: the bundle is read only, and the bundle's copy of every "
+        "moved file stays where it is until the bundle's own seed deletes it, so nothing on main points at a "
+        "path that is not there."),
+    "provider": (
+        "This seed edits no capability: every file it deletes has already been taken by a capability that has "
+        "merged and released, and the pull request body of that seed is the list it works from. A file no such "
+        "list names is left where it is and reported in the pull request body."),
+}
+
+MIGRATION_PATHS = {
+    "concepts": ("the computation concepts, to `knowledge/computations/` in this repository, each with its "
+                 "`computation`, `executor.resource` and `attester.resource` rewritten to the new path of the "
+                 "script and its digests brought up to date"),
+    "code": ("the executors, attesters, loaders and derivation scripts, into the `scripts/` directory of the "
+             "skill that runs each of them"),
+    "roots": ("the stamped data roots and their record, manifest, exhibit and fixture files, to "
+              "`knowledge/references/retrieval/` as data, which is what they are"),
+    "evidence": ("the data files a concept cites (masks, calibration tables), to "
+                 "`knowledge/references/retrieval/` beside the roots"),
+    "local": "the code this repository already owns, out of where it sits today and into the skill that runs it",
+    "chains": ("the check chains and the named reference runs, rewritten as goldens directly under "
+               "`verification/` that the goldens workflow runs"),
+}
 
 
-RECEIPT_SKILL_RULES = (
-    "A receipt skill computes nothing of its own: every number it emits is a field of a "
-    "receipt the attester passed, or a table, figure or paragraph made of such fields, and it "
-    "combines no two receipts into a value no receipt carries. That is the whole discipline, and "
-    "the script enforces it rather than the prose: it runs the attester on every receipt before "
-    "reading one and records a receipt that did not pass as a failed row with the attester's own "
-    "line, never as a number; it refuses to emit any aggregate across rows (no mean, no overall "
-    "rate, no count of closures presented as a rate), because that aggregate would be a number no "
-    "concept owns, which is domain expansion under ADR D and waits on the ablation; it refuses to "
-    "mix receipts whose executor digest (code_sha256) or data root manifest differ, so a table is "
-    "one method on one root; and it refuses a parameter the concept does not declare. It reaches "
-    "the executor and attester by the installed bundle's path exactly as the wrapping skill in "
-    "this repository does, and never copies either. The script lives in the skill's scripts/ "
-    "directory (the placement rule), carries a --selftest that runs on the executor's synthetic "
-    "fixture and exercises every refusal, and is named in the goldens workflow through the golden "
-    "that runs it offline. The SKILL.md says in its first paragraph that the skill computes "
-    "nothing and where every number it shows comes from, tells the agent to report the table or "
-    "figure with the run identifiers and the concept's caveats beside it, and forbids in its "
-    "Must NOT list the one sentence a reader will want most, the headline number the rows do not "
-    "carry. Skill frontmatter follows the Agent Skills rules: `name` equals the directory and is "
-    "lowercase words joined by single hyphens, `description` is one sentence under 1024 characters, "
-    "and the body stays under 500 lines.")
+def moves_text(seed: dict) -> str:
+    moves = seed.get("moves") or {}
+    if not moves:
+        return ""
+    out = ["WHAT MOVES, and where each thing lands:"]
+    for key, where in MIGRATION_PATHS.items():
+        value = moves.get(key)
+        if not value:
+            continue
+        if isinstance(value, list):
+            out.append(f"- {where}:")
+            out += [f"  - `{v}`" for v in value]
+        else:
+            out.append(f"- {where}: {value}")
+    return "\n".join(out) + "\n"
+
+
+def receiving_text(seed: dict) -> str:
+    out = []
+    receiving = seed.get("receiving_skills") or []
+    repoint = seed.get("receipt_skills_to_repoint") or []
+    if receiving:
+        out.append("RECEIVING SKILLS, each taking into its `scripts/` directory the executor and the attester of "
+                   "the computation its SKILL.md names today, keeping its own text and changing only the paths: "
+                   + ", ".join(f"`{s}`" for s in receiving) + ". A skill may carry the scripts of several "
+                   "computations that one workflow runs together; how the computations group into skills is this "
+                   "repository's call, and the pull request body says which script went to which skill and why.")
+    if repoint:
+        out.append("SKILLS TO REPOINT, which reach an executor or an attester by the installed bundle's path "
+                   "today and reach `${CLAUDE_PLUGIN_ROOT}` after the move: " + ", ".join(f"`{s}`" for s in repoint)
+                   + ". Their discipline and their text do not change; their paths do.")
+    return "\n\n".join(out) + "\n" if out else ""
+
+
+def acceptance_text(seed: dict) -> str:
+    rows = seed.get("acceptance") or []
+    if not rows:
+        return ""
+    return "ACCEPTANCE, what the pull request body must show:\n" + "\n".join(f"- {a}" for a in rows) + "\n"
+
+
+def read_first_text(seed: dict) -> str:
+    out = ["READ FIRST (a path that starts with another repository's name is in a read-only clone beside "
+           f"this one, `git clone https://github.com/{ORG}/<repo> ../<repo>`):",
+           "- marketplace/docs/decisions/adr-e-a-computation-is-a-skill.md, the decision this seed carries out",
+           "- marketplace/docs/contributing-a-skill.md and the specification's section on where the files go"]
+    if seed.get("moves"):
+        out.append("- every concept this seed moves, and the usage text of every executor and attester it moves")
+    if seed.get("receiving_skills"):
+        out.append("- the SKILL.md of every receiving skill, so the paths you change are the ones it names")
+    if seed.get("repo") == PROVIDER:
+        out.append("- the pull request body of every seed this one depends on, which lists the paths it copied from")
+    out += [f"- {p}" for p in seed.get("pattern") or []]
+    return "\n".join(out)
+
+
+def render_migration(round_: dict, seed: dict) -> str:
+    """A migration seed: the code, the concepts and the roots of an
+    attested computation move into the package that runs it (ADR E). The
+    seed in the provider bundle is the other end of the same move, where
+    what the capabilities took is deleted and what cites it is
+    repointed."""
+    repo, branch = seed["repo"], seed["branch"]
+    spheres = ", ".join(seed.get("spheres") or []) or "none"
+    bundle_side = repo == PROVIDER
+    if bundle_side:
+        role = ("You are finishing the move in the provider bundle for the Open Science Pillars organization "
+                f"(github.com/{ORG}), in the repository {repo}")
+        boundary = seed.get("boundary") or (
+            f"this seed touches only the {repo} repository, and only what the capabilities have already taken "
+            "and released. It edits no capability and leaves the roadmap and the release to the coordinator.")
+        how = ("Delete a file only when the pull request body of the seed that took it names it, and check the "
+               "capability's released package for the copy before you delete the original. Then repoint what "
+               "cites it: a recipe, a convention, a finding or a log entry that names an executor or a "
+               "computation concept by bundle path names the capability's concept by package path instead.")
+        checks = (CHECKS[PROVIDER] + " Then every path every remaining concept names must resolve, and no file "
+                  "under knowledge/ may be runnable: `uv run ../build-kit/scripts/osp.py validate . --standalone` "
+                  "reports both findings, and this repository is the one that must come out clean.")
+        pr_line = ('the line "Bundle PR: merges on the coordinator\'s review, after every capability has released"')
+    else:
+        role = ("You are moving an attested computation into the package that runs it for the Open Science "
+                f"Pillars organization (github.com/{ORG}), in the repository {repo}")
+        boundary = seed.get("boundary") or (
+            f"this seed touches only the {repo} repository. It reads {PROVIDER} and never edits it, edits no "
+            "other repository, and leaves the roadmap to the coordinator.")
+        how = ("Move a file with `git mv` so its history follows it, then fix what the move broke: the relative "
+               "imports of the script, the paths the concept names, the paths the SKILL.md names, and the paths "
+               "the goldens name. Nothing about any number changes; the executors, the roots and the reference "
+               "values are re-homed and re-run, not revised.")
+        checks = (CHECKS["plugin"] + " Then every golden must pass headless and offline "
+                  "(`uv run verification/<golden>.py`), every script's `--selftest` must pass, and every "
+                  "reference run this seed moved must reproduce at its new path: paste the command, the "
+                  "receipt's headline fields and the attester's last line for each, beside the value the "
+                  "concept states. A run that does not reproduce is reported, not fixed.")
+        pr_line = ('the line "Migration PR: merges on the coordinator\'s review of the reproduced runs, on the '
+                   'maintainer\'s behalf"')
+    body = "\n\n".join(b.strip() for b in [
+        f"WHAT TO BUILD ({seed['title']}). {seed['scope'].strip()}",
+        moves_text(seed), receiving_text(seed), acceptance_text(seed), read_first_text(seed),
+        context_text(seed).strip(), f"HOW TO WORK. {NO_DOWNLOAD} {how}", dnr_text(seed).strip(),
+    ] if b.strip())
+    log = ("Add one entry at the top of this bundle's log naming what was deleted and what now cites the "
+           f"capability, and re-render the digest with `uv run tools/digest.py <bundle>`." if bundle_side else
+           "Add one entry at the top of this repository's `knowledge/log.md` naming what came in, from which "
+           "bundle path, with the old and the new digest of every concept. The goldens workflow runs the "
+           "goldens this seed writes; the gate workflow needs no new step, because `osp.py validate` carries "
+           "the two findings.")
+    listing = ("every file deleted with the pull request that took it, every citation repointed with its old "
+               "and its new path" if bundle_side else
+               "every file moved with its old bundle path, its new path and its old and new sha256, every "
+               "concept with the digests it now names, every reference run reproduced with its command and "
+               "its attestation, every bundle path the seed copied from so the bundle's own seed can delete "
+               "them")
+    return f"""{role}, on a new branch `{branch}` created from main. A coordinator session dispatched you and will review, merge, re-sign the concepts your edit touches on the maintainer's behalf and reconcile the roadmap; you work, re-run, check, push and open one pull request. Do not merge anything, do not sign anything, change no number. {others_text(round_, seed)}BOUNDARY: {boundary}{issue_text(seed)} Spheres: {spheres}.
+
+{body}
+
+FORMAT. Clone read-only beside the repository: `git clone https://github.com/{ORG}/marketplace ../marketplace`, likewise ../{PROVIDER} and ../build-kit. {log}
+
+RULES. {CONTENT_RULES} {MIGRATION_RULES} {SIDE_RULES['provider' if bundle_side else 'capability']}
+
+CHECKS BEFORE PUSHING: {checks}
+
+COMMIT, PUSH, PR. `git commit -s` (DCO sign-off) with the attribution lines your session instructions give you. Push the branch and open one pull request against main in {repo} with a body listing {listing}, the check results, a closing paragraph headed "For the reviewer" that says in plain words what a reviewer who knows the product should check first, and {pr_line}. {report_text()}
+"""
 
 
 def skills_text(seed: dict) -> str:
@@ -542,59 +644,31 @@ def skills_text(seed: dict) -> str:
     for s in seed["skills"]:
         out.append(f"- `{s['name']}` with `scripts/{s['script']}`: {s['does']} Refuses: {s['refuses']}")
     out.append("")
-    out.append("THE COMPUTATIONS THEY OPERATE ON, each reached the way the wrapping skill reaches it:")
+    out.append("THE COMPUTATIONS THEY OPERATE ON, each named by its concept, which is what a script reads "
+               "before it runs anything:")
     for w in seed["operates_on"]:
-        out.append(f"- concept `{w['concept']}`, executor `{w['executor']}`, attester `{w['attester']}`, "
-                   f"wrapped by `{w['wrapped_by']}`; parameters the concept declares: {w['parameters']}")
+        out.append(f"- concept `{w['concept']}`, executor `{w['executor']}`, attester `{w['attester']}`; "
+                   f"parameters the concept declares: {w['parameters']}")
     return "\n".join(out)
 
 
-def wraps_text(seed: dict) -> str:
-    rows = seed.get("wraps") or []
-    if not rows:
-        return ""
-    lines = "\n".join(
-        f"- `{w['skill']}` wraps {w['concept']}; executor {w['executor']}; attester {w['attester']}"
-        for w in rows)
-    return ("WRAPS, one skill per computation, each named for the workflow and not for the "
-            f"product (a path is in the provider bundle's repository, {seed['bundle']} is its "
-            f"bundle):\n{lines}\n\nRead each concept's frontmatter and body first, and each "
-            "executor's and attester's usage text, so that the parameters a skill binds, the "
-            "refusals it reports and the receipt fields it quotes are exactly what the concept "
-            "declares. A parameter the concept declares and the skill does not bind is a gap the "
-            "pull request body names.\n")
-
-
-def render_capability(round_: dict, seed: dict) -> str:
-    repo, bundle, branch = seed["repo"], seed["bundle"], seed["branch"]
-    spheres = ", ".join(seed.get("spheres") or [])
-    checks = (CHECKS["plugin"] + " Then the golden must pass headless and offline "
-              "(`uv run verification/<golden>.py`), and `uv run ../build-kit/scripts/osp.py "
-              "placement-check . --strict` must report no error and no warning. In the provider "
-              "bundle's clone, `SIGNATURE_DEBT=report bash tools/run_checks.sh` must end in ALL "
-              "GREEN with your concept edits in place.")
-    return f"""You are promoting a planned capability out of planned for the Open Science Pillars organization (github.com/{ORG}): the repository {repo}, on a new branch `{branch}` created from main, and a second branch of the same name in nasa-daac-knowledge for the provider-bundle edit. A coordinator session dispatched you and will review, merge, re-sign the concepts your edit touches and reconcile the roadmap; you build, check, push and open one pull request per repository. Do not merge anything, do not sign anything, never promote a concept's status. {others_text(round_, seed)}BOUNDARY: {seed['boundary']} This seed is issue #{seed['issue']} in {repo}; reference it in the PR body. Spheres: {spheres}.
-
-WHAT TO BUILD ({seed['title']}). {seed['scope'].strip()}
-
-{wraps_text(seed)}
-{deliverables_text(seed)}
-
-{pattern_text(seed)}
-{context_text(seed)}
-SOURCES, and what to read on each:
-{sources_text(seed)}
-
-HOW TO READ THEM. {FETCH} {NO_DOWNLOAD}
-{dnr_text(seed)}
-FORMAT. Clone read-only beside the repository: `git clone https://github.com/{ORG}/marketplace ../marketplace`, likewise ../nasa-daac-knowledge, ../build-kit, ../ocean-science, ../hydrology and ../plugin-template. Read the marketplace specification's section on the first wrap-only releases and ADR D in its decisions directory before writing a skill, then marketplace/docs/contributing-a-skill.md and docs/package-authoring-guide.md. The provider-bundle branch adds one key, `executor.skill`, to each concept named above under `executor:`, and one entry at the top of that bundle's log naming the wrap; nothing else there changes, and the concept's status and signature block are left exactly as they are.
-
-RULES. {CONTENT_RULES} {CAPABILITY_RULES} {CAPABILITY_METADATA}
-
-CHECKS BEFORE PUSHING: {checks}
-
-COMMIT, PUSH, PR. `git commit -s` (DCO sign-off) with the attribution lines your session instructions give you. Push both branches and open one pull request against main in {repo} and one in nasa-daac-knowledge, with bodies listing every file added, each skill with the computation it wraps and the parameters it binds, the golden's output, the eval cases and what they grade, the check results, {pr_body_common()}, and the line "Capability PR: merges on the coordinator's review of the wrap discipline, on the maintainer's behalf" (the provider PR carries "Knowledge PR: merges on the maintainer's review; the edited concepts owe a re-sign" instead). {report_text()}
-"""
+SKILL_RULES = (
+    "A skill is a SKILL.md and the scripts beside it: the procedure in the text, the code in "
+    "`scripts/`, the proof in a golden directly under `verification/`. Every number a script "
+    "emits is a field of a receipt whose attester passed, or a table, figure or paragraph made "
+    "of such fields, and a receipt that did not pass is a failed row carrying the attester's own "
+    "line, never a number. The script runs the attester on every receipt before it reads one, "
+    "refuses a parameter the concept does not declare, and refuses to mix receipts whose executor "
+    "digest (code_sha256) or data root manifest differ, so a table is one method on one root. "
+    "Each script carries a `--selftest` that runs on the executor's synthetic fixture and "
+    "exercises every refusal it enforces, carries the `# /// script` dependency header with each "
+    "dependency pinned, runs under `uv run`, and is named in the goldens workflow through the "
+    "golden that runs it offline. The SKILL.md says in its first paragraph where every number it "
+    "shows comes from, tells the agent to report the run identifiers and the concept's caveats "
+    "beside the result, and names in its Must NOT list the one sentence a reader will want most "
+    "and the rows do not carry. Skill frontmatter follows the Agent Skills rules: `name` equals "
+    "the directory and is lowercase words joined by single hyphens, `description` is one sentence "
+    "under 1024 characters, and the body stays under 500 lines.")
 
 
 def render_skill(round_: dict, seed: dict) -> str:
@@ -605,13 +679,12 @@ def render_skill(round_: dict, seed: dict) -> str:
                  f"of the same name there with its own pull request: {ev['case'].strip()}" if ev else "")
     checks = (CHECKS["plugin"] + " Then each script's `--selftest` and the golden named in the deliverables "
               "(`uv run verification/<golden>.py`) must pass headless and offline with the provider bundle "
-              "checked out beside this repository and named by its environment variable, and "
-              "`uv run ../build-kit/scripts/osp.py placement-check . --strict` must report no error and no warning.")
+              "checked out beside this repository and named by its environment variable.")
     siblings = [s for s in ("marketplace", "nasa-daac-knowledge", "build-kit", "ocean-science") if s != repo]
     rest = [f"../{s}" for s in siblings[1:]]
     clone_text = (f"`git clone https://github.com/{ORG}/{siblings[0]} ../{siblings[0]}`, likewise "
                   + (", ".join(rest[:-1]) + " and " + rest[-1] if len(rest) > 1 else rest[0]))
-    return f"""You are building receipt skills for the Open Science Pillars organization (github.com/{ORG}) in the repository {repo}, on a new branch `{branch}` created from main. A coordinator session dispatched you and will review, merge and reconcile the roadmap; you build, check, push and open one pull request per repository you touch. Do not merge anything, do not sign anything, never edit a concept, an executor, an attester or a loader in the provider bundle. {others_text(round_, seed)}BOUNDARY: {seed['boundary']} This seed is issue #{seed['issue']} in {repo}; reference it in the PR body. Spheres: {spheres}.
+    return f"""You are building skills for the Open Science Pillars organization (github.com/{ORG}) in the repository {repo}, on a new branch `{branch}` created from main. A coordinator session dispatched you and will review, merge and reconcile the roadmap; you build, check, push and open one pull request per repository you touch. Do not merge anything, do not sign anything, never edit a concept, an executor, an attester or a loader in the provider bundle. {others_text(round_, seed)}BOUNDARY: {seed['boundary']}{issue_text(seed)} Spheres: {spheres}.
 
 WHAT TO BUILD ({seed['title']}). {seed['scope'].strip()}
 
@@ -626,13 +699,13 @@ SOURCES, and what to read on each:
 
 HOW TO READ THEM. {FETCH} {NO_DOWNLOAD}
 {dnr_text(seed)}
-FORMAT. Clone read-only beside the repository: {clone_text}. Read the marketplace specification's section on the first wrap-only releases and ADR D in its decisions directory, then marketplace/docs/contributing-a-skill.md and docs/package-authoring-guide.md, before writing a skill. Add one entry at the top of this repository's `knowledge/log.md` naming the skills built; nothing in a provider bundle changes.
+FORMAT. Clone read-only beside the repository: {clone_text}. Read marketplace/docs/contributing-a-skill.md, the specification's section on where the files go and docs/package-authoring-guide.md before writing a skill. Add one entry at the top of this repository's `knowledge/log.md` naming the skills built; nothing in a provider bundle changes.
 
-RULES. {CONTENT_RULES} {RECEIPT_SKILL_RULES}
+RULES. {CONTENT_RULES} {SKILL_RULES}
 
 CHECKS BEFORE PUSHING: {checks}
 
-COMMIT, PUSH, PR. `git commit -s` (DCO sign-off) with the attribution lines your session instructions give you. Push the branch and open one pull request against main in {repo}, with a body listing every file added, each skill with the computation it operates on and every refusal its script enforces, the selftest and golden output, a worked table or figure from the committed root pasted in, {pr_body_common()}, and the line "Skill PR: merges on the coordinator's review of the receipt discipline, on the maintainer's behalf". {report_text()}
+COMMIT, PUSH, PR. `git commit -s` (DCO sign-off) with the attribution lines your session instructions give you. Push the branch and open one pull request against main in {repo}, with a body listing every file added, each skill with the computation it operates on and every refusal its script enforces, the selftest and golden output, a worked table or figure from the committed root pasted in, {pr_body_common()}, and the line "Skill PR: merges on the coordinator's review of the scripts and the golden, on the maintainer's behalf". {report_text()}
 """
 
 
@@ -641,7 +714,7 @@ RENDERERS = {
     "computation": render_computation,
     "connector": render_connector,
     "data-root": render_data_root,
-    "capability": render_capability,
+    "migration": render_migration,
     "skill": render_skill,
 }
 
@@ -667,7 +740,8 @@ def main():
     if a.list:
         for s in round_["seeds"]:
             print(f"{s['id']:34} {s.get('wave', '-'):2} {s.get('kind', 'knowledge'):12} "
-                  f"{s['repo']:22} {s['bundle']:28} {s['branch']:38} #{s['issue']}")
+                  f"{s['repo']:22} {str(s.get('bundle') or '-'):28} {s['branch']:38} "
+                  f"{'#' + str(s['issue']) if s.get('issue') else '-'}")
         return
     if a.all:
         chosen = list(seeds.values())
