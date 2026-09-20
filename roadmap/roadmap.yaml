@@ -1494,7 +1494,7 @@ initiatives:
           url: https://github.com/open-science-pillars/ocean-science/issues/64
         title: A sweep over the sea level budget's declared parameters, the pattern-setter for receipt skills
         repo: ocean-science
-        status: active
+        status: done
         priority: P1
         depends_on: []
         gate: "Built first in ocean-science because it is not under the wrap-only bound and already carries the two sibling patterns, receipt-figures and cite-ecco; the sphere seeds copy its shape."
@@ -1502,7 +1502,12 @@ initiatives:
           - "A sweep skill with a script that runs the wrapped sea level budget executor over a family of values of a declared parameter, attests every receipt before reading it, and tabulates the executor's own headline fields per receipt, refusals included as rows."
           - "The script refuses any aggregate across rows, refuses to mix receipts whose executor digest or data root manifest differ, and refuses a parameter the concept does not declare; each refusal is exercised by its selftest and by a golden the goldens workflow runs offline."
           - "An eval case asks for the overall rate from a sweep and passes only when the agent refuses to average; a worked table from the committed root is in the pull request body."
-        evidence: []
+        evidence:
+          - "ocean-science PR #65: skills/sweep with scripts/sweep.py, stdlib only, reaching the sea level budget executor, attester and concept at the installed bundle's path as the wrapping skill does; the declared parameter set is read from the concept's frontmatter rather than kept as a list of its own. Five refusals exit 4 with a reason code and leave no partial table: aggregate-across-rows, parameter-not-declared, parameter-not-stated, mixed-method (differing executor digests) and mixed-input (differing data root manifests or fixture seeds). An executor refusal is a row carrying its reason code; a receipt the attester did not pass is a failed row carrying the attester's line and no number, and the script exits nonzero"
+          - "The coordinator reproduced the worked table on the committed root to the digit, 17 windows of 60 months, 13 computed, 4 refused at the GRACE to GRACE-FO gap without a bridge citation, 0 not attested, the 2013-01:2017-12 row matching the pull request including its run identifier; ran the selftest and the golden offline; and read build_row, which runs the attester first and returns a row with empty cells on anything but PASS, so no path exists by which a number reaches a table before the attester passes. The only sum in the script counts rows for the summary line"
+          - "The seed caught an order-dependent bug in its own selftest on the runner (a glob that also matched the attestation beside each receipt, collapsing the mixed-input comparison) and fixed it by reading receipts from the manifest, which is where a reader follows a cell back to a receipt"
+          - "agent-evals PR #35 and evals PR #44: the rejection case sweep-aggregate-refusal asks for the overall trend across a sweep of windows and passes only when the agent reports the table, refuses to average it citing the concept by bundle path, and names a single window's receipt the reader may quote; registered under ocean-science with Bash allowed because the skill runs a script"
+          - "One thing recorded for the next release of the executor rather than for this skill: the sea level budget receipt carries its headline trend fields rounded to four decimals beside full-precision intervals, so a sweep row mixes the two. The sweep is faithful to the receipt; the wart belongs to the receipt layout"
         contributor:
           readiness: needs-context
           champion: PaulMRamirez
