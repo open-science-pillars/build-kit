@@ -15,7 +15,6 @@
 - `reconcile-project-record`: Reconcile specifications, progress, limitations, and counts (`marketplace`)
 - `roadmap-harness-v1`: Build the federated roadmap harness (`build-kit`)
 - `landice-grace-knowledge`: GRACE-FO mass change knowledge for land ice, reviewed and offered for confirmation (`nasa-daac-knowledge`)
-- `ocean-sweep`: A sweep over the sea level budget's declared parameters, the pattern-setter for receipt skills (`ocean-science`)
 - `r2-core-reference`: Qualify core as the reference capability on Claude Code, Cowork and Codex from one SKILL.md (`core`)
 - `landice-nsidc-knowledge`: ICESat-2 height change and ice velocity knowledge in a new NSIDC bundle (`nasa-daac-knowledge`)
 - `seed-argo-gridded-steric`: Roemmich and Gilson gridded Argo knowledge, seeded and reviewed (`ocean-science`)
@@ -50,7 +49,9 @@
 
 Proposed, every dependency done, in priority order.
 
+- P1 `atmos-receipt-skills`: Sweep, figures and methods over the asdc computations, as receipt skills in atmospheric-physics (`atmospheric-physics`): gate: Waits on the amendment that admits receipt skills to a wrap-only capability and on the ocean-science sweep that sets the shape.
 - P1 `hydro-investigation-tutorial`: Write the hydrology investigation tutorial and run it with a non-author reader (`tutorials`)
+- P1 `landice-receipt-skills`: Sweep, figures and methods over the nsidc closures, as receipt skills in land-ice (`land-ice`): gate: Waits on the amendment that admits receipt skills to a wrap-only capability and on the ocean-science sweep that sets the shape.
 - P1 `provider-confirmed-voicing`: Voice the provider-confirmed tier when citing a concept (`core`): gate: Lands in the release after 0.5.1; a release candidate never edits a skill.
 - P2 `hydro-coastal-water`: Coastal composites where hydrology meets ocean science (`ocean-science`)
 - P2 `r6-compat-probes`: Add non-blocking compatibility probes for Gemini CLI and Goose (`build-kit`)
@@ -64,20 +65,18 @@ Proposed, waiting on a dependency, in priority order.
 - P0 `ablation-runner-calibration`: Calibrate non-obvious probes and release-mixing grading (`evals`)
 - P0 `powered-ablation-run`: Run and publish the powered ablation (`evals`)
 - P1 `activation-eval-runner`: Build and pilot the activation-eval runner (`evals`)
-- P1 `atmos-receipt-skills`: Sweep, figures and methods over the asdc computations, as receipt skills in atmospheric-physics (`atmospheric-physics`)
 - P1 `codex-surface-policy`: Define Codex as a supported distribution and behavior runtime (`marketplace`)
 - P1 `conversational-surface-validation`: Complete Cowork qualification of a release (`marketplace`)
 - P1 `governed-release`: Cut the first governed, citable OSP release (`build-kit`)
 - P1 `hydro-stewards-and-releases`: Steward scaffolds, CODEOWNERS scopes, and the general-availability flip (`nasa-daac-knowledge`)
-- P1 `landice-receipt-skills`: Sweep, figures and methods over the nsidc closures, as receipt skills in land-ice (`land-ice`)
 - P1 `provider-steward-handoff`: Complete or accurately reframe provider stewardship (`nasa-daac-knowledge`)
 - P1 `r3-dependency-reference`: Validate dependency realization on ocean-science across runtimes (`ocean-science`)
 - P1 `tutorial-nonauthor-validation`: Complete non-author Tutorial 2 validation (`tutorials`)
 
-### Done (45)
+### Done (46)
 
 <details>
-<summary>45 done deliverables</summary>
+<summary>46 done deliverables</summary>
 
 - `hydro-usgs-waterdata-migration`: Migrate the USGS connector to the Water Data APIs and release it
 - `hydro-basin-unit`: Add basin delineation as the unit of analysis
@@ -112,6 +111,7 @@ Proposed, waiting on a dependency, in priority order.
 - `landice-input-output`: Ice sheet mass balance by the input-output method, as a third independent attested computation
 - `landice-promotion`: Promote land-ice out of planned as a wrap-only release
 - `adr-d-receipt-skills`: Amend the promotion-to-host-a-wrap decision to admit receipt skills, with the test that keeps them honest
+- `ocean-sweep`: A sweep over the sea level budget's declared parameters, the pattern-setter for receipt skills
 - `atmos-syn1deg-knowledge`: The synoptic radiation product and the surface flux caveat as concepts
 - `atmos-cloud-radiative-effect`: Cloud radiative effect at the top of the atmosphere, as an attested computation
 - `atmos-physics-promotion`: Promote atmospheric-physics out of planned as a wrap-only release
@@ -810,7 +810,7 @@ Every wrapped computation can be swept over its declared parameters, drawn from 
 | Deliverable | Repository | Status | Priority | Contributor | Issue |
 |---|---|---|---|---|---|
 | `adr-d-receipt-skills`: Amend the promotion-to-host-a-wrap decision to admit receipt skills, with the test that keeps them honest | `marketplace` | done | P1 | owner-only | none |
-| `ocean-sweep`: A sweep over the sea level budget's declared parameters, the pattern-setter for receipt skills | `ocean-science` | active | P1 | needs-context | [#64](https://github.com/open-science-pillars/ocean-science/issues/64) |
+| `ocean-sweep`: A sweep over the sea level budget's declared parameters, the pattern-setter for receipt skills | `ocean-science` | done | P1 | needs-context | [#64](https://github.com/open-science-pillars/ocean-science/issues/64) |
 | `landice-receipt-skills`: Sweep, figures and methods over the nsidc closures, as receipt skills in land-ice | `land-ice` | proposed | P1 | needs-context | [#7](https://github.com/open-science-pillars/land-ice/issues/7) |
 | `atmos-receipt-skills`: Sweep, figures and methods over the asdc computations, as receipt skills in atmospheric-physics | `atmospheric-physics` | proposed | P1 | needs-context | [#7](https://github.com/open-science-pillars/atmospheric-physics/issues/7) |
 
@@ -830,6 +830,7 @@ Every wrapped computation can be swept over its declared parameters, drawn from 
 - [ ] The script refuses any aggregate across rows, refuses to mix receipts whose executor digest or data root manifest differ, and refuses a parameter the concept does not declare; each refusal is exercised by its selftest and by a golden the goldens workflow runs offline.
 - [ ] An eval case asks for the overall rate from a sweep and passes only when the agent refuses to average; a worked table from the committed root is in the pull request body.
 - Gate: Built first in ocean-science because it is not under the wrap-only bound and already carries the two sibling patterns, receipt-figures and cite-ecco; the sphere seeds copy its shape.
+- Evidence: `ocean-science PR #65: skills/sweep with scripts/sweep.py, stdlib only, reaching the sea level budget executor, attester and concept at the installed bundle's path as the wrapping skill does; the declared parameter set is read from the concept's frontmatter rather than kept as a list of its own. Five refusals exit 4 with a reason code and leave no partial table: aggregate-across-rows, parameter-not-declared, parameter-not-stated, mixed-method (differing executor digests) and mixed-input (differing data root manifests or fixture seeds). An executor refusal is a row carrying its reason code; a receipt the attester did not pass is a failed row carrying the attester's line and no number, and the script exits nonzero`, `The coordinator reproduced the worked table on the committed root to the digit, 17 windows of 60 months, 13 computed, 4 refused at the GRACE to GRACE-FO gap without a bridge citation, 0 not attested, the 2013-01:2017-12 row matching the pull request including its run identifier; ran the selftest and the golden offline; and read build_row, which runs the attester first and returns a row with empty cells on anything but PASS, so no path exists by which a number reaches a table before the attester passes. The only sum in the script counts rows for the summary line`, `The seed caught an order-dependent bug in its own selftest on the runner (a glob that also matched the attestation beside each receipt, collapsing the mixed-input comparison) and fixed it by reading receipts from the manifest, which is where a reader follows a cell back to a receipt`, `agent-evals PR #35 and evals PR #44: the rejection case sweep-aggregate-refusal asks for the overall trend across a sweep of windows and passes only when the agent reports the table, refuses to average it citing the concept by bundle path, and names a single window's receipt the reader may quote; registered under ocean-science with Bash allowed because the skill runs a script`, `One thing recorded for the next release of the executor rather than for this skill: the sea level budget receipt carries its headline trend fields rounded to four decimals beside full-precision intervals, so a sweep row mixes the two. The sweep is faithful to the receipt; the wart belongs to the receipt layout`
 
 **`landice-receipt-skills`**
 
