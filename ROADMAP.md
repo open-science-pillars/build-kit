@@ -49,9 +49,7 @@
 
 Proposed, every dependency done, in priority order.
 
-- P1 `atmos-receipt-skills`: Sweep, figures and methods over the asdc computations, as receipt skills in atmospheric-physics (`atmospheric-physics`): gate: Waits on the amendment that admits receipt skills to a wrap-only capability and on the ocean-science sweep that sets the shape.
 - P1 `hydro-investigation-tutorial`: Write the hydrology investigation tutorial and run it with a non-author reader (`tutorials`)
-- P1 `landice-receipt-skills`: Sweep, figures and methods over the nsidc closures, as receipt skills in land-ice (`land-ice`): gate: Waits on the amendment that admits receipt skills to a wrap-only capability and on the ocean-science sweep that sets the shape.
 - P1 `provider-confirmed-voicing`: Voice the provider-confirmed tier when citing a concept (`core`): gate: Lands in the release after 0.5.1; a release candidate never edits a skill.
 - P2 `hydro-coastal-water`: Coastal composites where hydrology meets ocean science (`ocean-science`)
 - P2 `r6-compat-probes`: Add non-blocking compatibility probes for Gemini CLI and Goose (`build-kit`)
@@ -73,10 +71,10 @@ Proposed, waiting on a dependency, in priority order.
 - P1 `r3-dependency-reference`: Validate dependency realization on ocean-science across runtimes (`ocean-science`)
 - P1 `tutorial-nonauthor-validation`: Complete non-author Tutorial 2 validation (`tutorials`)
 
-### Done (46)
+### Done (48)
 
 <details>
-<summary>46 done deliverables</summary>
+<summary>48 done deliverables</summary>
 
 - `hydro-usgs-waterdata-migration`: Migrate the USGS connector to the Water Data APIs and release it
 - `hydro-basin-unit`: Add basin delineation as the unit of analysis
@@ -112,6 +110,8 @@ Proposed, waiting on a dependency, in priority order.
 - `landice-promotion`: Promote land-ice out of planned as a wrap-only release
 - `adr-d-receipt-skills`: Amend the promotion-to-host-a-wrap decision to admit receipt skills, with the test that keeps them honest
 - `ocean-sweep`: A sweep over the sea level budget's declared parameters, the pattern-setter for receipt skills
+- `landice-receipt-skills`: Sweep, figures and methods over the nsidc closures, as receipt skills in land-ice
+- `atmos-receipt-skills`: Sweep, figures and methods over the asdc computations, as receipt skills in atmospheric-physics
 - `atmos-syn1deg-knowledge`: The synoptic radiation product and the surface flux caveat as concepts
 - `atmos-cloud-radiative-effect`: Cloud radiative effect at the top of the atmosphere, as an attested computation
 - `atmos-physics-promotion`: Promote atmospheric-physics out of planned as a wrap-only release
@@ -811,8 +811,8 @@ Every wrapped computation can be swept over its declared parameters, drawn from 
 |---|---|---|---|---|---|
 | `adr-d-receipt-skills`: Amend the promotion-to-host-a-wrap decision to admit receipt skills, with the test that keeps them honest | `marketplace` | done | P1 | owner-only | none |
 | `ocean-sweep`: A sweep over the sea level budget's declared parameters, the pattern-setter for receipt skills | `ocean-science` | done | P1 | needs-context | [#64](https://github.com/open-science-pillars/ocean-science/issues/64) |
-| `landice-receipt-skills`: Sweep, figures and methods over the nsidc closures, as receipt skills in land-ice | `land-ice` | proposed | P1 | needs-context | [#7](https://github.com/open-science-pillars/land-ice/issues/7) |
-| `atmos-receipt-skills`: Sweep, figures and methods over the asdc computations, as receipt skills in atmospheric-physics | `atmospheric-physics` | proposed | P1 | needs-context | [#7](https://github.com/open-science-pillars/atmospheric-physics/issues/7) |
+| `landice-receipt-skills`: Sweep, figures and methods over the nsidc closures, as receipt skills in land-ice | `land-ice` | done | P1 | needs-context | [#7](https://github.com/open-science-pillars/land-ice/issues/7) |
+| `atmos-receipt-skills`: Sweep, figures and methods over the asdc computations, as receipt skills in atmospheric-physics | `atmospheric-physics` | done | P1 | needs-context | [#7](https://github.com/open-science-pillars/atmospheric-physics/issues/7) |
 
 #### Acceptance details
 
@@ -840,6 +840,7 @@ Every wrapped computation can be swept over its declared parameters, drawn from 
 - [ ] One golden exercising all three offline; an eval case that passes only on a refusal to average a sweep; the strict placement gate clean.
 - Depends on: `adr-d-receipt-skills`, `ocean-sweep`
 - Gate: Waits on the amendment that admits receipt skills to a wrap-only capability and on the ocean-science sweep that sets the shape.
+- Evidence: `land-ice PR #8: skills/sweep, skills/receipt-figures and skills/methods, each a script in the skill's scripts directory reaching both nsidc executors and attesters at the installed bundle's path as the wrapping skills do; the sweep keeps the ocean-science command line, the three outputs and the five refusal codes (aggregate-across-rows, parameter-not-declared, parameter-not-stated, mixed-method, mixed-input, each exit 4 and no partial table), reads the declared parameter set from the concept's frontmatter, and passes the data root to the attester so term-file digests are verified against the tree. The golden verification/receipt_skills.py exercises all three offline against committed expectations and the goldens workflow names it`, `The coordinator's review reproduced the worked table on the committed root to the digit, six windows of the closure concept's own Boundaries section, the five hand-run windows the concept quotes in prose reproduced as rows (2003-01:2009-12 closes at -82.378 against 200.726, 2010-01:2016-12 does not at +109.281 against 94.500); traced two cells through the manifest's column map to their receipts; ran the three selftests and the golden; forced the aggregate and saw exit 4 with no out-dir created; edited one receipt digit and saw the attester fail it, the sweep keep it as a row with empty cells and no run id, and the figure and methods scripts refuse it; swept an undeclared parameter and saw parameter-not-declared. build_row runs the attester before any field is read and returns on anything but PASS; the only sums in the script count rows`, `The figures skill departs from the pattern where the receipt does: a closure receipt carries no per-array hash block, so the renderer hashes the receipt bytes on both sides of the attestation, requires the input digests, and requires every drawn series to be one the receipt names with its stated count and derivation rule (altimetric mass from density, volume and firn; each annual-lag difference from the term series; the residual from the two differences), refusing array-hash-mismatch on any of them. The methods paragraph is 23 sentences each bound to receipt paths, the reference list the concept's 19 sources verbatim, and a fact from outside is refused before a file is written`, `agent-evals PR #36 and the evals manifest: the rejection case sweep-window-verdict asks for Greenland's mass balance from a sweep of windows and passes only on the table, a refusal citing the concept by bundle path, the sentence that the verdict belongs to a window, and one named receipt to quote; registered under land-ice with Bash allowed`, `Noted for later and not fixed here: the sweep's precision note says the rate columns are rounded to four decimals, which is true of the term rates and not of the residual rate; the renderer parses the receipt before the pre-attestation hash is taken, so the parsed dict is not provably the hashed bytes; executor-failed is a sixth refusal code inherited from ocean-science and absent from both docstrings`
 
 **`atmos-receipt-skills`**
 
@@ -849,6 +850,7 @@ Every wrapped computation can be swept over its declared parameters, drawn from 
 - [ ] One golden exercising all three offline; an eval case that passes only on a refusal to average across conventions; the strict placement gate clean.
 - Depends on: `adr-d-receipt-skills`, `ocean-sweep`
 - Gate: Waits on the amendment that admits receipt skills to a wrap-only capability and on the ocean-science sweep that sets the shape.
+- Evidence: `atmospheric-physics PR #8: skills/sweep, skills/receipt-figures and skills/methods over the two asdc computations, each a script in the skill's scripts directory reaching the executor and attester at the installed bundle's path as the wrapping skills do; the sweep keeps the ocean-science command line, outputs and five refusal codes, reads the declared parameters from the concept frontmatter, passes the data root to the attester, and its aggregate refusal over a sweep of the two clear-sky conventions cites the convention concept and the clear-sky gotcha by bundle path. The golden verification/receipt_skills.py exercises all three offline, asserts the Antarctic sign reversal against live rows, and the goldens workflow names it`, `The coordinator's review reproduced the eight-region table on the committed root exactly, the sign reversal of the convention difference between the globe and the polar bands read from the receipts themselves; the energy-budget sweep gave one computed window and three refused rows with empty cells, because one Argo receipt exists; every cell of both sweeps equalled its manifest column's receipt field and contrast_cre_net_W_m2 is the same receipt's convention_contrast block; the convention aggregate refused with exit 4 and no out-dir; a tampered receipt was failed by the attester and kept as an empty row; mixed-input and mixed-method exercised on real receipts; the renderer's digest round trip accepted its own digest and refused a wrong one`, `One blocking finding, fixed before merge: the contrast figure computed a difference between the two conventions' terms and drew it three times and printed it once, a number no receipt carries. The seed removed the computation and the annotations, corrected the docstring and the skill text, and in the same push made the golden's sweep check open each row's receipt and compare every cell against its named field, so a re-measured expectations file alone cannot pass it`, `Also recorded by the seed: a window mean is not bit-reproducible across CPython 3.11 and 3.12 (compensated summation), so the expectations file pins no bit-exact digest of a derived float; cells compare at 1e-9 relative against the expectations and exactly against the receipt`, `agent-evals PR #37 and the evals manifest: the gotcha-avoidance case sweep-refuses-to-average-clear-sky-conventions gives the agent permission to average the two conventions and passes only on both rows, a refusal, the gotcha cited by bundle path and the reason in substance; registered under atmospheric-physics with Bash allowed`
 
 ### Open the Atmosphere through atmospheric-physics and the energy budget
 
