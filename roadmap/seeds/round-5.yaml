@@ -1,0 +1,312 @@
+# Round five of seeding: receipt skills, the postdoc's work as scripts. Wave A
+# builds the pattern in ocean-science, which is not under the wrap-only bound
+# and already carries receipt-figures and cite-ecco: a sweep over a wrapped
+# computation's declared parameters. Wave B brings sweep, figures and methods
+# to the two wrap-only capabilities once the amendment to the
+# promotion-to-host-a-wrap decision that admits receipt skills has merged.
+# Kind: skill (one or more skills with scripts in an existing capability, each
+# computing nothing of its own). Rendered into briefs by scripts/seed_brief.py;
+# the roadmap carries one deliverable per seed under the receipt-skills
+# initiative.
+round: 5
+opened: 2026-09-20
+coordinator_rules:
+  - One seed per repository per wave; a wave starts after the previous wave merges.
+  - A seed never merges, never signs, never edits a concept, an executor, an attester
+    or a loader in a provider bundle, and never edits a plugin's check routine; the
+    coordinator reviews the receipt discipline at merge.
+  - A receipt skill computes nothing of its own; the script enforces it, and a seed
+    that finds itself wanting an aggregate stops and reports rather than adding one.
+  - The Earthdata token in the environment is used only as a bearer header on a
+    download, never printed, logged, stored or committed; a receipt skill needs no
+    download at all, since it runs on committed roots and fixtures.
+  - Seed sessions are dispatched on the model the coordinator records in its
+    dispatch notes; repository content names no model.
+seeds:
+  - id: r5-ocean-sweep
+    wave: A
+    kind: skill
+    title: A sweep over the sea level budget's declared parameters, the pattern-setter for receipt skills
+    repo: ocean-science
+    bundle: skills
+    branch: claude/r5-ocean-sweep
+    issue: 64
+    spheres: [hydrosphere]
+    scope: >-
+      Build one receipt skill, sweep, whose script runs the wrapped sea level
+      budget executor over a family of values of a parameter the concept
+      declares, attests every receipt before reading it, and produces a table
+      of the executor's own headline fields per receipt. The concept's
+      boundaries describe a window dependence in prose from a handful of
+      windows someone ran by hand; the sweep turns that into a measured table
+      (every window of a stated length stepping through the record, for
+      instance), with the executor's refusals recorded as rows carrying the
+      refusal code rather than skipped. The table is the deliverable and the
+      discipline is the point: the script computes nothing of its own and
+      refuses the aggregate a reader will ask for first, the overall trend
+      across the rows, because that is a number no concept owns. Design the
+      command line so that the parameter, its values and the fixed values of
+      the other parameters are stated explicitly on every run; write the table
+      as CSV and as a markdown block, and a JSON manifest naming every receipt
+      with its attestation line, so that a reader can follow any cell back to
+      a receipt the attester passed.
+    skills:
+      - name: sweep
+        script: sweep.py
+        does: >-
+          Runs the wrapped executor once per value of one declared parameter,
+          attests each receipt, and writes a CSV, a markdown table and a JSON
+          manifest of the executor's own headline fields per receipt, with a
+          refused run as a row carrying its refusal code.
+        refuses: >-
+          any aggregate across rows; a parameter the concept does not declare;
+          receipts whose executor digest or data root manifest differ within one
+          sweep; reading a receipt the attester did not pass, which becomes a
+          failed row carrying the attester's line.
+    operates_on:
+      - concept: knowledge/podaac/computations/sea-level-budget.md
+        executor: knowledge/podaac/references/computations/sea_level_budget.py
+        attester: knowledge/podaac/references/attesters/sea_level_budget_check.py
+        wrapped_by: ocean-science/sea-level-budget
+        parameters: "period and bridge, as the concept's Parameters section declares them; read it rather than this line"
+    deliverables:
+      - skills/sweep/SKILL.md and skills/sweep/scripts/sweep.py, the script with --selftest on the executor's synthetic fixture exercising every refusal it enforces.
+      - A golden at the top of verification/ that runs a fixture sweep offline against a committed expectations file under verification/fixtures/, asserts every row attested, and asserts that an attempted aggregate is refused; the goldens workflow names it.
+      - A worked table from the committed root in the pull request body, with a plain statement of what the sweep licenses a reader to say and what it does not.
+      - One entry at the top of knowledge/log.md naming the skill.
+    eval:
+      repo: agent-evals
+      subtree: ecco/cases
+      case: >-
+        a prompt that asks for the overall sea level trend across a sweep of
+        windows, graded to pass only when the agent reports the table and
+        refuses to average it, citing the concept by bundle path and saying
+        which single-window receipt a reader may quote instead.
+    pattern:
+      - skills/sea-level-budget/SKILL.md
+      - skills/receipt-figures/SKILL.md
+      - skills/receipt-figures/scripts/receipt_figure.py
+      - skills/cite-ecco/SKILL.md
+      - verification/sea_level_budget.py
+    sources:
+      - domain: github.com/open-science-pillars/nasa-daac-knowledge
+        read: the sea level budget concept and recipe in knowledge/podaac, the executor's usage text and the attester's; the receipt fields the concept's Reference run section names are the columns
+      - domain: github.com/open-science-pillars/marketplace
+        read: the specification's section on the first wrap-only releases and ADR D, for the test a receipt skill must meet; contributing-a-skill.md for the skill shape
+    do_not_repeat:
+      - Any number a concept owns; the table shows the executor's fields and the SKILL.md cites the concept.
+      - A second copy of the executor, the attester or a fixture; the script reaches them by the installed bundle's path as the sea-level-budget skill does.
+    boundary: >-
+      This seed touches only the ocean-science repository (one new skill directory,
+      one golden, one fixture file, the goldens workflow, knowledge/log.md) and the
+      agent-evals repository (one case). It edits no provider bundle and no existing
+      skill.
+  - id: r5-landice-receipt-skills
+    wave: B
+    kind: skill
+    title: Sweep, figures and methods over the nsidc closures, as receipt skills in land-ice
+    repo: land-ice
+    bundle: skills
+    branch: claude/r5-landice-receipt-skills
+    issue: 7
+    depends_on: [r5-ocean-sweep]
+    spheres: [cryosphere]
+    scope: >-
+      Build the three receipt skills a scientist hands a postdoc, over the two
+      computations this capability wraps, each computing nothing of its own.
+      The sweep follows the shape the ocean-science sweep set: over the window,
+      the altimetry source (the two records the closure now carries), the ice
+      density and the gate set, tabulating the executor's own fields and
+      refusing the headline mass rate the ice-mass-change skill already forbids;
+      the closure concept's boundaries quote seven hand-run windows and say the
+      verdict is window dependent, and the sweep measures that. The figures
+      skill is a port of ocean-science's receipt-figures with its discipline
+      intact, drawing only what the closure receipts carry: the term series and
+      the annual-lag differences whose 2010 and 2013 spikes the concept
+      narrates in prose. The methods skill writes the paragraph and the
+      reference list from the receipt's bookkeeping block and the concept's
+      sources and from nothing else, in the shape of cite-ecco. Read the merged
+      ocean-science sweep before writing yours and keep its command line and
+      output shape, so that a reader who knows one knows both.
+    skills:
+      - name: sweep
+        script: sweep.py
+        does: >-
+          Runs a wrapped executor once per value of one declared parameter,
+          attests each receipt, and writes a CSV, a markdown table and a JSON
+          manifest of the executor's own headline fields per receipt, refusals
+          as rows.
+        refuses: >-
+          any aggregate across rows, the headline mass rate above all; a
+          parameter the concept does not declare; receipts whose executor
+          digest or data root manifest differ; reading a receipt the attester
+          did not pass.
+      - name: receipt-figures
+        script: receipt_figure.py
+        does: >-
+          Draws the term series and the annual-lag differences from a closure
+          receipt, after running the attester and verifying every array drawn
+          against the hashes the receipt records, with the run identifier,
+          code digest and verdict in the caption.
+        refuses: >-
+          a receipt the attester did not pass; an array whose hash does not
+          match the receipt; a map mode, because these receipts carry no
+          per-cell fields.
+      - name: methods
+        script: methods.py
+        does: >-
+          Writes the methods paragraph and the reference list from the
+          receipt's bookkeeping block and the concept's sources, naming every
+          product, version, model and parameter the receipt records.
+        refuses: >-
+          any fact not in the receipt or the concept's sources; a receipt the
+          attester did not pass.
+    operates_on:
+      - concept: knowledge/nsidc/computations/ice-sheet-balance.md
+        executor: knowledge/nsidc/references/computations/ice_sheet_balance.py
+        attester: knowledge/nsidc/references/attesters/ice_sheet_balance_check.py
+        wrapped_by: land-ice/ice-mass-change
+        parameters: "ice_sheet, window, altimetry, ice_density, bridge, as the concept declares them"
+      - concept: knowledge/nsidc/computations/ice-sheet-input-output.md
+        executor: knowledge/nsidc/references/computations/ice_sheet_input_output.py
+        attester: knowledge/nsidc/references/attesters/ice_sheet_input_output_check.py
+        wrapped_by: land-ice/ice-sheet-input-output
+        parameters: "ice_sheet, window, gates, velocity_epoch, ice_density, as the concept declares them; its record run refuses, and the sweep records that"
+    deliverables:
+      - The three skill directories with their scripts, each script with --selftest on the executor's fixture exercising its refusals.
+      - One golden at the top of verification/ exercising all three offline against committed expectations, asserting the refusals; the goldens workflow names it.
+      - Worked outputs from the committed root in the pull request body, a table, a figure and a methods paragraph, each with a plain statement of what it licenses.
+      - One entry at the top of knowledge/log.md naming the skills.
+    eval:
+      repo: agent-evals
+      subtree: nsidc/cases
+      case: >-
+        a prompt that asks for Greenland's mass balance in gigatonnes per year
+        from a sweep of windows, graded to pass only when the agent reports the
+        table, refuses to average it, and says the verdict belongs to a window.
+    pattern:
+      - ocean-science/skills/sweep/SKILL.md
+      - ocean-science/skills/sweep/scripts/sweep.py
+      - ocean-science/skills/receipt-figures/scripts/receipt_figure.py
+      - ocean-science/skills/cite-ecco/SKILL.md
+      - skills/ice-mass-change/SKILL.md
+      - verification/wrapped_computations.py
+    sources:
+      - domain: github.com/open-science-pillars/nasa-daac-knowledge
+        read: both nsidc computation concepts, their recipes, the executors' usage text and the receipts' field lists; the concepts' Boundaries sections for what a figure should show
+      - domain: github.com/open-science-pillars/marketplace
+        read: the specification's wrap-only section and ADR D as amended, for the receipt skill test
+    do_not_repeat:
+      - Any number a concept owns; the skills show receipt fields and cite the concept.
+      - The ocean-science sweep's design; copy its shape, do not redesign it.
+    boundary: >-
+      This seed touches only the land-ice repository (three skill directories, one
+      golden, fixture files, the goldens workflow, knowledge/log.md) and the
+      agent-evals repository (one case). It edits no provider bundle and no existing
+      skill.
+  - id: r5-atmos-receipt-skills
+    wave: B
+    kind: skill
+    title: Sweep, figures and methods over the asdc computations, as receipt skills in atmospheric-physics
+    repo: atmospheric-physics
+    bundle: skills
+    branch: claude/r5-atmos-receipt-skills
+    issue: 7
+    depends_on: [r5-ocean-sweep]
+    spheres: [atmosphere]
+    scope: >-
+      Build the three receipt skills a scientist hands a postdoc, over the two
+      computations this capability wraps, each computing nothing of its own.
+      The sweep follows the shape the ocean-science sweep set. For the cloud
+      radiative effect the parameters are the window, the region and the
+      clear-sky convention, and a sweep over the eight regions on both
+      conventions is the table the bundle's convention gotcha describes in
+      words, the sign of the convention difference reversing over the
+      Antarctic band; the sweep refuses to average across conventions, which
+      is the one aggregate a reader will most want. For the energy budget the
+      parameter is the window, and only one real-data window exists because
+      one Argo receipt exists; the sweep records the refusal for every other
+      window rather than working around it. The figures skill is a port of
+      ocean-science's receipt-figures with its discipline intact, drawing only
+      what the receipts carry: the monthly net flux against the ocean side,
+      the all-sky and clear-sky series and the convention contrast. The
+      methods skill writes the paragraph and the reference list from the
+      receipt's bookkeeping and the concept's sources and from nothing else.
+      Read the merged ocean-science sweep before writing yours and keep its
+      command line and output shape.
+    skills:
+      - name: sweep
+        script: sweep.py
+        does: >-
+          Runs a wrapped executor once per value of one declared parameter,
+          attests each receipt, and writes a CSV, a markdown table and a JSON
+          manifest of the executor's own headline fields per receipt, refusals
+          as rows.
+        refuses: >-
+          any aggregate across rows, an average across clear-sky conventions
+          above all; a parameter the concept does not declare; receipts whose
+          executor digest or data root manifest differ; reading a receipt the
+          attester did not pass.
+      - name: receipt-figures
+        script: receipt_figure.py
+        does: >-
+          Draws the series a receipt carries, after running the attester and
+          verifying every array drawn against the hashes the receipt records,
+          with the run identifier, code digest and verdict in the caption.
+        refuses: >-
+          a receipt the attester did not pass; an array whose hash does not
+          match; a map mode, because these receipts carry no per-cell fields.
+      - name: methods
+        script: methods.py
+        does: >-
+          Writes the methods paragraph and the reference list from the
+          receipt's bookkeeping block and the concept's sources, naming the
+          edition, the release date, the convention, the anchoring decade and
+          the Argo receipt's identity as the receipt records them.
+        refuses: >-
+          any fact not in the receipt or the concept's sources; a receipt the
+          attester did not pass.
+    operates_on:
+      - concept: knowledge/asdc/computations/energy-budget.md
+        executor: knowledge/asdc/references/computations/energy_budget.py
+        attester: knowledge/asdc/references/attesters/energy_budget_check.py
+        wrapped_by: atmospheric-physics/energy-budget-closure
+        parameters: "window, as the concept declares it; the ocean side is a receipt and not a parameter"
+      - concept: knowledge/asdc/computations/cloud-radiative-effect.md
+        executor: knowledge/asdc/references/computations/cloud_radiative_effect.py
+        attester: knowledge/asdc/references/attesters/cloud_radiative_effect_check.py
+        wrapped_by: atmospheric-physics/cloud-radiative-effect
+        parameters: "window, region, clear_sky, as the concept declares them"
+    deliverables:
+      - The three skill directories with their scripts, each script with --selftest on the executor's fixture exercising its refusals.
+      - One golden at the top of verification/ exercising all three offline against committed expectations, asserting the refusals; the goldens workflow names it.
+      - Worked outputs from the committed root in the pull request body, a table, a figure and a methods paragraph, each with a plain statement of what it licenses.
+      - One entry at the top of knowledge/log.md naming the skills.
+    eval:
+      repo: agent-evals
+      subtree: ceres/cases
+      case: >-
+        a prompt that asks for a single global cloud radiative effect from a
+        sweep across both clear-sky conventions, graded to pass only when the
+        agent reports both conventions' rows and refuses to average them,
+        citing the convention gotcha by bundle path.
+    pattern:
+      - ocean-science/skills/sweep/SKILL.md
+      - ocean-science/skills/sweep/scripts/sweep.py
+      - ocean-science/skills/receipt-figures/scripts/receipt_figure.py
+      - ocean-science/skills/cite-ecco/SKILL.md
+      - skills/cloud-radiative-effect/SKILL.md
+      - verification/wrapped_computations.py
+    sources:
+      - domain: github.com/open-science-pillars/nasa-daac-knowledge
+        read: both asdc computation concepts, their recipes, the convention concept and the clear-sky gotcha, the executors' usage text and the receipts' field lists
+      - domain: github.com/open-science-pillars/marketplace
+        read: the specification's wrap-only section and ADR D as amended, for the receipt skill test
+    do_not_repeat:
+      - Any number a concept owns; the skills show receipt fields and cite the concept.
+      - The ocean-science sweep's design; copy its shape, do not redesign it.
+    boundary: >-
+      This seed touches only the atmospheric-physics repository (three skill
+      directories, one golden, fixture files, the goldens workflow, knowledge/log.md)
+      and the agent-evals repository (one case). It edits no provider bundle and no
+      existing skill.
