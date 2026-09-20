@@ -64,6 +64,12 @@ decisions:
     decided: 2026-09-13
     rationale: "The proposal-state axis, the seeded proposal issues, the decision labels and the reconcile step were built for a federation of maintainer teams the organization does not yet have. roadmap.yaml stays the single source of truth with one status per deliverable (proposed, active, blocked, done, declined); an active deliverable has an issue in its repository, opened when work starts and closed by the pull request that finishes it; the tool never writes issues. Revisit trigger: adopt GitHub Projects as a rendered view when a second maintainer team declines to edit the YAML or a partner asks for a board; render it from the YAML, one way."
 
+  - id: a-computation-is-a-skill
+    title: A computation is a skill (ADR E)
+    status: proposed
+    decided: 2026-09-20
+    rationale: "Every attested computation's code, data root and concept move out of the provider bundle into the capability that runs it; a knowledge bundle holds knowledge and evidence and no runnable code; the plane vocabulary, the placement gate, the wrapping rule and the wrap-only release are retired. Record: marketplace docs/decisions/adr-e-a-computation-is-a-skill.md; accepted when it merges."
+
   - id: first-new-sphere-land-ice
     title: Land-ice is the first new sphere, entered through the sea level budget
     status: accepted
@@ -1564,6 +1570,156 @@ initiatives:
           readiness: needs-context
           champion: PaulMRamirez
           prerequisites: [the ocean-science sweep, the decision amendment]
+        labels: [roadmap, priority:P1]
+  - id: computation-is-a-skill
+    title: A computation is a skill, and a knowledge bundle holds knowledge
+    outcome: Every attested computation lives in the capability that runs it, as a
+      concept beside a skill whose scripts are the executor and the attester and whose
+      golden proves them; the provider bundle holds concepts and evidence and no runnable
+      code; the specification says where files go in one sentence and no gate needs
+      seven codes to enforce it.
+    status: proposed
+    priority: P1
+    depends_on: []
+    gate: "The decision owner's record, ADR E. Re-homing a signed computation computes no new number, so the domain-expansion gate is untouched; a reference value that differs after a move is a finding, never an update."
+    deliverables:
+      - id: adr-e-a-computation-is-a-skill
+        title: The decision record, merged by the decision owner
+        repo: marketplace
+        status: proposed
+        priority: P1
+        depends_on: []
+        gate: "The decision owner's record; drafted by the coordinator with the measured inventory."
+        acceptance:
+          - "ADR E merged; ADR C and ADR D status lines say they are superseded by it and their text stands as history."
+        evidence: []
+        contributor:
+          readiness: owner-only
+          champion: PaulMRamirez
+          prerequisites: [the decision owner's merge]
+        labels: [roadmap, priority:P1]
+      - id: r6-wave-0-specification-and-tools
+        title: "Specification 0.7.0 and the tools: planes retired, placement gate replaced, seed kind added, templates reshaped"
+        repo: marketplace
+        status: proposed
+        priority: P1
+        depends_on: [adr-e-a-computation-is-a-skill]
+        gate: "Lands before any migration seed is dispatched, so every seed builds to the rule as written."
+        acceptance:
+          - "Specification 0.7.0 with sections 0.6 and 5.9 restated without the planes, sections 11 and 12 retired, and one new section in their place; the model document, the knowledge-versus-skills guide, both contributor guides, the package authoring guide and the testing guide carry no plane vocabulary; the pre-registration carries the dated entry."
+          - "build-kit: osp.py validate reports an executable under knowledge/ as an error and a computation whose code or attester does not resolve in-package or is named by no golden; placement-check is retired from osp.py, the gate template and every repository gate; seed_brief.py has the migration kind and no wrapping or placement text; reattest.py is osp.py reattest."
+          - "plugin-template ships one skill whose scripts hold an executor and an attester with the concept beside them; knowledge-template ships no code."
+        evidence: []
+        contributor:
+          readiness: owner-only
+          champion: PaulMRamirez
+          prerequisites: [the decision]
+        labels: [roadmap, priority:P1]
+      - id: r6-ocean-science-computations
+        title: ocean-science carries the podaac and Argo computations as skills
+        repo: ocean-science
+        status: proposed
+        priority: P1
+        depends_on: [r6-wave-0-specification-and-tools]
+        gate: "Reference runs reproduce at the new paths to the digit; the seed changes no number."
+        acceptance:
+          - "Twenty concepts under knowledge/computations with in-package code and attester paths; 39 scripts in the scripts directories of the skills that ran them; the roots and record files under knowledge/references/retrieval; every chain a golden; no SKILL.md names a bundle path for code; the receipt skills resolve through the plugin root."
+          - "The coordinator reproduced every reference run, merged, re-signed on the maintainer's behalf, and cut a release."
+        evidence: []
+        contributor:
+          readiness: needs-context
+          champion: PaulMRamirez
+          prerequisites: [the decision]
+        labels: [roadmap, priority:P1]
+      - id: r6-land-ice-computations
+        title: land-ice carries the nsidc computations as skills
+        repo: land-ice
+        status: proposed
+        priority: P1
+        depends_on: [r6-wave-0-specification-and-tools]
+        gate: "As for ocean-science."
+        acceptance:
+          - "Two concepts, fourteen scripts and two roots in the capability; the seven hand-run windows and the altimetry pair reproduce; the input-output record refusal is a golden; released and re-signed."
+        evidence: []
+        contributor:
+          readiness: needs-context
+          champion: PaulMRamirez
+          prerequisites: [the decision]
+        labels: [roadmap, priority:P1]
+      - id: r6-atmospheric-physics-computations
+        title: atmospheric-physics carries the asdc computations as skills
+        repo: atmospheric-physics
+        status: proposed
+        priority: P1
+        depends_on: [r6-wave-0-specification-and-tools]
+        gate: "As for ocean-science."
+        acceptance:
+          - "Two concepts, eight scripts and two roots in the capability; the eight regions on both conventions and the anchored window reproduce; released and re-signed."
+        evidence: []
+        contributor:
+          readiness: needs-context
+          champion: PaulMRamirez
+          prerequisites: [the decision]
+        labels: [roadmap, priority:P1]
+      - id: r6-hydrology-computations
+        title: hydrology's basin water balance code lives in its skill
+        repo: hydrology
+        status: proposed
+        priority: P1
+        depends_on: [r6-wave-0-specification-and-tools]
+        gate: "As for ocean-science."
+        acceptance:
+          - "No executable under knowledge/ or under verification/ that a skill runs; the goldens workflow runs the tree wholesale; released and re-signed."
+        evidence: []
+        contributor:
+          readiness: needs-context
+          champion: PaulMRamirez
+          prerequisites: [the decision]
+        labels: [roadmap, priority:P1]
+      - id: r6-core-computation
+        title: core's reference computation lives in basic-statistics
+        repo: core
+        status: proposed
+        priority: P1
+        depends_on: [r6-wave-0-specification-and-tools]
+        gate: "As for ocean-science."
+        acceptance:
+          - "The executor and attester under skills/basic-statistics/scripts; the trend golden unchanged in what it asserts; released and re-signed."
+        evidence: []
+        contributor:
+          readiness: needs-context
+          champion: PaulMRamirez
+          prerequisites: [the decision]
+        labels: [roadmap, priority:P1]
+      - id: r6-bundle-after-the-move
+        title: The provider bundle holds knowledge and evidence only
+        repo: nasa-daac-knowledge
+        status: proposed
+        priority: P1
+        depends_on: [r6-ocean-science-computations, r6-land-ice-computations, r6-atmospheric-physics-computations]
+        gate: "After every capability has released, so no capability on main points at a path that does not exist."
+        acceptance:
+          - "No .py under knowledge/ in any bundle; every concept that cited a moved computation cites its new home; run_checks.sh keeps the knowledge checks; reference_runs.yaml, reattest.py and receipt_identity.py gone; a calendar release cut and re-signed."
+        evidence: []
+        contributor:
+          readiness: needs-context
+          champion: PaulMRamirez
+          prerequisites: [the decision]
+        labels: [roadmap, priority:P1]
+      - id: r6-reconciliation
+        title: Everything that names a path follows the move
+        repo: build-kit
+        status: proposed
+        priority: P1
+        depends_on: [r6-bundle-after-the-move, r6-hydrology-computations, r6-core-computation]
+        gate: "The coordinator's close-out."
+        acceptance:
+          - "agent-evals concept_basis paths, evals manifests, marketplace catalog entries and qualification records for the new releases, roadmap evidence, sessions archived and triggers cleared."
+        evidence: []
+        contributor:
+          readiness: owner-only
+          champion: PaulMRamirez
+          prerequisites: [every migration merged]
         labels: [roadmap, priority:P1]
   - id: atmosphere-atmospheric-physics
     title: Open the Atmosphere through atmospheric-physics and the energy budget

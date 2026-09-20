@@ -1,0 +1,224 @@
+# Round six of seeding: a computation is a skill. The decision (ADR E in
+# marketplace) moves every attested computation's code, data root and
+# concept out of the provider bundle into the capability that runs it,
+# retires the plane vocabulary, the placement gate, the wrapping rule and
+# the wrap-only release, and leaves the knowledge bundle holding knowledge
+# and evidence only. Wave 0 is the coordinator's (the decision, the
+# specification, the tools); wave A is one migration seed per capability,
+# in parallel; wave B is the bundle after every capability has released;
+# wave C is the coordinator's reconciliation of everything that names a
+# path. Kind: migration (a new kind the wave 0 tooling adds to
+# scripts/seed_brief.py). Nothing about any number changes: the executors,
+# the roots and the reference values are re-homed and re-run, not revised.
+round: 6
+opened: 2026-09-20
+depends_on_decision: a-computation-is-a-skill
+coordinator_rules:
+  - Wave 0 lands before any wave A seed is dispatched; wave B is dispatched only
+    after every wave A capability has merged and released; wave C follows wave B.
+  - A seed never merges and never signs. It moves code, roots and concepts, re-runs
+    every reference run at the new paths, regenerates receipts, updates each concept's
+    digests and leaves it draft with a note naming the run it reproduced; the
+    coordinator reproduces the run, merges, and re-signs on the maintainer's behalf.
+  - A seed changes no number. A reference value that differs after the move is a
+    finding to report, never a value to update; the seed stops on it.
+  - A wave A seed reads the provider bundle and never edits it; the bundle's copy of
+    every moved file stays in place until wave B deletes it, so a capability on main
+    never points at a path that does not exist.
+  - The Earthdata token in the environment is used only as a bearer header on a
+    download, never printed, logged, stored or committed; this round downloads
+    nothing, since every root is already committed.
+  - Seed sessions are dispatched on the model the coordinator records in its
+    dispatch notes; repository content names no model.
+waves:
+  - id: "0"
+    owner: coordinator
+    repos: [marketplace, build-kit, plugin-template, knowledge-template]
+    scope: >-
+      The decision record merged by the decision owner. Specification 0.7.0:
+      section 0.6 restated without the planes, section 5.9 renamed, sections 11
+      and 12 retired, one new section "A computation is a skill" with the one
+      sentence on where files go and the two validate findings. MODEL.md,
+      knowledge-vs-skills.md, contributing-a-skill.md, contributing-knowledge.md,
+      package-authoring-guide.md and testing.md rewritten without the plane
+      vocabulary; ADR A to D status lines amended, text kept as history; the
+      pre-registration's dated entry saying a re-homed computation computes no
+      new number. build-kit: osp.py validate gains the two findings (executable
+      under knowledge/ is an error; a computation concept's computation and
+      attester resolve in-package and a golden names each), placement-check is
+      retired from osp.py, the gate template and every repository gate; seed_brief.py
+      gains the migration kind and loses the wrapping and placement text;
+      reattest.py becomes osp.py reattest with reference runs read from the
+      capability's verification/reference_runs.yaml; the roadmap marks the ADR C
+      and ADR D deliverables superseded by this decision. plugin-template ships one
+      skill whose scripts hold an executor and an attester with the concept beside
+      them; knowledge-template ships no code.
+  - id: A
+    owner: seeds
+    scope: One migration seed per capability, in parallel, each reaching the bundle read only.
+  - id: B
+    owner: seed
+    scope: The provider bundle, after every wave A capability has released.
+  - id: C
+    owner: coordinator
+    scope: >-
+      agent-evals concept_basis paths, evals manifests, marketplace catalog entries
+      for the new releases, qualification records, roadmap evidence, session and
+      trigger cleanup.
+seeds:
+  - id: r6-ocean-science-computations
+    wave: A
+    kind: migration
+    title: Move the podaac and Argo computations into ocean-science as skills
+    repo: ocean-science
+    branch: claude/r6-ocean-science-computations
+    spheres: [hydrosphere]
+    moves:
+      concepts:
+        - knowledge/podaac/computations/ecco-amoc-26n.md
+        - knowledge/podaac/computations/ecco-flux-decomposition.md
+        - knowledge/podaac/computations/ecco-geostrophic-balance.md
+        - knowledge/podaac/computations/ecco-heat-budget.md
+        - knowledge/podaac/computations/ecco-mht-26n.md
+        - knowledge/podaac/computations/ecco-ocean-heat-content.md
+        - knowledge/podaac/computations/ecco-rapid-amoc-confrontation.md
+        - knowledge/podaac/computations/ecco-regional-heat-budget.md
+        - knowledge/podaac/computations/ecco-regional-salt-budget.md
+        - knowledge/podaac/computations/ecco-regional-sea-level.md
+        - knowledge/podaac/computations/ecco-regional-volume-budget.md
+        - knowledge/podaac/computations/ecco-salt-budget.md
+        - knowledge/podaac/computations/ecco-section-transport.md
+        - knowledge/podaac/computations/ecco-ssh-vs-altimetry.md
+        - knowledge/podaac/computations/ecco-steric-height.md
+        - knowledge/podaac/computations/ecco-thermal-wind-reconstruction.md
+        - knowledge/podaac/computations/ecco-trend-ci.md
+        - knowledge/podaac/computations/ecco-volume-budget.md
+        - knowledge/podaac/computations/ecco-wind-stress-curl.md
+        - knowledge/podaac/computations/sea-level-budget.md
+      code: knowledge/podaac/references/{computations,attesters,loaders,derivations}
+      roots: knowledge/podaac/references/retrieval (the sea-level-budget-root and every record, manifest, exhibit and fixture file)
+      evidence: knowledge/podaac/references/{masks,calibration} (data files, moved beside the roots)
+      local: knowledge/references/{computations,attesters,loaders} of ocean-science itself (the Argo computation), into skills/argo-ohc/scripts
+      chains: every run_checks.sh function and reference_runs.yaml entry that names a podaac or Argo executor, rewritten as goldens
+    receiving_skills: [ecco, ocean-budget, transport-analysis, sea-level-analysis, sea-level-budget, compare-obs, argo-ohc]
+    receipt_skills_to_repoint: [sweep, receipt-figures, cite-ecco]
+    scope: >-
+      The largest move. Twenty concepts, 39 scripts and every podaac record file
+      come into ocean-science; each executor and attester lands in the scripts
+      directory of the skill whose SKILL.md names it today, each concept under
+      knowledge/computations with its computation and attester paths rewritten
+      relative to the new home, each stamped root and record file under
+      knowledge/references/retrieval. Every reference run in reference_runs.yaml
+      that concerns these computations is re-run at the new paths, and its chain
+      in run_checks.sh becomes a golden under verification that the goldens
+      workflow runs. Every SKILL.md that reached the bundle by its installed path
+      now reaches ${CLAUDE_PLUGIN_ROOT}; the three receipt skills resolve the
+      executor and attester through the plugin root instead of the bundle root.
+      The concept digests change because the code's relative imports change; the
+      seed records the old and new digest of every file in the pull request body.
+    acceptance:
+      - Every moved concept validates under check_okf_v02 with paths that resolve in-package, and osp.py validate reports no executable under knowledge/ and every computation named by a golden.
+      - Every reference run reproduces at the new path to the digit against the values the concept states, with the receipt and attestation pasted for each; a difference is reported, not fixed.
+      - No SKILL.md in the capability names a nasa-daac-knowledge path for code; product concepts and gotchas are still cited by bundle path.
+      - The three receipt skills' selftests and goldens pass against the moved executors.
+      - The bundle is untouched; the pull request body lists every bundle path the seed copied from so wave B can delete them.
+  - id: r6-land-ice-computations
+    wave: A
+    kind: migration
+    title: Move the nsidc computations into land-ice as skills
+    repo: land-ice
+    branch: claude/r6-land-ice-computations
+    spheres: [cryosphere]
+    moves:
+      concepts:
+        - knowledge/nsidc/computations/ice-sheet-balance.md
+        - knowledge/nsidc/computations/ice-sheet-input-output.md
+      code: knowledge/nsidc/references/{computations,attesters,loaders}
+      roots: knowledge/nsidc/references/retrieval/{ice-sheet-balance-root,ice-sheet-input-output-root}
+      chains: the ice_sheet_balance and ice_sheet_input_output functions of run_checks.sh and their reference_runs.yaml entries, as goldens
+    receiving_skills: [ice-mass-change, ice-sheet-input-output]
+    receipt_skills_to_repoint: [sweep, receipt-figures, methods]
+    scope: >-
+      Two concepts, fourteen scripts and two roots come into land-ice; the two
+      skills that wrapped them become the skills that carry them, their SKILL.md
+      text kept and only the paths changed. The altimetry pair run (ITS_LIVE and
+      ATL15 over 2019-01 through 2023-10) and the record refusal of the
+      input-output balance become goldens.
+    acceptance:
+      - As for ocean-science, over the two concepts, the seven hand-run windows the closure concept quotes, and the input-output record refusal.
+  - id: r6-atmospheric-physics-computations
+    wave: A
+    kind: migration
+    title: Move the asdc computations into atmospheric-physics as skills
+    repo: atmospheric-physics
+    branch: claude/r6-atmospheric-physics-computations
+    spheres: [atmosphere]
+    moves:
+      concepts:
+        - knowledge/asdc/computations/energy-budget.md
+        - knowledge/asdc/computations/cloud-radiative-effect.md
+      code: knowledge/asdc/references/{computations,attesters,loaders}
+      roots: knowledge/asdc/references/retrieval/{energy-budget-root,cloud-radiative-effect-root}
+      chains: the energy_budget and cloud_radiative_effect functions of run_checks.sh and their reference_runs.yaml entries, as goldens
+    receiving_skills: [energy-budget-closure, cloud-radiative-effect]
+    receipt_skills_to_repoint: [sweep, receipt-figures, methods]
+    scope: >-
+      Two concepts, eight scripts and two roots come into atmospheric-physics.
+      The energy budget root keeps the committed Argo receipt it reads as
+      evidence; no dependency on ocean-science is declared for it.
+    acceptance:
+      - As for ocean-science, over the two concepts, the eight regions on both conventions, and the anchored energy budget window.
+  - id: r6-hydrology-computations
+    wave: A
+    kind: migration
+    title: Move hydrology's basin water balance code out of knowledge into its skill
+    repo: hydrology
+    branch: claude/r6-hydrology-computations
+    spheres: [hydrosphere]
+    moves:
+      local: knowledge/references/{computations,attesters} of hydrology, into skills/basin-water-balance/scripts
+    receiving_skills: [basin-water-balance]
+    scope: >-
+      The concept already lives in the capability; only the two scripts move
+      from knowledge/references into the skill's scripts directory and the
+      concept's paths and digests follow. The seven runtime loaders under
+      verification/fixtures that skills invoke, which ADR C flagged, move to the
+      scripts of the skills that call them, and the goldens workflow stops listing
+      its goldens by hand.
+    acceptance:
+      - osp.py validate reports no executable under knowledge/ and none under verification/ that a skill runs; every golden runs in the workflow.
+  - id: r6-core-computation
+    wave: A
+    kind: migration
+    title: Move core's reference computation out of verification into basic-statistics
+    repo: core
+    branch: claude/r6-core-computation
+    spheres: []
+    moves:
+      local: verification/{trend_computation.py,trend_attester.py}, into skills/basic-statistics/scripts; the golden stays and runs them
+    receiving_skills: [basic-statistics]
+    scope: >-
+      The synthetic trend computation's executor and attester sit beside the
+      golden that proves them; they move into the skill and the concept's
+      paths follow.
+    acceptance:
+      - osp.py validate clean; the trend golden passes unchanged in what it asserts.
+  - id: r6-bundle-after-the-move
+    wave: B
+    kind: migration
+    title: The provider bundle after the move, holding knowledge and evidence only
+    repo: nasa-daac-knowledge
+    branch: claude/r6-bundle-after-the-move
+    spheres: [hydrosphere, cryosphere, atmosphere]
+    depends_on: [r6-ocean-science-computations, r6-land-ice-computations, r6-atmospheric-physics-computations]
+    scope: >-
+      Delete every file wave A copied, by the lists in the three pull request
+      bodies. Recipes, conventions, findings and logs that cite an executor or a
+      computation concept by bundle path now cite the capability's concept by
+      package path. run_checks.sh keeps the knowledge checks and loses every
+      chain; reference_runs.yaml, reattest.py and receipt_identity.py go with
+      the code; the digest tool's product tags are fixed. A calendar release is
+      cut by the coordinator after merge.
+    acceptance:
+      - No .py under knowledge/ in any bundle; check_okf_v02, check_prose, signature_check strict and run_checks.sh all green; every path a concept names resolves.
+      - Every concept that cited a moved computation cites its new home and is re-signed by the coordinator after merge.

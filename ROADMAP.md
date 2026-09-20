@@ -49,6 +49,7 @@
 
 Proposed, every dependency done, in priority order.
 
+- P1 `adr-e-a-computation-is-a-skill`: The decision record, merged by the decision owner (`marketplace`): gate: The decision owner's record; drafted by the coordinator with the measured inventory.
 - P1 `hydro-investigation-tutorial`: Write the hydrology investigation tutorial and run it with a non-author reader (`tutorials`)
 - P1 `provider-confirmed-voicing`: Voice the provider-confirmed tier when citing a concept (`core`): gate: Lands in the release after 0.5.1; a release candidate never edits a skill.
 - P2 `hydro-coastal-water`: Coastal composites where hydrology meets ocean science (`ocean-science`)
@@ -69,6 +70,14 @@ Proposed, waiting on a dependency, in priority order.
 - P1 `hydro-stewards-and-releases`: Steward scaffolds, CODEOWNERS scopes, and the general-availability flip (`nasa-daac-knowledge`)
 - P1 `provider-steward-handoff`: Complete or accurately reframe provider stewardship (`nasa-daac-knowledge`)
 - P1 `r3-dependency-reference`: Validate dependency realization on ocean-science across runtimes (`ocean-science`)
+- P1 `r6-atmospheric-physics-computations`: atmospheric-physics carries the asdc computations as skills (`atmospheric-physics`)
+- P1 `r6-bundle-after-the-move`: The provider bundle holds knowledge and evidence only (`nasa-daac-knowledge`)
+- P1 `r6-core-computation`: core's reference computation lives in basic-statistics (`core`)
+- P1 `r6-hydrology-computations`: hydrology's basin water balance code lives in its skill (`hydrology`)
+- P1 `r6-land-ice-computations`: land-ice carries the nsidc computations as skills (`land-ice`)
+- P1 `r6-ocean-science-computations`: ocean-science carries the podaac and Argo computations as skills (`ocean-science`)
+- P1 `r6-reconciliation`: Everything that names a path follows the move (`build-kit`)
+- P1 `r6-wave-0-specification-and-tools`: Specification 0.7.0 and the tools: planes retired, placement gate replaced, seed kind added, templates reshaped (`marketplace`)
 - P1 `tutorial-nonauthor-validation`: Complete non-author Tutorial 2 validation (`tutorials`)
 
 ### Done (48)
@@ -146,6 +155,7 @@ Proposed, waiting on a dependency, in priority order.
 - **Pillar means sphere (ADR A)** (`pillar-means-sphere`): proposed. Pillars are the five Earth science spheres; disciplines are domain capabilities inside them; provider bundles stay a separate authority axis; classification is canonical under .osp/repository.yaml. Record: marketplace docs/decisions/adr-a-pillar-means-sphere.md; accepted when it merges.
 - **One governed capability, projected to runtimes (ADR B)** (`multi-runtime-packaging`): proposed. KNOW, ACT, PROVE and REACH are authored once; build-kit renders a Claude projection and an Agent Plugins 1.0 projection; Claude Code, Cowork and Codex are qualification targets; no per-client adapters. Record: marketplace docs/decisions/adr-b-multi-runtime-capability-packaging.md; accepted when it merges.
 - **One state model for the roadmap** (`one-state-roadmap`): accepted. The proposal-state axis, the seeded proposal issues, the decision labels and the reconcile step were built for a federation of maintainer teams the organization does not yet have. roadmap.yaml stays the single source of truth with one status per deliverable (proposed, active, blocked, done, declined); an active deliverable has an issue in its repository, opened when work starts and closed by the pull request that finishes it; the tool never writes issues. Revisit trigger: adopt GitHub Projects as a rendered view when a second maintainer team declines to edit the YAML or a partner asks for a board; render it from the YAML, one way.
+- **A computation is a skill (ADR E)** (`a-computation-is-a-skill`): proposed. Every attested computation's code, data root and concept move out of the provider bundle into the capability that runs it; a knowledge bundle holds knowledge and evidence and no runnable code; the plane vocabulary, the placement gate, the wrapping rule and the wrap-only release are retired. Record: marketplace docs/decisions/adr-e-a-computation-is-a-skill.md; accepted when it merges.
 - **Land-ice is the first new sphere, entered through the sea level budget** (`first-new-sphere-land-ice`): accepted. The first sphere opened after the founding domains is land-ice, entered through GRACE-FO mass change and the sea level budget rather than through ice-sheet altimetry. Reasons: GRACE-FO is a PO.DAAC product, so the first non-founding capability carries knowledge signed by the center that produces it; the budget composes what exists (altimetry in the provider bundle, Argo through the core connector, the GRACE-FO mascon concept) into one deterministic computation with a receipt, the first true composite; its traps (glacial isostatic adjustment, leakage, the 2017 to 2018 gap between missions, degree-1 and C20 replacements, mascon versus spherical-harmonic solutions) are the kind the project exists to prevent; and the data is small. Sea-ice follows when an NSIDC steward engages; precipitation stays a hydrology slice until it carries workflows hydrology does not. Promotion out of planned still waits on the pre-registered domain-expansion gate (the powered ablation) and on a dated pre-registration entry; the provider-bundle knowledge can be captured before that, as the ingest loop allows.
 - **A planned capability may promote out of planned to host a wrap** (`promotion-to-host-a-wrap`): accepted. Supersedes, for one narrow case, the clause of first-new-sphere-land-ice that sends every promotion through the domain-expansion gate. A planned capability may take package, surfaces and runtime metadata, and a catalog entry, ahead of the powered ablation when its release adds no scientific number of its own: every number it reports is owned by an attested computation already signed stable in a provider bundle and reached through the wrapping rule. The reason is that a wrapping skill computes nothing, so what promotion buys is reachability, that an agent which installed a capability can run a signed computation rather than a reader having to find a concept, and reachability is not the breadth the gate protects. The rest of the promotion rule is satisfied in full and not waived: a maintainer, sources on every claim, an eval case for every high-severity gotcha the release relies on, and a named provider contact invited. A skill that computes a number of its own is domain expansion, waits on the ablation, and takes its own dated pre-registration entry; building and signing a new attested computation in an existing provider bundle stays inside the knowledge intake loop, as the hydrology expansion was read in September. The first two capabilities on this path are atmospheric-physics and land-ice; a third is a new decision. The architectural record is ADR D in the marketplace decisions directory, the specification carries the wrap-only release section, and the dated reading against the go and stop conditions is the amendment of the same date in the pre-registration.
 - **Provider confirmation is a badge and a ladder, never a gate** (`provenance-ladder`): accepted. A steward signature was doing two jobs: the honesty marker (a person who knows the product confirmed the claim) and the gate (nothing stable, released, promoted or composite without it). The first stays; the second blocked the organization on a role nobody at a data center holds yet, and people in these domains are only getting accustomed to AI. From now on a verified event carries a role (maintainer, provider, community); stable needs one human review of any role; high severity needs two, provider preferred and invited, not required; provider confirmation is a tier the runtime voices. A provider person can start by answering one confirm-this-concept issue, with the maintainer recording the event on their behalf; a bundle digest shows them what is claimed about their products. Promotion out of planned needs a maintainer, sources, evals and an invited provider contact; a composite needs a maintainer and a reviewer per sphere. The maintainer who holds a bundle is its steward; interim and handoff language is retired. Unchanged: human review before merge (the security control), evidence per claim, and the signature debt on edits after a signature.
@@ -851,6 +861,86 @@ Every wrapped computation can be swept over its declared parameters, drawn from 
 - Depends on: `adr-d-receipt-skills`, `ocean-sweep`
 - Gate: Waits on the amendment that admits receipt skills to a wrap-only capability and on the ocean-science sweep that sets the shape.
 - Evidence: `atmospheric-physics PR #8: skills/sweep, skills/receipt-figures and skills/methods over the two asdc computations, each a script in the skill's scripts directory reaching the executor and attester at the installed bundle's path as the wrapping skills do; the sweep keeps the ocean-science command line, outputs and five refusal codes, reads the declared parameters from the concept frontmatter, passes the data root to the attester, and its aggregate refusal over a sweep of the two clear-sky conventions cites the convention concept and the clear-sky gotcha by bundle path. The golden verification/receipt_skills.py exercises all three offline, asserts the Antarctic sign reversal against live rows, and the goldens workflow names it`, `The coordinator's review reproduced the eight-region table on the committed root exactly, the sign reversal of the convention difference between the globe and the polar bands read from the receipts themselves; the energy-budget sweep gave one computed window and three refused rows with empty cells, because one Argo receipt exists; every cell of both sweeps equalled its manifest column's receipt field and contrast_cre_net_W_m2 is the same receipt's convention_contrast block; the convention aggregate refused with exit 4 and no out-dir; a tampered receipt was failed by the attester and kept as an empty row; mixed-input and mixed-method exercised on real receipts; the renderer's digest round trip accepted its own digest and refused a wrong one`, `One blocking finding, fixed before merge: the contrast figure computed a difference between the two conventions' terms and drew it three times and printed it once, a number no receipt carries. The seed removed the computation and the annotations, corrected the docstring and the skill text, and in the same push made the golden's sweep check open each row's receipt and compare every cell against its named field, so a re-measured expectations file alone cannot pass it`, `Also recorded by the seed: a window mean is not bit-reproducible across CPython 3.11 and 3.12 (compensated summation), so the expectations file pins no bit-exact digest of a derived float; cells compare at 1e-9 relative against the expectations and exactly against the receipt`, `agent-evals PR #37 and the evals manifest: the gotcha-avoidance case sweep-refuses-to-average-clear-sky-conventions gives the agent permission to average the two conventions and passes only on both rows, a refusal, the gotcha cited by bundle path and the reason in substance; registered under atmospheric-physics with Bash allowed`
+
+### A computation is a skill, and a knowledge bundle holds knowledge
+
+**ID:** `computation-is-a-skill`  
+**Status:** proposed  
+**Priority:** P1
+
+Every attested computation lives in the capability that runs it, as a concept beside a skill whose scripts are the executor and the attester and whose golden proves them; the provider bundle holds concepts and evidence and no runnable code; the specification says where files go in one sentence and no gate needs seven codes to enforce it.
+
+> **Gate:** The decision owner's record, ADR E. Re-homing a signed computation computes no new number, so the domain-expansion gate is untouched; a reference value that differs after a move is a finding, never an update.
+
+| Deliverable | Repository | Status | Priority | Contributor | Issue |
+|---|---|---|---|---|---|
+| `adr-e-a-computation-is-a-skill`: The decision record, merged by the decision owner | `marketplace` | proposed | P1 | owner-only | none |
+| `r6-wave-0-specification-and-tools`: Specification 0.7.0 and the tools: planes retired, placement gate replaced, seed kind added, templates reshaped | `marketplace` | proposed | P1 | owner-only | none |
+| `r6-ocean-science-computations`: ocean-science carries the podaac and Argo computations as skills | `ocean-science` | proposed | P1 | needs-context | none |
+| `r6-land-ice-computations`: land-ice carries the nsidc computations as skills | `land-ice` | proposed | P1 | needs-context | none |
+| `r6-atmospheric-physics-computations`: atmospheric-physics carries the asdc computations as skills | `atmospheric-physics` | proposed | P1 | needs-context | none |
+| `r6-hydrology-computations`: hydrology's basin water balance code lives in its skill | `hydrology` | proposed | P1 | needs-context | none |
+| `r6-core-computation`: core's reference computation lives in basic-statistics | `core` | proposed | P1 | needs-context | none |
+| `r6-bundle-after-the-move`: The provider bundle holds knowledge and evidence only | `nasa-daac-knowledge` | proposed | P1 | needs-context | none |
+| `r6-reconciliation`: Everything that names a path follows the move | `build-kit` | proposed | P1 | owner-only | none |
+
+#### Acceptance details
+
+**`adr-e-a-computation-is-a-skill`**
+
+- [ ] ADR E merged; ADR C and ADR D status lines say they are superseded by it and their text stands as history.
+- Gate: The decision owner's record; drafted by the coordinator with the measured inventory.
+
+**`r6-wave-0-specification-and-tools`**
+
+- [ ] Specification 0.7.0 with sections 0.6 and 5.9 restated without the planes, sections 11 and 12 retired, and one new section in their place; the model document, the knowledge-versus-skills guide, both contributor guides, the package authoring guide and the testing guide carry no plane vocabulary; the pre-registration carries the dated entry.
+- [ ] build-kit: osp.py validate reports an executable under knowledge/ as an error and a computation whose code or attester does not resolve in-package or is named by no golden; placement-check is retired from osp.py, the gate template and every repository gate; seed_brief.py has the migration kind and no wrapping or placement text; reattest.py is osp.py reattest.
+- [ ] plugin-template ships one skill whose scripts hold an executor and an attester with the concept beside them; knowledge-template ships no code.
+- Depends on: `adr-e-a-computation-is-a-skill`
+- Gate: Lands before any migration seed is dispatched, so every seed builds to the rule as written.
+
+**`r6-ocean-science-computations`**
+
+- [ ] Twenty concepts under knowledge/computations with in-package code and attester paths; 39 scripts in the scripts directories of the skills that ran them; the roots and record files under knowledge/references/retrieval; every chain a golden; no SKILL.md names a bundle path for code; the receipt skills resolve through the plugin root.
+- [ ] The coordinator reproduced every reference run, merged, re-signed on the maintainer's behalf, and cut a release.
+- Depends on: `r6-wave-0-specification-and-tools`
+- Gate: Reference runs reproduce at the new paths to the digit; the seed changes no number.
+
+**`r6-land-ice-computations`**
+
+- [ ] Two concepts, fourteen scripts and two roots in the capability; the seven hand-run windows and the altimetry pair reproduce; the input-output record refusal is a golden; released and re-signed.
+- Depends on: `r6-wave-0-specification-and-tools`
+- Gate: As for ocean-science.
+
+**`r6-atmospheric-physics-computations`**
+
+- [ ] Two concepts, eight scripts and two roots in the capability; the eight regions on both conventions and the anchored window reproduce; released and re-signed.
+- Depends on: `r6-wave-0-specification-and-tools`
+- Gate: As for ocean-science.
+
+**`r6-hydrology-computations`**
+
+- [ ] No executable under knowledge/ or under verification/ that a skill runs; the goldens workflow runs the tree wholesale; released and re-signed.
+- Depends on: `r6-wave-0-specification-and-tools`
+- Gate: As for ocean-science.
+
+**`r6-core-computation`**
+
+- [ ] The executor and attester under skills/basic-statistics/scripts; the trend golden unchanged in what it asserts; released and re-signed.
+- Depends on: `r6-wave-0-specification-and-tools`
+- Gate: As for ocean-science.
+
+**`r6-bundle-after-the-move`**
+
+- [ ] No .py under knowledge/ in any bundle; every concept that cited a moved computation cites its new home; run_checks.sh keeps the knowledge checks; reference_runs.yaml, reattest.py and receipt_identity.py gone; a calendar release cut and re-signed.
+- Depends on: `r6-ocean-science-computations`, `r6-land-ice-computations`, `r6-atmospheric-physics-computations`
+- Gate: After every capability has released, so no capability on main points at a path that does not exist.
+
+**`r6-reconciliation`**
+
+- [ ] agent-evals concept_basis paths, evals manifests, marketplace catalog entries and qualification records for the new releases, roadmap evidence, sessions archived and triggers cleared.
+- Depends on: `r6-bundle-after-the-move`, `r6-hydrology-computations`, `r6-core-computation`
+- Gate: The coordinator's close-out.
 
 ### Open the Atmosphere through atmospheric-physics and the energy budget
 
