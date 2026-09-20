@@ -72,17 +72,15 @@ Proposed, waiting on a dependency, in priority order.
 - P1 `r3-dependency-reference`: Validate dependency realization on ocean-science across runtimes (`ocean-science`)
 - P1 `r6-atmospheric-physics-computations`: atmospheric-physics carries the asdc computations as skills (`atmospheric-physics`)
 - P1 `r6-bundle-after-the-move`: The provider bundle holds knowledge and evidence only (`nasa-daac-knowledge`)
-- P1 `r6-core-computation`: core's reference computation lives in basic-statistics (`core`)
-- P1 `r6-hydrology-computations`: hydrology's basin water balance code lives in its skill (`hydrology`)
 - P1 `r6-land-ice-computations`: land-ice carries the nsidc computations as skills (`land-ice`)
 - P1 `r6-ocean-science-computations`: ocean-science carries the podaac and Argo computations as skills (`ocean-science`)
 - P1 `r6-reconciliation`: Everything that names a path follows the move (`build-kit`)
 - P1 `tutorial-nonauthor-validation`: Complete non-author Tutorial 2 validation (`tutorials`)
 
-### Done (49)
+### Done (51)
 
 <details>
-<summary>49 done deliverables</summary>
+<summary>51 done deliverables</summary>
 
 - `hydro-usgs-waterdata-migration`: Migrate the USGS connector to the Water Data APIs and release it
 - `hydro-basin-unit`: Add basin delineation as the unit of analysis
@@ -121,6 +119,8 @@ Proposed, waiting on a dependency, in priority order.
 - `landice-receipt-skills`: Sweep, figures and methods over the nsidc closures, as receipt skills in land-ice
 - `atmos-receipt-skills`: Sweep, figures and methods over the asdc computations, as receipt skills in atmospheric-physics
 - `adr-e-a-computation-is-a-skill`: The decision record, merged by the decision owner
+- `r6-hydrology-computations`: hydrology's basin water balance code lives in its skill
+- `r6-core-computation`: core's reference computation lives in basic-statistics
 - `atmos-syn1deg-knowledge`: The synoptic radiation product and the surface flux caveat as concepts
 - `atmos-cloud-radiative-effect`: Cloud radiative effect at the top of the atmosphere, as an attested computation
 - `atmos-physics-promotion`: Promote atmospheric-physics out of planned as a wrap-only release
@@ -879,8 +879,8 @@ Every attested computation lives in the capability that runs it, as a concept be
 | `r6-ocean-science-computations`: ocean-science carries the podaac and Argo computations as skills | `ocean-science` | proposed | P1 | needs-context | none |
 | `r6-land-ice-computations`: land-ice carries the nsidc computations as skills | `land-ice` | proposed | P1 | needs-context | none |
 | `r6-atmospheric-physics-computations`: atmospheric-physics carries the asdc computations as skills | `atmospheric-physics` | proposed | P1 | needs-context | none |
-| `r6-hydrology-computations`: hydrology's basin water balance code lives in its skill | `hydrology` | proposed | P1 | needs-context | none |
-| `r6-core-computation`: core's reference computation lives in basic-statistics | `core` | proposed | P1 | needs-context | none |
+| `r6-hydrology-computations`: hydrology's basin water balance code lives in its skill | `hydrology` | done | P1 | needs-context | none |
+| `r6-core-computation`: core's reference computation lives in basic-statistics | `core` | done | P1 | needs-context | none |
 | `r6-bundle-after-the-move`: The provider bundle holds knowledge and evidence only | `nasa-daac-knowledge` | proposed | P1 | needs-context | none |
 | `r6-reconciliation`: Everything that names a path follows the move | `build-kit` | proposed | P1 | owner-only | none |
 
@@ -924,12 +924,14 @@ Every attested computation lives in the capability that runs it, as a concept be
 - [ ] No executable under knowledge/ or under verification/ that a skill runs; the goldens workflow runs the tree wholesale; released and re-signed.
 - Depends on: `r6-wave-0-specification-and-tools`
 - Gate: As for ocean-science.
+- Evidence: `hydrology PR #74: the basin water balance executor and attester moved from knowledge/references into skills/basin-water-balance/scripts, the concept's three paths followed them and the retired executor.skill key went; knowledge/references is gone, so the bundle holds no runnable file. The seven runtime loaders and the goldens workflow glob were already in the right shape and are reported as such rather than changed`, `The coordinator's review read the evidence that matters: the four regenerated receipts differ from the committed ones in exactly eight lines across four files, the code digest and the run time, and in nothing else, so no term, no uncertainty, no bar and no measured value moved. The two script diffs are the path resolution alone. osp.py validate reports no warning at all where main reported six`, `hydrology PR #75: the coordinator re-signed the concept on the maintainer's behalf as event 4, citing #74, and returned it to stable`, `One observation the seed raised rather than changed: the precipitation loader reaches a fixture builder under verification with its optional fetch flag, which the record leaves where it is`
 
 **`r6-core-computation`**
 
 - [ ] The executor and attester under skills/basic-statistics/scripts; the trend golden unchanged in what it asserts; released and re-signed.
 - Depends on: `r6-wave-0-specification-and-tools`
 - Gate: As for ocean-science.
+- Evidence: `core PR #46: trend_computation.py and trend_attester.py moved from verification into skills/basic-statistics/scripts, the concept's paths followed them and the retired executor.skill key went; the golden gained a cell that runs both scripts at their new paths, which is what names them for the second validate finding, and the workflow's separate step that ran them by their old paths is gone`, `The coordinator's review compared the receipts: every field is identical to a run at the old path on main, including the full 480 month series, except the three that name the file, computation, code_sha256 and the run identifier that digests them. The script diffs are path resolution alone. osp.py validate is now silent where main reported the retired key`, `The concept carries no signature block and never did, so nothing was re-signed; it stays at draft as it was`, `One finding reported and not changed: the concept's reference run paragraph says the half width is near 0.02 K per decade where the run gives 0.0018, which is a prose rounding wrong by a factor of ten on main as well, not a value the move disturbed. No gate depends on it and the maintainer decides it`
 
 **`r6-bundle-after-the-move`**
 
