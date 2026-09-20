@@ -608,8 +608,9 @@ def render_skill(round_: dict, seed: dict) -> str:
               "checked out beside this repository and named by its environment variable, and "
               "`uv run ../build-kit/scripts/osp.py placement-check . --strict` must report no error and no warning.")
     siblings = [s for s in ("marketplace", "nasa-daac-knowledge", "build-kit", "ocean-science") if s != repo]
+    rest = [f"../{s}" for s in siblings[1:]]
     clone_text = (f"`git clone https://github.com/{ORG}/{siblings[0]} ../{siblings[0]}`, likewise "
-                  + " and ".join(f"../{s}" for s in siblings[1:]))
+                  + (", ".join(rest[:-1]) + " and " + rest[-1] if len(rest) > 1 else rest[0]))
     return f"""You are building receipt skills for the Open Science Pillars organization (github.com/{ORG}) in the repository {repo}, on a new branch `{branch}` created from main. A coordinator session dispatched you and will review, merge and reconcile the roadmap; you build, check, push and open one pull request per repository you touch. Do not merge anything, do not sign anything, never edit a concept, an executor, an attester or a loader in the provider bundle. {others_text(round_, seed)}BOUNDARY: {seed['boundary']} This seed is issue #{seed['issue']} in {repo}; reference it in the PR body. Spheres: {spheres}.
 
 WHAT TO BUILD ({seed['title']}). {seed['scope'].strip()}
