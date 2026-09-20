@@ -49,9 +49,9 @@
 
 Proposed, every dependency done, in priority order.
 
-- P1 `adr-e-a-computation-is-a-skill`: The decision record, merged by the decision owner (`marketplace`): gate: The decision owner's record; drafted by the coordinator with the measured inventory.
 - P1 `hydro-investigation-tutorial`: Write the hydrology investigation tutorial and run it with a non-author reader (`tutorials`)
 - P1 `provider-confirmed-voicing`: Voice the provider-confirmed tier when citing a concept (`core`): gate: Lands in the release after 0.5.1; a release candidate never edits a skill.
+- P1 `r6-wave-0-specification-and-tools`: Specification 0.7.0 and the tools: planes retired, placement gate replaced, seed kind added, templates reshaped (`marketplace`): gate: Lands before any migration seed is dispatched, so every seed builds to the rule as written.
 - P2 `hydro-coastal-water`: Coastal composites where hydrology meets ocean science (`ocean-science`)
 - P2 `r6-compat-probes`: Add non-blocking compatibility probes for Gemini CLI and Goose (`build-kit`)
 - P2 `r9-headless-ci-qualification`: Run the headless qualification legs in the organization's CI on a release candidate (`build-kit`): gate: Needs a decision to hold a runtime credential in CI, at which scope and who may trigger it, and the first Codex checklist run to confirm how the portable package installs there (build-kit issue 32).
@@ -77,13 +77,12 @@ Proposed, waiting on a dependency, in priority order.
 - P1 `r6-land-ice-computations`: land-ice carries the nsidc computations as skills (`land-ice`)
 - P1 `r6-ocean-science-computations`: ocean-science carries the podaac and Argo computations as skills (`ocean-science`)
 - P1 `r6-reconciliation`: Everything that names a path follows the move (`build-kit`)
-- P1 `r6-wave-0-specification-and-tools`: Specification 0.7.0 and the tools: planes retired, placement gate replaced, seed kind added, templates reshaped (`marketplace`)
 - P1 `tutorial-nonauthor-validation`: Complete non-author Tutorial 2 validation (`tutorials`)
 
-### Done (48)
+### Done (49)
 
 <details>
-<summary>48 done deliverables</summary>
+<summary>49 done deliverables</summary>
 
 - `hydro-usgs-waterdata-migration`: Migrate the USGS connector to the Water Data APIs and release it
 - `hydro-basin-unit`: Add basin delineation as the unit of analysis
@@ -121,6 +120,7 @@ Proposed, waiting on a dependency, in priority order.
 - `ocean-sweep`: A sweep over the sea level budget's declared parameters, the pattern-setter for receipt skills
 - `landice-receipt-skills`: Sweep, figures and methods over the nsidc closures, as receipt skills in land-ice
 - `atmos-receipt-skills`: Sweep, figures and methods over the asdc computations, as receipt skills in atmospheric-physics
+- `adr-e-a-computation-is-a-skill`: The decision record, merged by the decision owner
 - `atmos-syn1deg-knowledge`: The synoptic radiation product and the surface flux caveat as concepts
 - `atmos-cloud-radiative-effect`: Cloud radiative effect at the top of the atmosphere, as an attested computation
 - `atmos-physics-promotion`: Promote atmospheric-physics out of planned as a wrap-only release
@@ -155,7 +155,7 @@ Proposed, waiting on a dependency, in priority order.
 - **Pillar means sphere (ADR A)** (`pillar-means-sphere`): proposed. Pillars are the five Earth science spheres; disciplines are domain capabilities inside them; provider bundles stay a separate authority axis; classification is canonical under .osp/repository.yaml. Record: marketplace docs/decisions/adr-a-pillar-means-sphere.md; accepted when it merges.
 - **One governed capability, projected to runtimes (ADR B)** (`multi-runtime-packaging`): proposed. KNOW, ACT, PROVE and REACH are authored once; build-kit renders a Claude projection and an Agent Plugins 1.0 projection; Claude Code, Cowork and Codex are qualification targets; no per-client adapters. Record: marketplace docs/decisions/adr-b-multi-runtime-capability-packaging.md; accepted when it merges.
 - **One state model for the roadmap** (`one-state-roadmap`): accepted. The proposal-state axis, the seeded proposal issues, the decision labels and the reconcile step were built for a federation of maintainer teams the organization does not yet have. roadmap.yaml stays the single source of truth with one status per deliverable (proposed, active, blocked, done, declined); an active deliverable has an issue in its repository, opened when work starts and closed by the pull request that finishes it; the tool never writes issues. Revisit trigger: adopt GitHub Projects as a rendered view when a second maintainer team declines to edit the YAML or a partner asks for a board; render it from the YAML, one way.
-- **A computation is a skill (ADR E)** (`a-computation-is-a-skill`): proposed. Every attested computation's code, data root and concept move out of the provider bundle into the capability that runs it; a knowledge bundle holds knowledge and evidence and no runnable code; the plane vocabulary, the placement gate, the wrapping rule and the wrap-only release are retired. Record: marketplace docs/decisions/adr-e-a-computation-is-a-skill.md; accepted when it merges.
+- **A computation is a skill (ADR E)** (`a-computation-is-a-skill`): accepted. Every attested computation's code, data root and concept move out of the provider bundle into the capability that runs it; a knowledge bundle holds knowledge and evidence and no runnable code; the plane vocabulary, the placement gate, the wrapping rule and the wrap-only release are retired. Record: marketplace docs/decisions/adr-e-a-computation-is-a-skill.md, merged 2026-09-20 (marketplace PR 107) on the decision owner's instruction.
 - **Land-ice is the first new sphere, entered through the sea level budget** (`first-new-sphere-land-ice`): accepted. The first sphere opened after the founding domains is land-ice, entered through GRACE-FO mass change and the sea level budget rather than through ice-sheet altimetry. Reasons: GRACE-FO is a PO.DAAC product, so the first non-founding capability carries knowledge signed by the center that produces it; the budget composes what exists (altimetry in the provider bundle, Argo through the core connector, the GRACE-FO mascon concept) into one deterministic computation with a receipt, the first true composite; its traps (glacial isostatic adjustment, leakage, the 2017 to 2018 gap between missions, degree-1 and C20 replacements, mascon versus spherical-harmonic solutions) are the kind the project exists to prevent; and the data is small. Sea-ice follows when an NSIDC steward engages; precipitation stays a hydrology slice until it carries workflows hydrology does not. Promotion out of planned still waits on the pre-registered domain-expansion gate (the powered ablation) and on a dated pre-registration entry; the provider-bundle knowledge can be captured before that, as the ingest loop allows.
 - **A planned capability may promote out of planned to host a wrap** (`promotion-to-host-a-wrap`): accepted. Supersedes, for one narrow case, the clause of first-new-sphere-land-ice that sends every promotion through the domain-expansion gate. A planned capability may take package, surfaces and runtime metadata, and a catalog entry, ahead of the powered ablation when its release adds no scientific number of its own: every number it reports is owned by an attested computation already signed stable in a provider bundle and reached through the wrapping rule. The reason is that a wrapping skill computes nothing, so what promotion buys is reachability, that an agent which installed a capability can run a signed computation rather than a reader having to find a concept, and reachability is not the breadth the gate protects. The rest of the promotion rule is satisfied in full and not waived: a maintainer, sources on every claim, an eval case for every high-severity gotcha the release relies on, and a named provider contact invited. A skill that computes a number of its own is domain expansion, waits on the ablation, and takes its own dated pre-registration entry; building and signing a new attested computation in an existing provider bundle stays inside the knowledge intake loop, as the hydrology expansion was read in September. The first two capabilities on this path are atmospheric-physics and land-ice; a third is a new decision. The architectural record is ADR D in the marketplace decisions directory, the specification carries the wrap-only release section, and the dated reading against the go and stop conditions is the amendment of the same date in the pre-registration.
 - **Provider confirmation is a badge and a ladder, never a gate** (`provenance-ladder`): accepted. A steward signature was doing two jobs: the honesty marker (a person who knows the product confirmed the claim) and the gate (nothing stable, released, promoted or composite without it). The first stays; the second blocked the organization on a role nobody at a data center holds yet, and people in these domains are only getting accustomed to AI. From now on a verified event carries a role (maintainer, provider, community); stable needs one human review of any role; high severity needs two, provider preferred and invited, not required; provider confirmation is a tier the runtime voices. A provider person can start by answering one confirm-this-concept issue, with the maintainer recording the event on their behalf; a bundle digest shows them what is claimed about their products. Promotion out of planned needs a maintainer, sources, evals and an invited provider contact; a composite needs a maintainer and a reviewer per sphere. The maintainer who holds a bundle is its steward; interim and handoff language is retired. Unchanged: human review before merge (the security control), evidence per claim, and the signature debt on edits after a signature.
@@ -865,7 +865,7 @@ Every wrapped computation can be swept over its declared parameters, drawn from 
 ### A computation is a skill, and a knowledge bundle holds knowledge
 
 **ID:** `computation-is-a-skill`  
-**Status:** proposed  
+**Status:** active  
 **Priority:** P1
 
 Every attested computation lives in the capability that runs it, as a concept beside a skill whose scripts are the executor and the attester and whose golden proves them; the provider bundle holds concepts and evidence and no runnable code; the specification says where files go in one sentence and no gate needs seven codes to enforce it.
@@ -874,7 +874,7 @@ Every attested computation lives in the capability that runs it, as a concept be
 
 | Deliverable | Repository | Status | Priority | Contributor | Issue |
 |---|---|---|---|---|---|
-| `adr-e-a-computation-is-a-skill`: The decision record, merged by the decision owner | `marketplace` | proposed | P1 | owner-only | none |
+| `adr-e-a-computation-is-a-skill`: The decision record, merged by the decision owner | `marketplace` | done | P1 | owner-only | none |
 | `r6-wave-0-specification-and-tools`: Specification 0.7.0 and the tools: planes retired, placement gate replaced, seed kind added, templates reshaped | `marketplace` | proposed | P1 | owner-only | none |
 | `r6-ocean-science-computations`: ocean-science carries the podaac and Argo computations as skills | `ocean-science` | proposed | P1 | needs-context | none |
 | `r6-land-ice-computations`: land-ice carries the nsidc computations as skills | `land-ice` | proposed | P1 | needs-context | none |
@@ -890,6 +890,7 @@ Every attested computation lives in the capability that runs it, as a concept be
 
 - [ ] ADR E merged; ADR C and ADR D status lines say they are superseded by it and their text stands as history.
 - Gate: The decision owner's record; drafted by the coordinator with the measured inventory.
+- Evidence: `marketplace PR #107 merged 2026-09-20 on the decision owner's instruction, the status line reading accepted; the ADR C and ADR D status amendments land with the specification rewrite`
 
 **`r6-wave-0-specification-and-tools`**
 
