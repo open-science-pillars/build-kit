@@ -51,6 +51,7 @@ Proposed, every dependency done, in priority order.
 
 - P1 `hydro-investigation-tutorial`: Write the hydrology investigation tutorial and run it with a non-author reader (`tutorials`)
 - P1 `provider-confirmed-voicing`: Voice the provider-confirmed tier when citing a concept (`core`): gate: Lands in the release after 0.5.1; a release candidate never edits a skill.
+- P1 `r6-bundle-after-the-move`: The provider bundle holds knowledge and evidence only (`nasa-daac-knowledge`): gate: After every capability has released, so no capability on main points at a path that does not exist.
 - P1 `r6-wave-0-specification-and-tools`: Specification 0.7.0 and the tools: planes retired, placement gate replaced, seed kind added, templates reshaped (`marketplace`): gate: Lands before any migration seed is dispatched, so every seed builds to the rule as written.
 - P2 `hydro-coastal-water`: Coastal composites where hydrology meets ocean science (`ocean-science`)
 - P2 `r6-compat-probes`: Add non-blocking compatibility probes for Gemini CLI and Goose (`build-kit`)
@@ -70,17 +71,13 @@ Proposed, waiting on a dependency, in priority order.
 - P1 `hydro-stewards-and-releases`: Steward scaffolds, CODEOWNERS scopes, and the general-availability flip (`nasa-daac-knowledge`)
 - P1 `provider-steward-handoff`: Complete or accurately reframe provider stewardship (`nasa-daac-knowledge`)
 - P1 `r3-dependency-reference`: Validate dependency realization on ocean-science across runtimes (`ocean-science`)
-- P1 `r6-atmospheric-physics-computations`: atmospheric-physics carries the asdc computations as skills (`atmospheric-physics`)
-- P1 `r6-bundle-after-the-move`: The provider bundle holds knowledge and evidence only (`nasa-daac-knowledge`)
-- P1 `r6-land-ice-computations`: land-ice carries the nsidc computations as skills (`land-ice`)
-- P1 `r6-ocean-science-computations`: ocean-science carries the podaac and Argo computations as skills (`ocean-science`)
 - P1 `r6-reconciliation`: Everything that names a path follows the move (`build-kit`)
 - P1 `tutorial-nonauthor-validation`: Complete non-author Tutorial 2 validation (`tutorials`)
 
-### Done (51)
+### Done (54)
 
 <details>
-<summary>51 done deliverables</summary>
+<summary>54 done deliverables</summary>
 
 - `hydro-usgs-waterdata-migration`: Migrate the USGS connector to the Water Data APIs and release it
 - `hydro-basin-unit`: Add basin delineation as the unit of analysis
@@ -119,6 +116,9 @@ Proposed, waiting on a dependency, in priority order.
 - `landice-receipt-skills`: Sweep, figures and methods over the nsidc closures, as receipt skills in land-ice
 - `atmos-receipt-skills`: Sweep, figures and methods over the asdc computations, as receipt skills in atmospheric-physics
 - `adr-e-a-computation-is-a-skill`: The decision record, merged by the decision owner
+- `r6-ocean-science-computations`: ocean-science carries the podaac and Argo computations as skills
+- `r6-land-ice-computations`: land-ice carries the nsidc computations as skills
+- `r6-atmospheric-physics-computations`: atmospheric-physics carries the asdc computations as skills
 - `r6-hydrology-computations`: hydrology's basin water balance code lives in its skill
 - `r6-core-computation`: core's reference computation lives in basic-statistics
 - `atmos-syn1deg-knowledge`: The synoptic radiation product and the surface flux caveat as concepts
@@ -876,9 +876,9 @@ Every attested computation lives in the capability that runs it, as a concept be
 |---|---|---|---|---|---|
 | `adr-e-a-computation-is-a-skill`: The decision record, merged by the decision owner | `marketplace` | done | P1 | owner-only | none |
 | `r6-wave-0-specification-and-tools`: Specification 0.7.0 and the tools: planes retired, placement gate replaced, seed kind added, templates reshaped | `marketplace` | proposed | P1 | owner-only | none |
-| `r6-ocean-science-computations`: ocean-science carries the podaac and Argo computations as skills | `ocean-science` | proposed | P1 | needs-context | none |
-| `r6-land-ice-computations`: land-ice carries the nsidc computations as skills | `land-ice` | proposed | P1 | needs-context | none |
-| `r6-atmospheric-physics-computations`: atmospheric-physics carries the asdc computations as skills | `atmospheric-physics` | proposed | P1 | needs-context | none |
+| `r6-ocean-science-computations`: ocean-science carries the podaac and Argo computations as skills | `ocean-science` | done | P1 | needs-context | none |
+| `r6-land-ice-computations`: land-ice carries the nsidc computations as skills | `land-ice` | done | P1 | needs-context | none |
+| `r6-atmospheric-physics-computations`: atmospheric-physics carries the asdc computations as skills | `atmospheric-physics` | done | P1 | needs-context | none |
 | `r6-hydrology-computations`: hydrology's basin water balance code lives in its skill | `hydrology` | done | P1 | needs-context | none |
 | `r6-core-computation`: core's reference computation lives in basic-statistics | `core` | done | P1 | needs-context | none |
 | `r6-bundle-after-the-move`: The provider bundle holds knowledge and evidence only | `nasa-daac-knowledge` | proposed | P1 | needs-context | none |
@@ -906,18 +906,21 @@ Every attested computation lives in the capability that runs it, as a concept be
 - [ ] The coordinator reproduced every reference run, merged, re-signed on the maintainer's behalf, and cut a release.
 - Depends on: `r6-wave-0-specification-and-tools`
 - Gate: Reference runs reproduce at the new paths to the digit; the seed changes no number.
+- Evidence: `ocean-science PR #66: twenty podaac computations and the capability's own Argo computation came in as skills, with 39 scripts into the scripts directories of the skills that run them, every stamped root and record file under knowledge/references/retrieval, every check chain a golden, and the three receipt skills repointed to the plugin root`, `The coordinator compared every number in all twenty-one concepts against the copies the bundle still holds: none was removed and none changed. The only numbers the branch adds sit inside the placement notes the move wrote, a reference to the 2010 fixture cache and the attester's tolerance among them. osp.py validate reports no warning and the bundle is untouched`, `ocean-science PR #67: seventeen concepts that were stable before the move are re-signed on the maintainer's behalf and returned to stable; the four that were draft stay draft and unsigned`
 
 **`r6-land-ice-computations`**
 
 - [ ] Two concepts, fourteen scripts and two roots in the capability; the seven hand-run windows and the altimetry pair reproduce; the input-output record refusal is a golden; released and re-signed.
 - Depends on: `r6-wave-0-specification-and-tools`
 - Gate: As for ocean-science.
+- Evidence: `land-ice PR #9: both nsidc computations came in as skills with fourteen scripts and two stamped roots, the two skills that reached them now carry them, and the check chains became goldens, ten attested runs for the mass balance closure and the record refusal for the input-output balance among them`, `The coordinator compared every number in both concepts against the bundle's copies, 270 and 123 with none added and none removed, and the goldens reproduce the seven hand-run windows the closure concept quotes and both altimetry records to the digit`, `land-ice PR #10: both concepts re-signed on the maintainer's behalf and returned to stable. The goldens read the concept's own status rather than a remembered word, so their committed expectation of draft moved to stable with the signature, which is the check working as its author intended`
 
 **`r6-atmospheric-physics-computations`**
 
 - [ ] Two concepts, eight scripts and two roots in the capability; the eight regions on both conventions and the anchored window reproduce; released and re-signed.
 - Depends on: `r6-wave-0-specification-and-tools`
 - Gate: As for ocean-science.
+- Evidence: `atmospheric-physics PR #9: both asdc computations came in as skills with eight scripts and two stamped roots, and the check chains became goldens. The energy budget root keeps the committed Argo receipt it reads as evidence and the capability declares no dependency on ocean-science for it`, `The coordinator compared every number in both concepts against the bundle's copies, 254 and 138 with none added and none removed; osp.py validate reports no warning and the bundle is untouched`, `atmospheric-physics PR #10: both concepts re-signed on the maintainer's behalf and returned to stable`
 
 **`r6-hydrology-computations`**
 
