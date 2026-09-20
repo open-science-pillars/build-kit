@@ -24,7 +24,12 @@ coordinator_rules:
     download, never printed, logged, stored or committed.
   - A source that cannot be reached is named as unreachable in the pull request
     body, and the claim it would have supported is cited on the registry record
-    or dropped; no number is carried over from memory.
+    or dropped; no number is carried over from memory. Unreachability is measured
+    in the session that meets it and is never inherited. A domain a seed needs is
+    fetched before it is called unreachable, a brief that calls one unreachable
+    says which session measured it and when, and a bundle log entry recording an
+    unreachable host is a dated observation about that session rather than a
+    standing fact about the environment.
   - Seed sessions are dispatched on the model the coordinator records in its
     dispatch notes; repository content names no model.
 seeds:
@@ -78,7 +83,9 @@ seeds:
       - domain: its-live.jpl.nasa.gov
         read: "the firn product the root already carries, to keep the new term's units, sign convention and stamp keys identical"
       - domain: doi.org and api.crossref.org
-        read: "the product DOIs and the regional climate model's own papers on the registry records, for the version, the domain, the forcing and what the firn air content variable is; a journal page may be unreachable, in which case the registry record and the abstract are the citation and the pull request body says so"
+        read: "the product DOIs verified on the registry records for title, authors, journal and year"
+      - domain: tc.copernicus.org and gmd.copernicus.org
+        read: "the regional climate model's and the firn model's own papers, for the version, the domain, the forcing and what the firn air content variable is; both hosts answered on 2026-09-19, so the paper is fetched and read, and the registry record with the abstract is the citation only for a fetch that actually fails, which the pull request body then names with its status code"
     do_not_repeat:
       - The Greenland firn and surface mass balance terms; they stay as they are.
       - The dataset concepts and the reference epoch gotcha; they exist, and this seed writes no concept.
@@ -121,7 +128,9 @@ seeds:
       - domain: essd.copernicus.org
         read: "the published multi-method ice sheet mass balance assessment: the per-sheet and per-period rates, the uncertainties, the method groups and what the assessment says about their independence"
       - domain: doi.org and api.crossref.org
-        read: "every DOI verified on the registry record for title, authors, journal and year, including the regional climate model and firn references whose journal pages may be unreachable"
+        read: "every DOI verified on the registry record for title, authors, journal and year"
+      - domain: tc.copernicus.org and gmd.copernicus.org
+        read: "the firn model descriptions the products name, for what the air content variable is, where each model's uncertainty lives and what a model's own evaluation says about the spread between models; both hosts answered on 2026-09-19, so the paper is fetched and read, and the registry record with the abstract is the citation only for a fetch that actually fails, which the pull request body then names with its status code"
       - domain: nsidc.org
         read: "the product documentation for the elevation change and velocity products the closure already cites"
       - domain: its-live.jpl.nasa.gov
