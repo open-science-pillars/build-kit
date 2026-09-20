@@ -1619,14 +1619,17 @@ initiatives:
       - id: r6-ocean-science-computations
         title: ocean-science carries the podaac and Argo computations as skills
         repo: ocean-science
-        status: proposed
+        status: done
         priority: P1
         depends_on: [r6-wave-0-specification-and-tools]
         gate: "Reference runs reproduce at the new paths to the digit; the seed changes no number."
         acceptance:
           - "Twenty concepts under knowledge/computations with in-package code and attester paths; 39 scripts in the scripts directories of the skills that ran them; the roots and record files under knowledge/references/retrieval; every chain a golden; no SKILL.md names a bundle path for code; the receipt skills resolve through the plugin root."
           - "The coordinator reproduced every reference run, merged, re-signed on the maintainer's behalf, and cut a release."
-        evidence: []
+        evidence:
+          - "ocean-science PR #66: twenty podaac computations and the capability's own Argo computation came in as skills, with 39 scripts into the scripts directories of the skills that run them, every stamped root and record file under knowledge/references/retrieval, every check chain a golden, and the three receipt skills repointed to the plugin root"
+          - "The coordinator compared every number in all twenty-one concepts against the copies the bundle still holds: none was removed and none changed. The only numbers the branch adds sit inside the placement notes the move wrote, a reference to the 2010 fixture cache and the attester's tolerance among them. osp.py validate reports no warning and the bundle is untouched"
+          - "ocean-science PR #67: seventeen concepts that were stable before the move are re-signed on the maintainer's behalf and returned to stable; the four that were draft stay draft and unsigned"
         contributor:
           readiness: needs-context
           champion: PaulMRamirez
@@ -1635,13 +1638,16 @@ initiatives:
       - id: r6-land-ice-computations
         title: land-ice carries the nsidc computations as skills
         repo: land-ice
-        status: proposed
+        status: done
         priority: P1
         depends_on: [r6-wave-0-specification-and-tools]
         gate: "As for ocean-science."
         acceptance:
           - "Two concepts, fourteen scripts and two roots in the capability; the seven hand-run windows and the altimetry pair reproduce; the input-output record refusal is a golden; released and re-signed."
-        evidence: []
+        evidence:
+          - "land-ice PR #9: both nsidc computations came in as skills with fourteen scripts and two stamped roots, the two skills that reached them now carry them, and the check chains became goldens, ten attested runs for the mass balance closure and the record refusal for the input-output balance among them"
+          - "The coordinator compared every number in both concepts against the bundle's copies, 270 and 123 with none added and none removed, and the goldens reproduce the seven hand-run windows the closure concept quotes and both altimetry records to the digit"
+          - "land-ice PR #10: both concepts re-signed on the maintainer's behalf and returned to stable. The goldens read the concept's own status rather than a remembered word, so their committed expectation of draft moved to stable with the signature, which is the check working as its author intended"
         contributor:
           readiness: needs-context
           champion: PaulMRamirez
@@ -1650,13 +1656,16 @@ initiatives:
       - id: r6-atmospheric-physics-computations
         title: atmospheric-physics carries the asdc computations as skills
         repo: atmospheric-physics
-        status: proposed
+        status: done
         priority: P1
         depends_on: [r6-wave-0-specification-and-tools]
         gate: "As for ocean-science."
         acceptance:
           - "Two concepts, eight scripts and two roots in the capability; the eight regions on both conventions and the anchored window reproduce; released and re-signed."
-        evidence: []
+        evidence:
+          - "atmospheric-physics PR #9: both asdc computations came in as skills with eight scripts and two stamped roots, and the check chains became goldens. The energy budget root keeps the committed Argo receipt it reads as evidence and the capability declares no dependency on ocean-science for it"
+          - "The coordinator compared every number in both concepts against the bundle's copies, 254 and 138 with none added and none removed; osp.py validate reports no warning and the bundle is untouched"
+          - "atmospheric-physics PR #10: both concepts re-signed on the maintainer's behalf and returned to stable"
         contributor:
           readiness: needs-context
           champion: PaulMRamirez
