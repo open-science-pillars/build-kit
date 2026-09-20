@@ -140,12 +140,13 @@ seeds:
     receipt_skills_to_repoint: [sweep, receipt-figures, methods]
     scope: >-
       Two concepts, fourteen scripts and two roots come into land-ice; the two
-      skills that wrapped them become the skills that carry them, their SKILL.md
+      skills that reach them today become the skills that carry them, their SKILL.md
       text kept and only the paths changed. The altimetry pair run (ITS_LIVE and
       ATL15 over 2019-01 through 2023-10) and the record refusal of the
       input-output balance become goldens.
     acceptance:
-      - As for ocean-science, over the two concepts, the seven hand-run windows the closure concept quotes, and the input-output record refusal.
+      - Both concepts under knowledge/computations with their code in the scripts of the skill that runs each, the two roots under knowledge/references/retrieval, every chain a golden, no SKILL.md naming a bundle path for code, and the three skills that reach an executor repointed to the plugin root.
+      - The seven hand-run windows the closure concept quotes reproduce at the new paths to the digit, the altimetry pair run reproduces on both records, and the input-output record run still refuses and attests as a refusal.
   - id: r6-atmospheric-physics-computations
     wave: A
     kind: migration
@@ -167,7 +168,8 @@ seeds:
       The energy budget root keeps the committed Argo receipt it reads as
       evidence; no dependency on ocean-science is declared for it.
     acceptance:
-      - As for ocean-science, over the two concepts, the eight regions on both conventions, and the anchored energy budget window.
+      - Both concepts under knowledge/computations with their code in the scripts of the skill that runs each, the two roots under knowledge/references/retrieval, every chain a golden, no SKILL.md naming a bundle path for code, and the three skills that reach an executor repointed to the plugin root.
+      - The eight regions reproduce on both clear-sky conventions with the sign reversal over the polar bands intact, and the anchored energy budget window reproduces with its residual, its bar and its verdict.
   - id: r6-hydrology-computations
     wave: A
     kind: migration
