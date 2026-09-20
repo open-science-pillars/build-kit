@@ -2,6 +2,7 @@ from __future__ import annotations
 
 import importlib.util
 import json
+import shutil
 import sys
 import tempfile
 import types
@@ -146,6 +147,72 @@ class QualifyTests(unittest.TestCase):
         bare = q.load_capability(capability(self.root, name="core", deps=False, reach=False))
         bare["probes"] = {}
         self.assertEqual("start", q.probes_for(bare)["skill-invocation"]["skill"])
+
+    def test_a_domain_reference_skill_is_never_expected_to_say_its_package_name(self):
+        """The package's own name is what start says and what a domain skill
+        has no reason to say.
+
+        A sea level analysis or a basin water balance prints a plan, a
+        concept path and numbers; nothing in it names the package it ships
+        in, and making it print one would be noise in a scientist's output
+        bought to satisfy the harness. So the default expectation for a
+        reference skill that is not start is nothing at all, and the
+        capability is told what it owes instead of being failed on a
+        string its skill was never going to emit."""
+        repo = capability(self.root)
+        shutil.rmtree(repo / "skills" / "start")
+        surfaces = yaml.safe_load((repo / ".osp" / "surfaces.yaml").read_text())
+        del surfaces["probes"]
+        write(repo / ".osp" / "surfaces.yaml", surfaces)
+        cap = q.load_capability(repo)
+        probe = q.probes_for(cap)["skill-invocation"]
+        self.assertEqual("ecco", probe["skill"])
+        self.assertEqual([], probe["expect"])
+        self.assertIn("declares no expectation", q.probe_debt("ocean-science", probe))
+
+        # the name stands where it means something, and nowhere else
+        self.assertIsNone(q.probe_debt("core", {"skill": "start", "expect": ["core"]}))
+        self.assertIn("package's own name",
+                      q.probe_debt("ocean-science", {"skill": "sea-level-analysis", "expect": ["ocean-science"]}))
+        self.assertIsNone(q.probe_debt("land-ice", {"skill": "ice-mass-change",
+                                                    "expect": ["knowledge/computations/ice-sheet-balance[.]md", 2003]}))
+
+        # a probe that cannot judge the skill is a debt the run states, and
+        # a blocked required test is never qualified
+        path = self.root / "cowork.yaml"
+        q.write_checklist(cap, "claude-cowork", path)
+        item = {i["test"]: i for i in yaml.safe_load(path.read_text())["tests"]}["skill-invocation"]
+        self.assertEqual("blocked", item["status"])
+        self.assertIn("declares no expectation", item["evidence"])
+        ok, blockers = q.verdict(cap, {t: {"status": "pass", "evidence": "x"} for t in cap["required"]}
+                                 | {"skill-invocation": {"status": "blocked", "evidence": item["evidence"]}})
+        self.assertFalse(ok)
+        self.assertEqual(["skill-invocation: blocked"], blockers)
+
+    def test_the_slash_form_carries_what_the_probe_asks_for(self):
+        """A bare slash command is the skill's instructions and nothing else.
+
+        A skill that needs a region and a period can only ask for them, so
+        an expectation that requires the skill to do work cannot be met in
+        that form, and the run records a failure that belongs to the
+        harness. The slash form carries the probe's arguments, its prompt
+        when it states none, so both forms are judged on the expectation
+        each can satisfy."""
+        cap = q.load_capability(capability(self.root))
+        probe = q.probes_for(cap)["skill-invocation"]
+        self.assertEqual("/ocean-science:ecco Load ECCO for me.", q.slash_form("ocean-science", probe))
+
+        # a capability that wants the slash form to carry something else says so
+        probe["arguments"] = "the US northeast coast over 2010"
+        self.assertEqual("/ocean-science:ecco the US northeast coast over 2010", q.slash_form("ocean-science", probe))
+
+        # the operator running the matrix by hand is given the same two forms
+        path = self.root / "cowork.yaml"
+        q.write_checklist(cap, "claude-cowork", path)
+        item = {i["test"]: i for i in yaml.safe_load(path.read_text())["tests"]}["skill-invocation"]
+        self.assertEqual("/ocean-science:ecco Load ECCO for me.", item["slash"])
+        self.assertEqual("Load ECCO for me.", item["prompt"])
+        self.assertEqual("", item["status"])
 
     def test_golden_scripts_leave_the_prove_scripts_out(self):
         cap = q.load_capability(capability(self.root))

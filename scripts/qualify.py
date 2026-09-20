@@ -72,6 +72,7 @@ KNOWLEDGE_PATH = re.compile(r"knowledge/[A-Za-z0-9_.-]+(?:/[A-Za-z0-9_.-]+)+\.md
 CONCEPT_STATUS = re.compile(r"\b(stable|draft|deprecated)\b", re.I)
 GATE_WORDS = re.compile(r"confirm|approv|proceed|before (?:I |we )?download|gate|permission", re.I)
 SIZE_WORDS = re.compile(r"\b(?:gb|tb|mb|gigabyte|terabyte|size|estimate)\b", re.I)
+START_SKILL = "start"
 DEFAULT_TURNS = 30
 DEFAULT_TOOLS = "Read,Glob,Grep,Skill,Bash(claude plugin list*)"
 GATE_TOOLS = "Read,Glob,Grep,Skill"
@@ -131,18 +132,36 @@ def golden_scripts(cap: dict[str, Any], root: Path) -> list[Path]:
 def probes_for(cap: dict[str, Any]) -> dict[str, dict[str, Any]]:
     """The prompts each conversational test uses, verbatim on every runtime:
     from surfaces.yaml `probes` where the capability states them, with the
-    organization's defaults otherwise."""
+    organization's defaults otherwise.
+
+    The reference skill is resolved before the defaults are built, so a
+    capability that names its own skill and takes the default prompt is
+    asked about the skill it named rather than about the one this function
+    would have chosen."""
     name = cap["name"]
     skills = skill_names(cap["dir"], cap["package"])
-    reference = "start" if "start" in skills else (skills[0] if skills else None)
+    declared = cap["probes"].get("skill-invocation") or {}
+    reference = declared.get("skill") or (START_SKILL if START_SKILL in skills else (skills[0] if skills else None))
+    starts = reference == START_SKILL
     defaults = {
         "skill-invocation": {
             "skill": reference,
             "prompt": ("What science tools do I have set up here, and what should I do next?"
-                       if reference == "start" else f"Use the {reference} skill now and show me its result."),
-            "expect": [re.escape(name)],
-            "criteria": "The skill's screen appears without coaching: the capability is named, and the skill's "
-                        "required behaviors are all present.",
+                       if starts else f"Use the {reference} skill now and show me its result."),
+            # The package's own name is the expectation for a start-like
+            # reference skill, whose whole job is to tell a reader which
+            # capabilities are installed, and for no other skill. A domain
+            # skill has no reason to emit its package name, and printing
+            # one to satisfy the harness would put noise into a user's
+            # output, so a domain skill gets no default expectation: the
+            # capability declares what its skill must state, and until it
+            # does, probe_debt says what is owed and the test is blocked.
+            "expect": [re.escape(name)] if starts else [],
+            "criteria": ("The skill's screen appears without coaching: the capability is named, and the skill's "
+                         "required behaviors are all present." if starts else
+                         "The skill's screen appears without coaching, in the slash form with the probe's "
+                         "arguments and in the conversational form, and states what the capability's own "
+                         "expectation names."),
         },
         "knowledge-resolution": {
             "prompt": "Consult the installed knowledge bundles the way the installed consult-knowledge skill sets "
@@ -165,6 +184,54 @@ def probes_for(cap: dict[str, Any]) -> dict[str, dict[str, Any]]:
         merged.update(cap["probes"].get(test) or {})
         out[test] = merged
     return out
+
+
+def probe_debt(name: str, probe: dict[str, Any]) -> str | None:
+    """What the capability owes this skill-invocation probe, or None when
+    the probe can judge the skill.
+
+    An expectation is worth running only when it is something the skill has
+    a reason to emit. For a start-like reference skill that is the
+    package's name, which is the whole point of the skill. For a domain
+    skill it is whatever the skill must state to have done the work: the
+    two probes in the organization that read well name the computation
+    concept by its package path and a value the prompt bound, a window or
+    a region. A domain skill with no expectation, or with its package's
+    name as the only one, is not being tested by the probe it has, and a
+    package cannot honestly answer either one: the first passes on any
+    reply at all, the second passes only if the skill prints its package
+    name in output a scientist reads. So the harness states the debt and
+    the test is blocked, which no release can advertise past, rather than
+    recording a pass or a failure that says nothing about the skill."""
+    if probe.get("skill") == START_SKILL:
+        return None
+    owed = ("declare probes.skill-invocation in surfaces.yaml with an expectation the skill has a reason to "
+            "emit, such as the computation concept it must cite by package path together with a value the "
+            "prompt bound")
+    expect = [str(e).strip() for e in (probe.get("expect") or [])]
+    if not expect:
+        return (f"{probe.get('skill')} is not a start-like reference skill and this capability declares no "
+                f"expectation for it: " + owed)
+    if set(expect) <= {name, re.escape(name)}:
+        return (f"the expectation for {probe.get('skill')} is the package's own name, which a domain skill has "
+                f"no reason to emit: " + owed)
+    return None
+
+
+def slash_form(name: str, probe: dict[str, Any]) -> str:
+    """The slash invocation of the probe's skill, carrying the work its
+    expectation is judged on.
+
+    A bare slash command delivers the skill's instructions and nothing
+    else, so a skill that needs a region and a period can only ask for
+    them, and the run records a failure that belongs to the harness rather
+    than to the package. The probe's `arguments` are sent when it states
+    them and its conversational prompt otherwise, so both forms are judged
+    on the same expectation and the only difference left between them is
+    the one the test is for: whether the skill is reached by name or
+    chosen without coaching."""
+    args = str(probe.get("arguments") or probe.get("prompt") or "").strip()
+    return f"/{name}:{probe['skill']}" + (f" {args}" if args else "")
 
 
 # ---------------------------------------------------------------------------
@@ -475,13 +542,16 @@ def qualify_claude_code(cap: dict[str, Any], marketplace: str, model: str | None
 
     # skill-invocation: slash form and conversational form, no coaching
     p = probes["skill-invocation"]
+    owed = probe_debt(name, p) if p.get("skill") else None
     if skip("skill-invocation"):
         pass
     elif not p.get("skill"):
         record("skill-invocation", "skip", "the package carries no skills")
+    elif owed:
+        record("skill-invocation", "blocked", owed, skill=p["skill"])
     else:
         results = []
-        for form, prompt in (("slash", f"/{name}:{p['skill']}"), ("conversational", p["prompt"])):
+        for form, prompt in (("slash", slash_form(name, p)), ("conversational", p["prompt"])):
             reply = headless(prompt, DEFAULT_TOOLS, max_turns, model, timeout, cwd=work)
             if reply["model"]:
                 models.add(reply["model"])
@@ -493,7 +563,7 @@ def qualify_claude_code(cap: dict[str, Any], marketplace: str, model: str | None
         record("skill-invocation", "pass" if ok_all else "fail",
                "; ".join(f"{form}: {'ok' if ok else 'unmatched ' + str(un)} ({st}, {turns} turns) {path}"
                          for form, ok, st, turns, un, path in results),
-               skill=p["skill"], prompt=p["prompt"])
+               skill=p["skill"], prompt=p["prompt"], slash=slash_form(name, p))
 
     # knowledge-resolution: a concept cited by bundle path with its status
     p = probes["knowledge-resolution"]
@@ -759,6 +829,14 @@ def write_checklist(cap: dict[str, Any], runtime: str, path: Path) -> None:
             item["criteria"] = probe["criteria"]
             if probe.get("skill"):
                 item["skill"] = probe["skill"]
+                if t == "skill-invocation":
+                    # The operator runs the same two forms the headless
+                    # runner does, and is told the same debt rather than
+                    # being left to mark a probe that cannot judge anything.
+                    item["slash"] = slash_form(cap["name"], probe)
+                    owed = probe_debt(cap["name"], probe)
+                    if owed:
+                        item.update(status="blocked", evidence=owed)
         else:
             item["criteria"] = criteria.get(t, "")
         if t == "dependency-resolution" and not osp.dependency_entries(cap["package"]):
@@ -812,7 +890,7 @@ def read_checklist(cap: dict[str, Any], runtime: str, path: Path) -> tuple[dict[
             errors.append(f"{t}: evidence is empty")
             continue
         tests[t] = {"status": st, "evidence": ev}
-        for k in ("prompt", "skill"):
+        for k in ("prompt", "skill", "slash"):
             if item.get(k):
                 tests[t][k] = item[k]
     if errors:
