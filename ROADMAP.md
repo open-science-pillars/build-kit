@@ -14,7 +14,6 @@
 - `federated-governance-baseline`: Declare repository-level roadmap authority (`.github`)
 - `reconcile-project-record`: Reconcile specifications, progress, limitations, and counts (`marketplace`)
 - `roadmap-harness-v1`: Build the federated roadmap harness (`build-kit`)
-- `adr-d-receipt-skills`: Amend the promotion-to-host-a-wrap decision to admit receipt skills, with the test that keeps them honest (`marketplace`)
 - `landice-grace-knowledge`: GRACE-FO mass change knowledge for land ice, reviewed and offered for confirmation (`nasa-daac-knowledge`)
 - `ocean-sweep`: A sweep over the sea level budget's declared parameters, the pattern-setter for receipt skills (`ocean-science`)
 - `r2-core-reference`: Qualify core as the reference capability on Claude Code, Cowork and Codex from one SKILL.md (`core`)
@@ -75,10 +74,10 @@ Proposed, waiting on a dependency, in priority order.
 - P1 `r3-dependency-reference`: Validate dependency realization on ocean-science across runtimes (`ocean-science`)
 - P1 `tutorial-nonauthor-validation`: Complete non-author Tutorial 2 validation (`tutorials`)
 
-### Done (44)
+### Done (45)
 
 <details>
-<summary>44 done deliverables</summary>
+<summary>45 done deliverables</summary>
 
 - `hydro-usgs-waterdata-migration`: Migrate the USGS connector to the Water Data APIs and release it
 - `hydro-basin-unit`: Add basin delineation as the unit of analysis
@@ -112,6 +111,7 @@ Proposed, waiting on a dependency, in priority order.
 - `landice-imbie-knowledge`: The published ice sheet assessment and the firn model as reference concepts
 - `landice-input-output`: Ice sheet mass balance by the input-output method, as a third independent attested computation
 - `landice-promotion`: Promote land-ice out of planned as a wrap-only release
+- `adr-d-receipt-skills`: Amend the promotion-to-host-a-wrap decision to admit receipt skills, with the test that keeps them honest
 - `atmos-syn1deg-knowledge`: The synoptic radiation product and the surface flux caveat as concepts
 - `atmos-cloud-radiative-effect`: Cloud radiative effect at the top of the atmosphere, as an attested computation
 - `atmos-physics-promotion`: Promote atmospheric-physics out of planned as a wrap-only release
@@ -809,7 +809,7 @@ Every wrapped computation can be swept over its declared parameters, drawn from 
 
 | Deliverable | Repository | Status | Priority | Contributor | Issue |
 |---|---|---|---|---|---|
-| `adr-d-receipt-skills`: Amend the promotion-to-host-a-wrap decision to admit receipt skills, with the test that keeps them honest | `marketplace` | active | P1 | owner-only | none |
+| `adr-d-receipt-skills`: Amend the promotion-to-host-a-wrap decision to admit receipt skills, with the test that keeps them honest | `marketplace` | done | P1 | owner-only | none |
 | `ocean-sweep`: A sweep over the sea level budget's declared parameters, the pattern-setter for receipt skills | `ocean-science` | active | P1 | needs-context | [#64](https://github.com/open-science-pillars/ocean-science/issues/64) |
 | `landice-receipt-skills`: Sweep, figures and methods over the nsidc closures, as receipt skills in land-ice | `land-ice` | proposed | P1 | needs-context | [#7](https://github.com/open-science-pillars/land-ice/issues/7) |
 | `atmos-receipt-skills`: Sweep, figures and methods over the asdc computations, as receipt skills in atmospheric-physics | `atmospheric-physics` | proposed | P1 | needs-context | [#7](https://github.com/open-science-pillars/atmospheric-physics/issues/7) |
@@ -822,6 +822,7 @@ Every wrapped computation can be swept over its declared parameters, drawn from 
 - [ ] The specification's wrap-only section defines a receipt skill by the same test and names a sweep that averages its rows as the number of its own that waits on the ablation.
 - [ ] The pre-registration carries a dated entry reading the amendment against its conditions: a sweep turns a window dependence the concepts already state into a measured table and prejudges nothing.
 - Gate: The decision owner's record. Point 3 of the decision bounds a wrap-only release to the wrapping skills and nothing else, which was written to keep promotion from becoming a back door for workflow skills; a receipt skill is neither a wrap nor a workflow, and the bound needs a gate with a test rather than a relaxation.
+- Evidence: `marketplace PR #106, merged by the decision owner on 2026-09-20: ADR D point 3 amended with a dated paragraph preserving the original wording and stating what was conflated, the specification at 0.6.22 with the receipt skill defined in the wrap-only section, and the pre-registration's dated reading. The first clause of point 3, the ablation as the gate for any number of a capability's own, is untouched`
 
 **`ocean-sweep`**
 
