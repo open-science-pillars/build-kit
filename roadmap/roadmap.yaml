@@ -50,14 +50,19 @@ decisions:
     rationale: "The project owner decided not to submit."
   - id: pillar-means-sphere
     title: Pillar means sphere (ADR A)
-    status: proposed
-    decided: 2026-09-11
-    rationale: "Pillars are the five Earth science spheres; disciplines are domain capabilities inside them; provider bundles stay a separate authority axis; classification is canonical under .osp/repository.yaml. Record: marketplace docs/decisions/adr-a-pillar-means-sphere.md; accepted when it merges."
+    status: accepted
+    decided: 2026-09-12
+    rationale: "Pillars are the five Earth science spheres; disciplines are domain capabilities inside them; provider bundles stay a separate authority axis; classification is canonical under .osp/repository.yaml. Record: marketplace docs/decisions/adr-a-pillar-means-sphere.md, accepted on merge to main 2026-09-12 and implemented the same day."
   - id: multi-runtime-packaging
     title: One governed capability, projected to runtimes (ADR B)
-    status: proposed
-    decided: 2026-09-11
-    rationale: "KNOW, ACT, PROVE and REACH are authored once; build-kit renders a Claude projection and an Agent Plugins 1.0 projection; Claude Code, Cowork and Codex are qualification targets; no per-client adapters. Record: marketplace docs/decisions/adr-b-multi-runtime-capability-packaging.md; accepted when it merges."
+    status: accepted
+    decided: 2026-09-12
+    rationale: "KNOW, ACT, PROVE and REACH are authored once; build-kit renders a Claude projection and an Agent Plugins 1.0 projection; Claude Code, Cowork and Codex are qualification targets; no per-client adapters. Record: marketplace docs/decisions/adr-b-multi-runtime-capability-packaging.md, accepted on merge to main 2026-09-12 and implemented the same day. The four plane names this decision was written in were retired by ADR E; what it settled about one governed capability projected to runtimes stands."
+  - id: code-placement-by-plane
+    title: Code placement by plane (ADR C)
+    status: accepted
+    decided: 2026-09-16
+    rationale: "Where a file lives follows the plane it belongs to. Record: marketplace docs/decisions/adr-c-code-placement-by-plane.md, accepted on merge to main 2026-09-16 and implemented the same day. Superseded 2026-09-20 by ADR E, except the retirement of references/skills/, which stands. Recorded here because it was accepted and implemented and the record ran from ADR B to ADR D without it."
   - id: one-state-roadmap
     title: One state model for the roadmap
     status: accepted
@@ -187,7 +192,7 @@ initiatives:
       - id: reconcile-project-record
         title: Reconcile specifications, progress, limitations, and counts
         repo: marketplace
-        status: active
+        status: done
         priority: P0
         depends_on: [roadmap-harness-v1]
         gate: null
@@ -195,7 +200,15 @@ initiatives:
           - "Completed work is not described as deferred."
           - "AI-for-Science is recorded as declined."
           - "Counts, versions, and current limitations match repositories."
-        evidence: []
+        evidence:
+          - "AI-for-Science was already recorded as declined, ai4s-2026 on 2026-07-15 with the owner's rationale, and needed no change. It is the one criterion of the three that held when this deliverable was opened."
+          - "The decisions record described accepted decisions as proposed. ADR A and ADR B both said proposed, dated 2026-09-11, with a rationale ending accepted when it merges; both had merged to main on 2026-09-12 and been implemented the same day. ADR C was missing from the record altogether, so it ran from B to D without the decision that placed every file for four days and is still in force for the part ADR E did not supersede. All three corrected against the ADRs' own status lines."
+          - "The organization profile, which is the public front page, listed land-ice and atmospheric-physics as planned when both are developing and both now carry a published release. Its sphere block is generated, and regenerating it also corrected the provider bundle's description, which named two archives when the bundle holds eight. The hand written line above the block said eleven sphere repositories are planned; nine do, the two promoted this round being the difference. build-kit's own SPHERE-VIEW.md had drifted the same way and was regenerated with it."
+          - "The marketplace README described atmospheric-physics and land-ice as carrying the run instructions for computations signed in a provider bundle, and the bundle as holding attested computations. That is the architecture from before the move: the computations live in the capabilities now and the bundle holds knowledge and evidence only. The runtime table also read Claude Cowork, tested, qualified per release, when no release has ever been qualified on Cowork."
+          - "The two live status documents named one stale version between them. known-limitations.md and runtime-distribution.md both said core 0.5.1 carries a qualified record; core is 0.6.0. Both now state the whole picture rather than one example: core 0.6.0 and hydrology 0.8.1 qualified on all eleven tests, hydrology's being the first record it has carried at any version, and ocean-science 0.9.0, land-ice 0.2.0 and atmospheric-physics 0.2.0 waived and brought down from supported to tested. That the three are waived is a current limitation and was recorded nowhere before this."
+          - "Not changed, deliberately. phase2-preregistration.md names atmospheric-physics 0.1.0 and land-ice 0.1.0, which are superseded versions, but the document states that nothing in it is edited in place and that amendments are dated additions; its entries are a dated record of what was true on 2026-09-19 and are correct as history. The release and qualification guides use core 0.5.1 as a worked example throughout, which is illustration rather than a claim about the current state."
+          - "Left for the maintainer rather than decided here. landice-grace-knowledge and landice-nsidc-knowledge are both active and both meet every criterion that a repository can answer: the concepts are stable, the four named GRACE gotchas and the sea level equivalent recipe are present, knowledge/nsidc holds ATL15 and ITS_LIVE with the height change is not mass change gotcha. What cannot be checked from a repository is whether a provider contact has been invited to confirm them, which each acceptance requires and only the steward knows."
+          - "ocean-science's Claude Code waiver for 0.9.0 states as a finding that the skill's output never names the capability. That was later established to be a defect in the qualification harness's default expectation rather than in the package, and the probe has been replaced. The waiver is a dated record attributed to the maintainer, so the text is left as written for the maintainer to amend or annotate."
         contributor:
           readiness: needs-context
           champion: PaulMRamirez

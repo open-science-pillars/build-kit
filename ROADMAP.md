@@ -12,7 +12,6 @@
 ### Now
 
 - `federated-governance-baseline`: Declare repository-level roadmap authority (`.github`)
-- `reconcile-project-record`: Reconcile specifications, progress, limitations, and counts (`marketplace`)
 - `landice-grace-knowledge`: GRACE-FO mass change knowledge for land ice, reviewed and offered for confirmation (`nasa-daac-knowledge`)
 - `r2-core-reference`: Qualify core as the reference capability on Claude Code, Cowork and Codex from one SKILL.md (`core`)
 - `landice-nsidc-knowledge`: ICESat-2 height change and ice velocity knowledge in a new NSIDC bundle (`nasa-daac-knowledge`)
@@ -48,8 +47,13 @@
 
 Proposed, every dependency done, in priority order.
 
+- P0 `ablation-protocol-amendment`: Publish the post-migration ablation amendment (`marketplace`)
+- P1 `codex-surface-policy`: Define Codex as a supported distribution and behavior runtime (`marketplace`)
+- P1 `conversational-surface-validation`: Complete Cowork qualification of a release (`marketplace`)
 - P1 `hydro-investigation-tutorial`: Write the hydrology investigation tutorial and run it with a non-author reader (`tutorials`)
 - P1 `provider-confirmed-voicing`: Voice the provider-confirmed tier when citing a concept (`core`): gate: Lands in the release after 0.5.1; a release candidate never edits a skill.
+- P1 `provider-steward-handoff`: Complete or accurately reframe provider stewardship (`nasa-daac-knowledge`)
+- P1 `tutorial-nonauthor-validation`: Complete non-author Tutorial 2 validation (`tutorials`)
 - P2 `hydro-coastal-water`: Coastal composites where hydrology meets ocean science (`ocean-science`)
 - P2 `r6-compat-probes`: Add non-blocking compatibility probes for Gemini CLI and Goose (`build-kit`)
 - P2 `r9-headless-ci-qualification`: Run the headless qualification legs in the organization's CI on a release candidate (`build-kit`): gate: Needs a decision to hold a runtime credential in CI, at which scope and who may trigger it, and the first Codex checklist run to confirm how the portable package installs there (build-kit issue 32).
@@ -58,24 +62,20 @@ Proposed, every dependency done, in priority order.
 
 Proposed, waiting on a dependency, in priority order.
 
-- P0 `ablation-protocol-amendment`: Publish the post-migration ablation amendment (`marketplace`)
 - P0 `ablation-runner-calibration`: Calibrate non-obvious probes and release-mixing grading (`evals`)
 - P0 `powered-ablation-run`: Run and publish the powered ablation (`evals`)
 - P1 `activation-eval-runner`: Build and pilot the activation-eval runner (`evals`)
-- P1 `codex-surface-policy`: Define Codex as a supported distribution and behavior runtime (`marketplace`)
-- P1 `conversational-surface-validation`: Complete Cowork qualification of a release (`marketplace`)
 - P1 `governed-release`: Cut the first governed, citable OSP release (`build-kit`)
 - P1 `hydro-stewards-and-releases`: Steward scaffolds, CODEOWNERS scopes, and the general-availability flip (`nasa-daac-knowledge`)
-- P1 `provider-steward-handoff`: Complete or accurately reframe provider stewardship (`nasa-daac-knowledge`)
 - P1 `r3-dependency-reference`: Validate dependency realization on ocean-science across runtimes (`ocean-science`)
-- P1 `tutorial-nonauthor-validation`: Complete non-author Tutorial 2 validation (`tutorials`)
 
-### Done (58)
+### Done (59)
 
 <details>
-<summary>58 done deliverables</summary>
+<summary>59 done deliverables</summary>
 
 - `roadmap-harness-v1`: Build the federated roadmap harness
+- `reconcile-project-record`: Reconcile specifications, progress, limitations, and counts
 - `hydro-usgs-waterdata-migration`: Migrate the USGS connector to the Water Data APIs and release it
 - `hydro-basin-unit`: Add basin delineation as the unit of analysis
 - `hydro-p-et-connectors`: Add IMERG precipitation and MOD16 and OpenET evapotranspiration with their trap sets
@@ -152,8 +152,9 @@ Proposed, waiting on a dependency, in priority order.
 ## Decisions
 
 - **AI-for-Science submission** (`ai4s-2026`): declined. The project owner decided not to submit.
-- **Pillar means sphere (ADR A)** (`pillar-means-sphere`): proposed. Pillars are the five Earth science spheres; disciplines are domain capabilities inside them; provider bundles stay a separate authority axis; classification is canonical under .osp/repository.yaml. Record: marketplace docs/decisions/adr-a-pillar-means-sphere.md; accepted when it merges.
-- **One governed capability, projected to runtimes (ADR B)** (`multi-runtime-packaging`): proposed. KNOW, ACT, PROVE and REACH are authored once; build-kit renders a Claude projection and an Agent Plugins 1.0 projection; Claude Code, Cowork and Codex are qualification targets; no per-client adapters. Record: marketplace docs/decisions/adr-b-multi-runtime-capability-packaging.md; accepted when it merges.
+- **Pillar means sphere (ADR A)** (`pillar-means-sphere`): accepted. Pillars are the five Earth science spheres; disciplines are domain capabilities inside them; provider bundles stay a separate authority axis; classification is canonical under .osp/repository.yaml. Record: marketplace docs/decisions/adr-a-pillar-means-sphere.md, accepted on merge to main 2026-09-12 and implemented the same day.
+- **One governed capability, projected to runtimes (ADR B)** (`multi-runtime-packaging`): accepted. KNOW, ACT, PROVE and REACH are authored once; build-kit renders a Claude projection and an Agent Plugins 1.0 projection; Claude Code, Cowork and Codex are qualification targets; no per-client adapters. Record: marketplace docs/decisions/adr-b-multi-runtime-capability-packaging.md, accepted on merge to main 2026-09-12 and implemented the same day. The four plane names this decision was written in were retired by ADR E; what it settled about one governed capability projected to runtimes stands.
+- **Code placement by plane (ADR C)** (`code-placement-by-plane`): accepted. Where a file lives follows the plane it belongs to. Record: marketplace docs/decisions/adr-c-code-placement-by-plane.md, accepted on merge to main 2026-09-16 and implemented the same day. Superseded 2026-09-20 by ADR E, except the retirement of references/skills/, which stands. Recorded here because it was accepted and implemented and the record ran from ADR B to ADR D without it.
 - **One state model for the roadmap** (`one-state-roadmap`): accepted. The proposal-state axis, the seeded proposal issues, the decision labels and the reconcile step were built for a federation of maintainer teams the organization does not yet have. roadmap.yaml stays the single source of truth with one status per deliverable (proposed, active, blocked, done, declined); an active deliverable has an issue in its repository, opened when work starts and closed by the pull request that finishes it; the tool never writes issues. Revisit trigger: adopt GitHub Projects as a rendered view when a second maintainer team declines to edit the YAML or a partner asks for a board; render it from the YAML, one way.
 - **A computation is a skill (ADR E)** (`a-computation-is-a-skill`): accepted. Every attested computation's code, data root and concept move out of the provider bundle into the capability that runs it; a knowledge bundle holds knowledge and evidence and no runnable code; the plane vocabulary, the placement gate, the wrapping rule and the wrap-only release are retired. Record: marketplace docs/decisions/adr-e-a-computation-is-a-skill.md, merged 2026-09-20 (marketplace PR 107) on the decision owner's instruction.
 - **Land-ice is the first new sphere, entered through the sea level budget** (`first-new-sphere-land-ice`): accepted. The first sphere opened after the founding domains is land-ice, entered through GRACE-FO mass change and the sea level budget rather than through ice-sheet altimetry. Reasons: GRACE-FO is a PO.DAAC product, so the first non-founding capability carries knowledge signed by the center that produces it; the budget composes what exists (altimetry in the provider bundle, Argo through the core connector, the GRACE-FO mascon concept) into one deterministic computation with a receipt, the first true composite; its traps (glacial isostatic adjustment, leakage, the 2017 to 2018 gap between missions, degree-1 and C20 replacements, mascon versus spherical-harmonic solutions) are the kind the project exists to prevent; and the data is small. Sea-ice follows when an NSIDC steward engages; precipitation stays a hydrology slice until it carries workflows hydrology does not. Promotion out of planned still waits on the pre-registered domain-expansion gate (the powered ablation) and on a dated pre-registration entry; the provider-bundle knowledge can be captured before that, as the ingest loop allows.
@@ -174,7 +175,7 @@ The organization has a team-safe roadmap harness and public documentation that m
 |---|---|---|---|---|---|
 | `roadmap-harness-v1`: Build the federated roadmap harness | `build-kit` | done | P0 | owner-only | none |
 | `federated-governance-baseline`: Declare repository-level roadmap authority | `.github` | active | P0 | owner-only | none |
-| `reconcile-project-record`: Reconcile specifications, progress, limitations, and counts | `marketplace` | active | P0 | needs-context | none |
+| `reconcile-project-record`: Reconcile specifications, progress, limitations, and counts | `marketplace` | done | P0 | needs-context | none |
 | `codex-surface-policy`: Define Codex as a supported distribution and behavior runtime | `marketplace` | proposed | P1 | needs-context | [#2](https://github.com/open-science-pillars/marketplace/issues/2) |
 
 #### Acceptance details
@@ -199,6 +200,7 @@ The organization has a team-safe roadmap harness and public documentation that m
 - [ ] AI-for-Science is recorded as declined.
 - [ ] Counts, versions, and current limitations match repositories.
 - Depends on: `roadmap-harness-v1`
+- Evidence: `AI-for-Science was already recorded as declined, ai4s-2026 on 2026-07-15 with the owner's rationale, and needed no change. It is the one criterion of the three that held when this deliverable was opened.`, `The decisions record described accepted decisions as proposed. ADR A and ADR B both said proposed, dated 2026-09-11, with a rationale ending accepted when it merges; both had merged to main on 2026-09-12 and been implemented the same day. ADR C was missing from the record altogether, so it ran from B to D without the decision that placed every file for four days and is still in force for the part ADR E did not supersede. All three corrected against the ADRs' own status lines.`, `The organization profile, which is the public front page, listed land-ice and atmospheric-physics as planned when both are developing and both now carry a published release. Its sphere block is generated, and regenerating it also corrected the provider bundle's description, which named two archives when the bundle holds eight. The hand written line above the block said eleven sphere repositories are planned; nine do, the two promoted this round being the difference. build-kit's own SPHERE-VIEW.md had drifted the same way and was regenerated with it.`, `The marketplace README described atmospheric-physics and land-ice as carrying the run instructions for computations signed in a provider bundle, and the bundle as holding attested computations. That is the architecture from before the move: the computations live in the capabilities now and the bundle holds knowledge and evidence only. The runtime table also read Claude Cowork, tested, qualified per release, when no release has ever been qualified on Cowork.`, `The two live status documents named one stale version between them. known-limitations.md and runtime-distribution.md both said core 0.5.1 carries a qualified record; core is 0.6.0. Both now state the whole picture rather than one example: core 0.6.0 and hydrology 0.8.1 qualified on all eleven tests, hydrology's being the first record it has carried at any version, and ocean-science 0.9.0, land-ice 0.2.0 and atmospheric-physics 0.2.0 waived and brought down from supported to tested. That the three are waived is a current limitation and was recorded nowhere before this.`, `Not changed, deliberately. phase2-preregistration.md names atmospheric-physics 0.1.0 and land-ice 0.1.0, which are superseded versions, but the document states that nothing in it is edited in place and that amendments are dated additions; its entries are a dated record of what was true on 2026-09-19 and are correct as history. The release and qualification guides use core 0.5.1 as a worked example throughout, which is illustration rather than a claim about the current state.`, `Left for the maintainer rather than decided here. landice-grace-knowledge and landice-nsidc-knowledge are both active and both meet every criterion that a repository can answer: the concepts are stable, the four named GRACE gotchas and the sea level equivalent recipe are present, knowledge/nsidc holds ATL15 and ITS_LIVE with the height change is not mass change gotcha. What cannot be checked from a repository is whether a provider contact has been invited to confirm them, which each acceptance requires and only the steward knows.`, `ocean-science's Claude Code waiver for 0.9.0 states as a finding that the skill's output never names the capability. That was later established to be a defect in the qualification harness's default expectation rather than in the package, and the probe has been replaced. The waiver is a dated record attributed to the maintainer, so the text is left as written for the maintainer to amend or annotate.`
 
 **`codex-surface-policy`**
 

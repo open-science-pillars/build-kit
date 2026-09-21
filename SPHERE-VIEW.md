@@ -14,7 +14,7 @@ installable.
 | Repository | Discipline | Status | Also |
 |---|---|---|---|
 | `atmospheric-composition` | Atmospheric Composition | planned |  |
-| `atmospheric-physics` | Atmospheric Physics | planned |  |
+| `atmospheric-physics` | Atmospheric Physics | developing |  |
 
 ## Biosphere
 
@@ -27,7 +27,7 @@ installable.
 
 | Repository | Discipline | Status | Also |
 |---|---|---|---|
-| `land-ice` | Land Ice | planned |  |
+| `land-ice` | Land Ice | developing |  |
 | `sea-ice` | Sea Ice | planned |  |
 
 ## Geosphere
@@ -49,7 +49,7 @@ installable.
 
 | Repository | Kind | Status | Spheres | Notes |
 |---|---|---|---|---|
-| `nasa-daac-knowledge` | provider | available | all | Provider knowledge bundles (PO.DAAC, ESDIS), signed by their stewards; installed as a dependency of the domain capabilities |
+| `nasa-daac-knowledge` | provider | available | all | Provider knowledge bundles (PO.DAAC, ESDIS, NSIDC, GES DISC, ASDC, OB.DAAC, LP DAAC, ORNL DAAC), signed by their stewards; installed as a dependency of the domain capabilities |
 | `partner-knowledge` | provider | planned | all | Provider knowledge from non-NASA stewards, signed by them; none engaged yet |
 
 ## Composites
