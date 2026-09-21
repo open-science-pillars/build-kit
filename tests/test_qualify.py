@@ -341,3 +341,58 @@ class WaiverAndCandidateTests(unittest.TestCase):
             q.candidate_catalog(self.cap, self.root / "work")
         self.assertIn("core", str(bad.exception))
         self.assertIn("is not there", str(bad.exception))
+
+
+class GoldenSelectionAndMarketplace(unittest.TestCase):
+    """The two defects a hydrology qualification run surfaced."""
+
+    def _cap(self, tmp, prove_text):
+        root = Path(tmp)
+        (root / "verification").mkdir(parents=True, exist_ok=True)
+        (root / "verification" / "basin_water_balance.py").write_text("print('golden')\n")
+        (root / "verification" / "drought_analysis.py").write_text("print('golden')\n")
+        return {
+            "name": "hydrology",
+            "dir": root,
+            "package": {"content": {"verification": "verification"}},
+            "probes": {"prove": {"prompt": prove_text}},
+        }
+
+    def test_a_golden_is_excluded_by_its_path_and_never_by_its_file_name(self):
+        """The executor and its golden share a file name once a computation
+        is a skill, so a name match drops the golden and still says pass."""
+        with tempfile.TemporaryDirectory() as tmp:
+            root = Path(tmp)
+            executor = "${PLUGIN_ROOT}/skills/basin-water-balance/scripts/basin_water_balance.py"
+            cap = self._cap(tmp, f"run the computation: uv run {executor} --receipt out.json")
+            names = sorted(s.name for s in q.golden_scripts(cap, root))
+            self.assertIn("basin_water_balance.py", names,
+                          "the golden shares a file name with the executor and must still run")
+            self.assertEqual(["basin_water_balance.py", "drought_analysis.py"], names)
+
+    def test_a_golden_the_prove_probe_names_by_path_is_still_excluded(self):
+        """The exclusion the function exists for keeps working."""
+        with tempfile.TemporaryDirectory() as tmp:
+            root = Path(tmp)
+            cap = self._cap(tmp, "uv run ${PLUGIN_ROOT}/verification/basin_water_balance.py --receipt out.json")
+            names = sorted(s.name for s in q.golden_scripts(cap, root))
+            self.assertEqual(["drought_analysis.py"], names)
+
+    def test_an_unregistered_marketplace_is_added_rather_than_raising(self):
+        """marketplace_name raises a plain QualifyError when nothing is
+        registered, which is exactly when the add is supposed to run."""
+        calls = []
+
+        def fake_name(_marketplace):
+            if not calls:
+                raise q.QualifyError("marketplace ... is not registered by the runtime; known: none")
+            return "osp-candidate"
+
+        def fake_run(argv, **_kw):
+            calls.append(argv)
+            return types.SimpleNamespace(returncode=0, stdout="", stderr="")
+
+        with mock.patch.object(q, "marketplace_name", fake_name), \
+             mock.patch.object(q, "run", fake_run):
+            self.assertEqual("osp-candidate", q.register_marketplace("/tmp/catalog"))
+        self.assertTrue(any("add" in argv for argv in calls), "the add never ran")

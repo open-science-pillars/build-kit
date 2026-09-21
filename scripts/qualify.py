@@ -117,7 +117,8 @@ def golden_scripts(cap: dict[str, Any], root: Path) -> list[Path]:
     """The scripts the golden test runs, with no arguments: those the
     capability lists under probes.golden-computation, else every script
     at the top of its verification tree except the executor and attester
-    the prove probe names (they take arguments and are the prove test)."""
+    the prove probe names by path (they take arguments and are the prove
+    test)."""
     listed = cap["probes"].get("golden-computation")
     if listed:
         return [root / str(rel) for rel in listed]
@@ -126,7 +127,12 @@ def golden_scripts(cap: dict[str, Any], root: Path) -> list[Path]:
         return []
     prove = cap["probes"].get("prove") or {}
     prove_text = " ".join([str(prove.get("prompt", ""))] + [str(c) for c in prove.get("command") or []])
-    return [s for s in sorted((root / ver_rel).glob("*.py")) if s.name not in prove_text]
+    # By path, never by bare file name. After a computation became a skill the
+    # executor and its golden routinely share a file name (hydrology's
+    # basin_water_balance.py is both), so a name match drops the golden the
+    # package most needs run and still reports the test passed.
+    return [s for s in sorted((root / ver_rel).glob("*.py"))
+            if str(s.relative_to(root)) not in prove_text]
 
 
 def probes_for(cap: dict[str, Any]) -> dict[str, dict[str, Any]]:
@@ -355,6 +361,8 @@ def register_marketplace(marketplace: str) -> str:
         if gone.returncode != 0:
             raise QualifyError(f"marketplace remove {stale.name} failed: "
                                f"{(gone.stderr or gone.stdout)[-300:]}") from stale
+    except QualifyError:
+        pass  # not registered at all, which is the case the add below exists for
     add = run(["claude", "plugin", "marketplace", "add", marketplace], timeout=600)
     if add.returncode != 0:
         raise QualifyError(f"marketplace add {marketplace} failed: {(add.stderr or add.stdout)[-300:]}")
