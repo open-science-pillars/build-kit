@@ -336,13 +336,18 @@ initiatives:
           url: https://github.com/open-science-pillars/marketplace/issues/4
         title: Publish the post-migration ablation amendment
         repo: marketplace
-        status: proposed
+        status: done
         priority: P0
         depends_on: [reconcile-project-record]
         gate: null
         acceptance:
           - "The refined cases, model, grading, sample size, and decision rule are recorded before the powered run."
-        evidence: []
+        evidence:
+          - "marketplace PR 113: a dated addition to phase2-preregistration.md, 0 deletions against main, so the document's own rule that nothing in it is edited in place holds. All five are recorded before any arm runs: the refined cases, the model, the grading, the sample size of 20 trials per case per arm, and the decision rule, which is the pooled risk difference with its binomial interval and is unchanged from the go and stop conditions it was always tied to"
+          - "The ablation could not have run at all, which had to be fixed before a design was worth writing. Its manifest named all seven cases at a path they left in July, the only manifest in the repository not carried along when the cases moved, so every one resolved to nothing; and its runner pinned the installed knowledge tree to ocean-science 0.3.0, four releases behind, so the bundle-OFF arm could only reach its own guard and exit. evals PR 46 repoints the manifest, all seven resolving, and makes the runner find the installed tree rather than name a version, with the restore path untouched"
+          - "The pilot's null was re-read rather than inherited. The July entry attributes the flat result to the skills carrying the gotcha rules in both arms, which covers six of the seven cases because they target a skill. It does not cover grace-leakage, which targets none, rests on the concepts alone, and was flat too. So a second explanation is live, that these traps are recoverable from the model's own prior knowledge, and the refined design has to separate the two rather than assume the first"
+          - "The refinement raises each case's graded claim from recognising that a trap exists to stating what only the signed concept carries: a value, an uncertainty, a named version or epoch, a dated verification. It deliberately does not also ablate the gotcha content from the skills, which was the pilot entry's other suggestion, because that would confound the knowledge bundle with the skill bodies and stop measuring what the go condition names"
+          - "The model is pinned to one identifier for both arms, named in the document on the decision owner's call. Naming it is a deliberate exception to the rule that repository content names no model: the rule keeps the product runtime neutral, and an ablation's model is not a dependency the capability carries but the condition the experiment measures. The pin departs from the line the headline experiment was first registered on, and the departure is recorded with its consequences before the run, chiefly that a stronger model holds more of these traps in prior knowledge, which makes a null both likelier and harder to attribute. The entry states that this is not a reason to choose a weaker model, since selecting the condition that flatters the hypothesis is what pre-registration exists to prevent, and it is instead why the grading asks for values rather than recognition and why grace-leakage reports separately"
         contributor:
           readiness: owner-only
           champion: PaulMRamirez

@@ -45,7 +45,7 @@
 
 Proposed, every dependency done, in priority order.
 
-- P0 `ablation-protocol-amendment`: Publish the post-migration ablation amendment (`marketplace`)
+- P0 `ablation-runner-calibration`: Calibrate non-obvious probes and release-mixing grading (`evals`)
 - P1 `codex-surface-policy`: Define Codex as a supported distribution and behavior runtime (`marketplace`)
 - P1 `conversational-surface-validation`: Complete Cowork qualification of a release (`marketplace`)
 - P1 `hydro-investigation-tutorial`: Write the hydrology investigation tutorial and run it with a non-author reader (`tutorials`)
@@ -60,20 +60,20 @@ Proposed, every dependency done, in priority order.
 
 Proposed, waiting on a dependency, in priority order.
 
-- P0 `ablation-runner-calibration`: Calibrate non-obvious probes and release-mixing grading (`evals`)
 - P0 `powered-ablation-run`: Run and publish the powered ablation (`evals`)
 - P1 `activation-eval-runner`: Build and pilot the activation-eval runner (`evals`)
 - P1 `governed-release`: Cut the first governed, citable OSP release (`build-kit`)
 - P1 `hydro-stewards-and-releases`: Steward scaffolds, CODEOWNERS scopes, and the general-availability flip (`nasa-daac-knowledge`)
 - P1 `r3-dependency-reference`: Validate dependency realization on ocean-science across runtimes (`ocean-science`)
 
-### Done (61)
+### Done (62)
 
 <details>
-<summary>61 done deliverables</summary>
+<summary>62 done deliverables</summary>
 
 - `roadmap-harness-v1`: Build the federated roadmap harness
 - `reconcile-project-record`: Reconcile specifications, progress, limitations, and counts
+- `ablation-protocol-amendment`: Publish the post-migration ablation amendment
 - `hydro-usgs-waterdata-migration`: Migrate the USGS connector to the Water Data APIs and release it
 - `hydro-basin-unit`: Add basin delineation as the unit of analysis
 - `hydro-p-et-connectors`: Add IMERG precipitation and MOD16 and OpenET evapotranspiration with their trap sets
@@ -272,7 +272,7 @@ The pre-registered knowledge-effectiveness gate has a reproducible published res
 
 | Deliverable | Repository | Status | Priority | Contributor | Issue |
 |---|---|---|---|---|---|
-| `ablation-protocol-amendment`: Publish the post-migration ablation amendment | `marketplace` | proposed | P0 | owner-only | [#4](https://github.com/open-science-pillars/marketplace/issues/4) |
+| `ablation-protocol-amendment`: Publish the post-migration ablation amendment | `marketplace` | done | P0 | owner-only | [#4](https://github.com/open-science-pillars/marketplace/issues/4) |
 | `ablation-runner-calibration`: Calibrate non-obvious probes and release-mixing grading | `evals` | proposed | P0 | needs-context | [#2](https://github.com/open-science-pillars/evals/issues/2) |
 | `powered-ablation-run`: Run and publish the powered ablation | `evals` | proposed | P0 | owner-only | [#3](https://github.com/open-science-pillars/evals/issues/3) |
 
@@ -282,6 +282,7 @@ The pre-registered knowledge-effectiveness gate has a reproducible published res
 
 - [ ] The refined cases, model, grading, sample size, and decision rule are recorded before the powered run.
 - Depends on: `reconcile-project-record`
+- Evidence: `marketplace PR 113: a dated addition to phase2-preregistration.md, 0 deletions against main, so the document's own rule that nothing in it is edited in place holds. All five are recorded before any arm runs: the refined cases, the model, the grading, the sample size of 20 trials per case per arm, and the decision rule, which is the pooled risk difference with its binomial interval and is unchanged from the go and stop conditions it was always tied to`, `The ablation could not have run at all, which had to be fixed before a design was worth writing. Its manifest named all seven cases at a path they left in July, the only manifest in the repository not carried along when the cases moved, so every one resolved to nothing; and its runner pinned the installed knowledge tree to ocean-science 0.3.0, four releases behind, so the bundle-OFF arm could only reach its own guard and exit. evals PR 46 repoints the manifest, all seven resolving, and makes the runner find the installed tree rather than name a version, with the restore path untouched`, `The pilot's null was re-read rather than inherited. The July entry attributes the flat result to the skills carrying the gotcha rules in both arms, which covers six of the seven cases because they target a skill. It does not cover grace-leakage, which targets none, rests on the concepts alone, and was flat too. So a second explanation is live, that these traps are recoverable from the model's own prior knowledge, and the refined design has to separate the two rather than assume the first`, `The refinement raises each case's graded claim from recognising that a trap exists to stating what only the signed concept carries: a value, an uncertainty, a named version or epoch, a dated verification. It deliberately does not also ablate the gotcha content from the skills, which was the pilot entry's other suggestion, because that would confound the knowledge bundle with the skill bodies and stop measuring what the go condition names`, `The model is pinned to one identifier for both arms, named in the document on the decision owner's call. Naming it is a deliberate exception to the rule that repository content names no model: the rule keeps the product runtime neutral, and an ablation's model is not a dependency the capability carries but the condition the experiment measures. The pin departs from the line the headline experiment was first registered on, and the departure is recorded with its consequences before the run, chiefly that a stronger model holds more of these traps in prior knowledge, which makes a null both likelier and harder to attribute. The entry states that this is not a reason to choose a weaker model, since selecting the condition that flatters the hypothesis is what pre-registration exists to prevent, and it is instead why the grading asks for values rather than recognition and why grace-leakage reports separately`
 
 **`ablation-runner-calibration`**
 
