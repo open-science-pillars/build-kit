@@ -12,9 +12,7 @@
 ### Now
 
 - `federated-governance-baseline`: Declare repository-level roadmap authority (`.github`)
-- `landice-grace-knowledge`: GRACE-FO mass change knowledge for land ice, reviewed and offered for confirmation (`nasa-daac-knowledge`)
 - `r2-core-reference`: Qualify core as the reference capability on Claude Code, Cowork and Codex from one SKILL.md (`core`)
-- `landice-nsidc-knowledge`: ICESat-2 height change and ice velocity knowledge in a new NSIDC bundle (`nasa-daac-knowledge`)
 - `seed-argo-gridded-steric`: Roemmich and Gilson gridded Argo knowledge, seeded and reviewed (`ocean-science`)
 - `seed-asdc-ceres-ebaf`: CERES EBAF knowledge for the asdc bundle, seeded and reviewed (`nasa-daac-knowledge`)
 - `seed-esdis-requirements-2`: ESDIS requirements round two, seeded and reviewed (`nasa-daac-knowledge`)
@@ -69,10 +67,10 @@ Proposed, waiting on a dependency, in priority order.
 - P1 `hydro-stewards-and-releases`: Steward scaffolds, CODEOWNERS scopes, and the general-availability flip (`nasa-daac-knowledge`)
 - P1 `r3-dependency-reference`: Validate dependency realization on ocean-science across runtimes (`ocean-science`)
 
-### Done (59)
+### Done (61)
 
 <details>
-<summary>59 done deliverables</summary>
+<summary>61 done deliverables</summary>
 
 - `roadmap-harness-v1`: Build the federated roadmap harness
 - `reconcile-project-record`: Reconcile specifications, progress, limitations, and counts
@@ -103,11 +101,13 @@ Proposed, waiting on a dependency, in priority order.
 - `c4-nasa-daac-placement`: Retire the run-skill references in nasa-daac-knowledge and point every computation at its executor and wrap
 - `c5-template-placement`: Ship the templates in the shape the placement gate expects
 - `c6-unwrapped-computations`: Wrap the energy budget and ice sheet balance computations when their sphere capabilities exist
+- `landice-grace-knowledge`: GRACE-FO mass change knowledge for land ice, reviewed and offered for confirmation
 - `sea-level-budget-closure`: Close the global sea level budget as an attested computation
 - `landice-atl15-altimetry`: Run the ice sheet balance on ICESat-2 gridded height change beside the velocity-era altimetry
 - `landice-imbie-knowledge`: The published ice sheet assessment and the firn model as reference concepts
 - `landice-input-output`: Ice sheet mass balance by the input-output method, as a third independent attested computation
 - `landice-promotion`: Promote land-ice out of planned as a wrap-only release
+- `landice-nsidc-knowledge`: ICESat-2 height change and ice velocity knowledge in a new NSIDC bundle
 - `adr-d-receipt-skills`: Amend the promotion-to-host-a-wrap decision to admit receipt skills, with the test that keeps them honest
 - `ocean-sweep`: A sweep over the sea level budget's declared parameters, the pattern-setter for receipt skills
 - `landice-receipt-skills`: Sweep, figures and methods over the nsidc closures, as receipt skills in land-ice
@@ -727,14 +727,14 @@ land-ice is an installable capability whose first attested computation closes th
 
 | Deliverable | Repository | Status | Priority | Contributor | Issue |
 |---|---|---|---|---|---|
-| `landice-grace-knowledge`: GRACE-FO mass change knowledge for land ice, reviewed and offered for confirmation | `nasa-daac-knowledge` | active | P1 | ready | [#123](https://github.com/open-science-pillars/nasa-daac-knowledge/issues/123) |
+| `landice-grace-knowledge`: GRACE-FO mass change knowledge for land ice, reviewed and offered for confirmation | `nasa-daac-knowledge` | done | P1 | ready | [#123](https://github.com/open-science-pillars/nasa-daac-knowledge/issues/123) |
 | `sea-level-budget-closure`: Close the global sea level budget as an attested computation | `ocean-science` | done | P1 | needs-context | [#45](https://github.com/open-science-pillars/ocean-science/issues/45) |
 | `landice-antarctic-firn`: A grounded Antarctic firn air content term, so the ice sheet balance stops refusing Antarctica | `nasa-daac-knowledge` | blocked | P1 | needs-context | [#184](https://github.com/open-science-pillars/nasa-daac-knowledge/issues/184) |
 | `landice-atl15-altimetry`: Run the ice sheet balance on ICESat-2 gridded height change beside the velocity-era altimetry | `nasa-daac-knowledge` | done | P1 | needs-context | [#185](https://github.com/open-science-pillars/nasa-daac-knowledge/issues/185) |
 | `landice-imbie-knowledge`: The published ice sheet assessment and the firn model as reference concepts | `nasa-daac-knowledge` | done | P1 | ready | [#186](https://github.com/open-science-pillars/nasa-daac-knowledge/issues/186) |
 | `landice-input-output`: Ice sheet mass balance by the input-output method, as a third independent attested computation | `nasa-daac-knowledge` | done | P1 | needs-context | [#189](https://github.com/open-science-pillars/nasa-daac-knowledge/issues/189) |
 | `landice-promotion`: Promote land-ice out of planned as a wrap-only release | `land-ice` | done | P1 | needs-context | [#4](https://github.com/open-science-pillars/land-ice/issues/4) |
-| `landice-nsidc-knowledge`: ICESat-2 height change and ice velocity knowledge in a new NSIDC bundle | `nasa-daac-knowledge` | active | P2 | needs-context | [#131](https://github.com/open-science-pillars/nasa-daac-knowledge/issues/131) |
+| `landice-nsidc-knowledge`: ICESat-2 height change and ice velocity knowledge in a new NSIDC bundle | `nasa-daac-knowledge` | done | P2 | needs-context | [#131](https://github.com/open-science-pillars/nasa-daac-knowledge/issues/131) |
 | `landice-nsidc-elevation`: Reconcile mass change and elevation change for one ice sheet, in the land-ice capability | `land-ice` | blocked | P2 | needs-context | none |
 
 #### Acceptance details
@@ -744,7 +744,7 @@ land-ice is an installable capability whose first attested computation closes th
 - [ ] The grace-fo-mascons dataset concept states the land-ice use, the solution version, the units and the reference period, is reviewed to stable, and a PO.DAAC contact has been invited to confirm it (provider confirmation is voiced when recorded, never required).
 - [ ] Gotchas exist, each with evidence and a matching eval case where the severity is high, for glacial isostatic adjustment, coastal leakage, the 2017 to 2018 gap between GRACE and GRACE-FO, and the degree-1 and C20 replacements.
 - [ ] A recipe converts a regional mass change to a sea level equivalent with its uncertainty, citing the concepts it uses.
-- Evidence: `nasa-daac-knowledge PR #124: the mascon dataset concept widened to land ice, the gap and low-degree gotchas, the mass-to-sea-level recipe, the grace-intermission-gap eval case (agent-evals PR #11, evals PR #32)`, `nasa-daac-knowledge PR #125: the four concepts re-verified against CMR and the PO.DAAC documentation index; TN-13 and TN-14 added as sources`, `nasa-daac-knowledge PR #126: the release note, TN-13, TN-14 and the month list read; every DOI verified against Crossref; the four concepts stable and signed by the maintainer. Outstanding: the PO.DAAC invitation to confirm`
+- Evidence: `nasa-daac-knowledge PR #124: the mascon dataset concept widened to land ice, the gap and low-degree gotchas, the mass-to-sea-level recipe, the grace-intermission-gap eval case (agent-evals PR #11, evals PR #32)`, `nasa-daac-knowledge PR #125: the four concepts re-verified against CMR and the PO.DAAC documentation index; TN-13 and TN-14 added as sources`, `nasa-daac-knowledge PR #126: the release note, TN-13, TN-14 and the month list read; every DOI verified against Crossref; the four concepts stable and signed by the maintainer. Outstanding: the PO.DAAC invitation to confirm`, `The PO.DAAC contact has been invited to confirm, which the maintainer states and which no repository can show. Confirmation itself is voiced when recorded and never required, so the invitation is what this acceptance asks for and it closes the deliverable. Everything else was re-checked against the repositories on 2026-09-21: grace-fo-mascons is stable and states the land ice use, the solution version (JPL RL06.3 version 4, CMR-verified twice), the units and the reference period; all four named gotchas exist; the two carrying high severity, coastal leakage and the intermission gap, each have a matching eval case registered in evals/manifests/ocean-science.yaml, and the two at medium severity need none under this acceptance; the mass to sea level recipe cites the concepts it uses`
 
 **`sea-level-budget-closure`**
 
@@ -801,7 +801,7 @@ land-ice is an installable capability whose first attested computation closes th
 
 - [ ] A knowledge/nsidc provider bundle holds dataset concepts for ICESat-2 ATL15 and the ITS_LIVE velocity mosaics with their gotchas (height change is not mass change at high severity, with an eval case), drafted from sources fetched live and reviewed to stable by the maintainer.
 - [ ] The eval case is registered in the evals manifests, and an NSIDC contact has been invited to confirm the concepts (voiced when recorded, never required).
-- Evidence: `nasa-daac-knowledge PR #129 and agent-evals PR #14: the bundle, two dataset concepts, five gotchas and the case, seeded 2026-09-13 from nsidc.org, its-live.jpl.nasa.gov, CMR and Crossref`, `nasa-daac-knowledge PR #127 (with the sea level budget run): the two dataset concepts and the four medium gotchas stable and signed by the maintainer; the high-severity gotcha carries a first review and waits on a second; the NSIDC invitation is outstanding`
+- Evidence: `nasa-daac-knowledge PR #129 and agent-evals PR #14: the bundle, two dataset concepts, five gotchas and the case, seeded 2026-09-13 from nsidc.org, its-live.jpl.nasa.gov, CMR and Crossref`, `nasa-daac-knowledge PR #127 (with the sea level budget run): the two dataset concepts and the four medium gotchas stable and signed by the maintainer; the high-severity gotcha carries a first review and waits on a second; the NSIDC invitation is outstanding`, `Both of those closed. The second maintainer review of the high-severity gotcha landed 2026-09-14, so atl15-height-change-is-not-mass-change carries two verified entries and reads stable; the line above it is a snapshot from before that review and is left as written. The NSIDC contact has been invited to confirm, which the maintainer states and which no repository can show. Re-checked on 2026-09-21: knowledge/nsidc holds icesat2-atl15 and its-live-ice-velocity, both stable, the gotcha is severity high, and its eval case is registered in evals/manifests/land-ice.yaml`
 
 **`landice-nsidc-elevation`**
 

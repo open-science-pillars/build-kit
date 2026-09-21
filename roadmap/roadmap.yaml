@@ -1234,7 +1234,7 @@ initiatives:
       - id: landice-grace-knowledge
         title: GRACE-FO mass change knowledge for land ice, reviewed and offered for confirmation
         repo: nasa-daac-knowledge
-        status: active
+        status: done
         priority: P1
         depends_on: []
         gate: ""
@@ -1253,6 +1253,7 @@ initiatives:
           - "nasa-daac-knowledge PR #124: the mascon dataset concept widened to land ice, the gap and low-degree gotchas, the mass-to-sea-level recipe, the grace-intermission-gap eval case (agent-evals PR #11, evals PR #32)"
           - "nasa-daac-knowledge PR #125: the four concepts re-verified against CMR and the PO.DAAC documentation index; TN-13 and TN-14 added as sources"
           - "nasa-daac-knowledge PR #126: the release note, TN-13, TN-14 and the month list read; every DOI verified against Crossref; the four concepts stable and signed by the maintainer. Outstanding: the PO.DAAC invitation to confirm"
+          - "The PO.DAAC contact has been invited to confirm, which the maintainer states and which no repository can show. Confirmation itself is voiced when recorded and never required, so the invitation is what this acceptance asks for and it closes the deliverable. Everything else was re-checked against the repositories on 2026-09-21: grace-fo-mascons is stable and states the land ice use, the solution version (JPL RL06.3 version 4, CMR-verified twice), the units and the reference period; all four named gotchas exist; the two carrying high severity, coastal leakage and the intermission gap, each have a matching eval case registered in evals/manifests/ocean-science.yaml, and the two at medium severity need none under this acceptance; the mass to sea level recipe cites the concepts it uses"
         contributor:
           readiness: ready
           champion: PaulMRamirez
@@ -1431,7 +1432,7 @@ initiatives:
       - id: landice-nsidc-knowledge
         title: ICESat-2 height change and ice velocity knowledge in a new NSIDC bundle
         repo: nasa-daac-knowledge
-        status: active
+        status: done
         priority: P2
         depends_on: []
         gate: ""
@@ -1446,6 +1447,7 @@ initiatives:
         evidence:
           - "nasa-daac-knowledge PR #129 and agent-evals PR #14: the bundle, two dataset concepts, five gotchas and the case, seeded 2026-09-13 from nsidc.org, its-live.jpl.nasa.gov, CMR and Crossref"
           - "nasa-daac-knowledge PR #127 (with the sea level budget run): the two dataset concepts and the four medium gotchas stable and signed by the maintainer; the high-severity gotcha carries a first review and waits on a second; the NSIDC invitation is outstanding"
+          - "Both of those closed. The second maintainer review of the high-severity gotcha landed 2026-09-14, so atl15-height-change-is-not-mass-change carries two verified entries and reads stable; the line above it is a snapshot from before that review and is left as written. The NSIDC contact has been invited to confirm, which the maintainer states and which no repository can show. Re-checked on 2026-09-21: knowledge/nsidc holds icesat2-atl15 and its-live-ice-velocity, both stable, the gotcha is severity high, and its eval case is registered in evals/manifests/land-ice.yaml"
         contributor:
           readiness: needs-context
           champion: PaulMRamirez
