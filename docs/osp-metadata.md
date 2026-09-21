@@ -353,6 +353,27 @@ taken on the record. The procedure, and the hands-on walkthrough per
 runtime, are in the marketplace's
 [release qualification guide](https://github.com/open-science-pillars/marketplace/blob/main/docs/release-qualification-guide.md).
 
+The `skill-invocation` probe is the one a capability owes in writing.
+It names the reference skill, the prompt, and `expect`, the regular
+expressions the reply must contain; `arguments` is what the slash form
+carries when the prompt is not what the skill should be handed. The
+test runs both forms, the slash invocation of the named skill and the
+conversational prompt, and judges each on the same expectation, so the
+slash form carries the work the expectation asks for rather than the
+skill's bare instructions. An expectation is only worth running when it
+is something the skill has a reason to emit. For a `start`-like
+reference skill, whose job is to say which capabilities are installed,
+that is the package's own name, and the harness defaults to it. Any
+other reference skill gets no default: a sea level analysis or a basin
+water balance has no reason to print its package name, and a skill made
+to print one would be putting noise into a scientist's output to satisfy
+a test. Such a capability declares its own expectation, which reads like
+the computation concept the skill must cite by package path together
+with a value the prompt bound (a window, a region, a count). Until it
+does, the qualification path records `skill-invocation` as `blocked`,
+saying what is owed, and a blocked required test is never qualified, so
+the bar is stated rather than lowered.
+
 ## Advertising a runtime, and publishing
 
 `osp.py advertise` states what a release may say per runtime, from
