@@ -148,7 +148,7 @@ initiatives:
       - id: roadmap-harness-v1
         title: Build the federated roadmap harness
         repo: build-kit
-        status: active
+        status: done
         priority: P0
         depends_on: []
         gate: null
@@ -159,6 +159,9 @@ initiatives:
         evidence:
           - "docs/roadmap-harness-plan.md"
           - "build-record/roadmap-implementation-guide.md"
+          - "The rendered view is deterministic. Two renders taken two seconds apart are byte identical to each other and to the committed ROADMAP.md, and validation passes over all 108 deliverables. The render check runs in the repository gate, so a roadmap edited without re-rendering fails before it merges, which is how this deliverable's own closing commit was caught once already"
+          - "The harness is runtime neutral by design, which is what lets any runtime audit and brief. roadmap.py names no runtime anywhere; seed_brief.py mentions one twice and both are brief text about a package's own plugin root rather than anything the tool depends on. Both are plain Python run under uv, so the audit and the brief are available to whatever can run a command"
+          - "Every GitHub write is dry-run unless confirmed twice over. The labels command is the only write in the tool, require_apply refuses it unless both --apply and the exact organization confirmation value are given, and the single POST sits inside that branch. No other write verb exists in the file, and the tool never opens, edits or closes an issue"
         contributor:
           readiness: owner-only
           champion: PaulMRamirez
@@ -1466,7 +1469,7 @@ initiatives:
       enforces that it computes nothing of its own, so the window dependence, the
       figure and the methods paragraph a scientist hands a postdoc are reproducible
       and refuse the headline number the rows do not carry.
-    status: active
+    status: done
     priority: P1
     depends_on: []
     gate: "A receipt skill emits only fields of receipts the attester passed, or a table,
@@ -2362,7 +2365,7 @@ initiatives:
       in the sea level budget's shape, each fed by stamped data roots and, where a
       term is observed, by a tool on the observations server, with their concepts
       reviewed and their check chains running on every change.
-    status: active
+    status: done
     priority: P2
     depends_on: [knowledge-seeding]
     gate: ""

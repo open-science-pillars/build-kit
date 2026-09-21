@@ -13,7 +13,6 @@
 
 - `federated-governance-baseline`: Declare repository-level roadmap authority (`.github`)
 - `reconcile-project-record`: Reconcile specifications, progress, limitations, and counts (`marketplace`)
-- `roadmap-harness-v1`: Build the federated roadmap harness (`build-kit`)
 - `landice-grace-knowledge`: GRACE-FO mass change knowledge for land ice, reviewed and offered for confirmation (`nasa-daac-knowledge`)
 - `r2-core-reference`: Qualify core as the reference capability on Claude Code, Cowork and Codex from one SKILL.md (`core`)
 - `landice-nsidc-knowledge`: ICESat-2 height change and ice velocity knowledge in a new NSIDC bundle (`nasa-daac-knowledge`)
@@ -71,11 +70,12 @@ Proposed, waiting on a dependency, in priority order.
 - P1 `r3-dependency-reference`: Validate dependency realization on ocean-science across runtimes (`ocean-science`)
 - P1 `tutorial-nonauthor-validation`: Complete non-author Tutorial 2 validation (`tutorials`)
 
-### Done (57)
+### Done (58)
 
 <details>
-<summary>57 done deliverables</summary>
+<summary>58 done deliverables</summary>
 
+- `roadmap-harness-v1`: Build the federated roadmap harness
 - `hydro-usgs-waterdata-migration`: Migrate the USGS connector to the Water Data APIs and release it
 - `hydro-basin-unit`: Add basin delineation as the unit of analysis
 - `hydro-p-et-connectors`: Add IMERG precipitation and MOD16 and OpenET evapotranspiration with their trap sets
@@ -172,7 +172,7 @@ The organization has a team-safe roadmap harness and public documentation that m
 
 | Deliverable | Repository | Status | Priority | Contributor | Issue |
 |---|---|---|---|---|---|
-| `roadmap-harness-v1`: Build the federated roadmap harness | `build-kit` | active | P0 | owner-only | none |
+| `roadmap-harness-v1`: Build the federated roadmap harness | `build-kit` | done | P0 | owner-only | none |
 | `federated-governance-baseline`: Declare repository-level roadmap authority | `.github` | active | P0 | owner-only | none |
 | `reconcile-project-record`: Reconcile specifications, progress, limitations, and counts | `marketplace` | active | P0 | needs-context | none |
 | `codex-surface-policy`: Define Codex as a supported distribution and behavior runtime | `marketplace` | proposed | P1 | needs-context | [#2](https://github.com/open-science-pillars/marketplace/issues/2) |
@@ -184,7 +184,7 @@ The organization has a team-safe roadmap harness and public documentation that m
 - [ ] Roadmap YAML validates and renders deterministically.
 - [ ] Claude and Codex can audit and brief roadmap work.
 - [ ] All GitHub writes are dry-run unless explicitly confirmed.
-- Evidence: `docs/roadmap-harness-plan.md`, `build-record/roadmap-implementation-guide.md`
+- Evidence: `docs/roadmap-harness-plan.md`, `build-record/roadmap-implementation-guide.md`, `The rendered view is deterministic. Two renders taken two seconds apart are byte identical to each other and to the committed ROADMAP.md, and validation passes over all 108 deliverables. The render check runs in the repository gate, so a roadmap edited without re-rendering fails before it merges, which is how this deliverable's own closing commit was caught once already`, `The harness is runtime neutral by design, which is what lets any runtime audit and brief. roadmap.py names no runtime anywhere; seed_brief.py mentions one twice and both are brief text about a package's own plugin root rather than anything the tool depends on. Both are plain Python run under uv, so the audit and the brief are available to whatever can run a command`, `Every GitHub write is dry-run unless confirmed twice over. The labels command is the only write in the tool, require_apply refuses it unless both --apply and the exact organization confirmation value are given, and the single POST sits inside that branch. No other write verb exists in the file, and the tool never opens, edits or closes an issue`
 
 **`federated-governance-baseline`**
 
@@ -810,7 +810,7 @@ land-ice is an installable capability whose first attested computation closes th
 ### The postdoc's work as receipt skills over the attested computations
 
 **ID:** `receipt-skills`  
-**Status:** active  
+**Status:** done  
 **Priority:** P1
 
 Every wrapped computation can be swept over its declared parameters, drawn from its receipt and written up from its bookkeeping by a skill whose script enforces that it computes nothing of its own, so the window dependence, the figure and the methods paragraph a scientist hands a postdoc are reproducible and refuse the headline number the rows do not carry.
@@ -1176,7 +1176,7 @@ Concepts for products the bundles lack are drafted in parallel sessions from sou
 ### Close budgets across spheres with attested computations
 
 **ID:** `cross-sphere-closures`  
-**Status:** active  
+**Status:** done  
 **Priority:** P2
 
 The ocean heat content, the Earth energy imbalance, the ice sheet mass balance and the basin water balance with groundwater are attested computations in the sea level budget's shape, each fed by stamped data roots and, where a term is observed, by a tool on the observations server, with their concepts reviewed and their check chains running on every change.
