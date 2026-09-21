@@ -49,11 +49,23 @@ class RoadmapTests(unittest.TestCase):
         self.assertIn("(`core`)", sections["Now"])
         self.assertIn("`phase3-flood-slice`", sections["Blocked"])
         self.assertIn("authorizes Phase 3", sections["Blocked"])
-        # every dependency of hydro-investigation-tutorial is done, so it is Next
-        self.assertIn("`hydro-investigation-tutorial`", sections["Next"])
-        # powered-ablation-run waits on an undone dependency, so it is Later
-        self.assertIn("`powered-ablation-run`", sections["Later"])
-        self.assertNotIn("`powered-ablation-run`", sections["Next"])
+        # The split between Next and Later is a rule, so assert the rule over
+        # every proposed deliverable rather than naming one. Naming one is what
+        # this test did until 2026-09-21, when closing a dependency moved
+        # powered-ablation-run from Later to Next, exactly as intended, and
+        # failed the test that had pinned it there.
+        index = roadmap.item_index(data)
+        proposed = [x for _, x in roadmap.deliverables(data) if x["status"] == "proposed"]
+        ready = [x for x in proposed if roadmap.dependencies_done(x, index)]
+        waiting = [x for x in proposed if not roadmap.dependencies_done(x, index)]
+        self.assertTrue(ready, "no proposed deliverable has every dependency done")
+        self.assertTrue(waiting, "no proposed deliverable is waiting on a dependency")
+        for item in ready:
+            self.assertIn(f"`{item['id']}`", sections["Next"])
+            self.assertNotIn(f"`{item['id']}`", sections["Later"])
+        for item in waiting:
+            self.assertIn(f"`{item['id']}`", sections["Later"])
+            self.assertNotIn(f"`{item['id']}`", sections["Next"])
         # a Next entry that still carries a gate says so
         self.assertIn("`r9-headless-ci-qualification`", sections["Next"])
         self.assertIn(": gate: ", sections["Next"])

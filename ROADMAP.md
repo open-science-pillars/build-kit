@@ -45,7 +45,7 @@
 
 Proposed, every dependency done, in priority order.
 
-- P0 `ablation-runner-calibration`: Calibrate non-obvious probes and release-mixing grading (`evals`)
+- P0 `powered-ablation-run`: Run and publish the powered ablation (`evals`)
 - P1 `codex-surface-policy`: Define Codex as a supported distribution and behavior runtime (`marketplace`)
 - P1 `conversational-surface-validation`: Complete Cowork qualification of a release (`marketplace`)
 - P1 `hydro-investigation-tutorial`: Write the hydrology investigation tutorial and run it with a non-author reader (`tutorials`)
@@ -60,20 +60,20 @@ Proposed, every dependency done, in priority order.
 
 Proposed, waiting on a dependency, in priority order.
 
-- P0 `powered-ablation-run`: Run and publish the powered ablation (`evals`)
 - P1 `activation-eval-runner`: Build and pilot the activation-eval runner (`evals`)
 - P1 `governed-release`: Cut the first governed, citable OSP release (`build-kit`)
 - P1 `hydro-stewards-and-releases`: Steward scaffolds, CODEOWNERS scopes, and the general-availability flip (`nasa-daac-knowledge`)
 - P1 `r3-dependency-reference`: Validate dependency realization on ocean-science across runtimes (`ocean-science`)
 
-### Done (62)
+### Done (63)
 
 <details>
-<summary>62 done deliverables</summary>
+<summary>63 done deliverables</summary>
 
 - `roadmap-harness-v1`: Build the federated roadmap harness
 - `reconcile-project-record`: Reconcile specifications, progress, limitations, and counts
 - `ablation-protocol-amendment`: Publish the post-migration ablation amendment
+- `ablation-runner-calibration`: Calibrate non-obvious probes and release-mixing grading
 - `hydro-usgs-waterdata-migration`: Migrate the USGS connector to the Water Data APIs and release it
 - `hydro-basin-unit`: Add basin delineation as the unit of analysis
 - `hydro-p-et-connectors`: Add IMERG precipitation and MOD16 and OpenET evapotranspiration with their trap sets
@@ -273,7 +273,7 @@ The pre-registered knowledge-effectiveness gate has a reproducible published res
 | Deliverable | Repository | Status | Priority | Contributor | Issue |
 |---|---|---|---|---|---|
 | `ablation-protocol-amendment`: Publish the post-migration ablation amendment | `marketplace` | done | P0 | owner-only | [#4](https://github.com/open-science-pillars/marketplace/issues/4) |
-| `ablation-runner-calibration`: Calibrate non-obvious probes and release-mixing grading | `evals` | proposed | P0 | needs-context | [#2](https://github.com/open-science-pillars/evals/issues/2) |
+| `ablation-runner-calibration`: Calibrate non-obvious probes and release-mixing grading | `evals` | done | P0 | needs-context | [#2](https://github.com/open-science-pillars/evals/issues/2) |
 | `powered-ablation-run`: Run and publish the powered ablation | `evals` | proposed | P0 | owner-only | [#3](https://github.com/open-science-pillars/evals/issues/3) |
 
 #### Acceptance details
@@ -289,6 +289,7 @@ The pre-registered knowledge-effectiveness gate has a reproducible published res
 - [ ] Every powered probe discriminates concept application rather than keyword mention.
 - [ ] Release-mixing grading is resolved before the run.
 - Depends on: `ablation-protocol-amendment`
+- Evidence: `Release-mixing is resolved, and the diagnosis is not the one the pilot entry guessed at. The grader was inverted: it demanded one of six literal phrases, among them not mix, so a reply saying the two releases must not be mixed failed it, which is the wording of the case's own notes. Every correct phrasing tried fails it and both wrong ones pass it, so 0 of 3 in both arms was the only score it could have produced. It is repaired rather than dropped, so the powered run is still seven cases by two arms at twenty trials`, `Two more defects of the same class across the rest of the suite. Terms were matched as substrings, so the leakage probe's cri is satisfied by the word described and fired on any transcript at all, and the native-grid probe's 0.5 is satisfied by 0.52 mm/yr, passing a reply that refused nothing. And a probe could be satisfied by naming a thing without using it: a transcript naming height_cor_xover and then saying it ignored it passed the probe whose purpose is to catch that`, `All seven powered probes now match words rather than substrings, require the concept to be applied rather than mentioned, and refuse the identifiable failure: assembling a series by giving each release its own span, dismissing the geothermal term as negligible, quoting a full-circle transport as RAPID, ignoring the crossover correction. Each of the seven graders is used by exactly one case and all seven are ablation cases, so the change reaches the powered suite and nothing else`, `The root cause was in the selftest rather than only in the graders. One good and one bad fixture per grader, each written in the grader's own words, agreed with a broken probe while the real run scored zero. The seven now carry several phrasings a reply actually uses and several near misses that must not pass, thirty three in all. Run against the old graders those fixtures catch thirteen misclassifications across six of the seven; the seventh, the orbit-phase probe, was loose rather than inverted and classified these same phrasings correctly`, `evals PR 47 and marketplace PR 114. The pre-registration carries a dated entry recording the diagnosis and the grader freeze, before either arm has run, which is what the amendment committed to. evals runner selftest: PASSED`
 
 **`powered-ablation-run`**
 
