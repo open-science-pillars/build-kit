@@ -51,8 +51,6 @@ Proposed, every dependency done, in priority order.
 
 - P1 `hydro-investigation-tutorial`: Write the hydrology investigation tutorial and run it with a non-author reader (`tutorials`)
 - P1 `provider-confirmed-voicing`: Voice the provider-confirmed tier when citing a concept (`core`): gate: Lands in the release after 0.5.1; a release candidate never edits a skill.
-- P1 `r6-bundle-after-the-move`: The provider bundle holds knowledge and evidence only (`nasa-daac-knowledge`): gate: After every capability has released, so no capability on main points at a path that does not exist.
-- P1 `r6-wave-0-specification-and-tools`: Specification 0.7.0 and the tools: planes retired, placement gate replaced, seed kind added, templates reshaped (`marketplace`): gate: Lands before any migration seed is dispatched, so every seed builds to the rule as written.
 - P2 `hydro-coastal-water`: Coastal composites where hydrology meets ocean science (`ocean-science`)
 - P2 `r6-compat-probes`: Add non-blocking compatibility probes for Gemini CLI and Goose (`build-kit`)
 - P2 `r9-headless-ci-qualification`: Run the headless qualification legs in the organization's CI on a release candidate (`build-kit`): gate: Needs a decision to hold a runtime credential in CI, at which scope and who may trigger it, and the first Codex checklist run to confirm how the portable package installs there (build-kit issue 32).
@@ -71,13 +69,12 @@ Proposed, waiting on a dependency, in priority order.
 - P1 `hydro-stewards-and-releases`: Steward scaffolds, CODEOWNERS scopes, and the general-availability flip (`nasa-daac-knowledge`)
 - P1 `provider-steward-handoff`: Complete or accurately reframe provider stewardship (`nasa-daac-knowledge`)
 - P1 `r3-dependency-reference`: Validate dependency realization on ocean-science across runtimes (`ocean-science`)
-- P1 `r6-reconciliation`: Everything that names a path follows the move (`build-kit`)
 - P1 `tutorial-nonauthor-validation`: Complete non-author Tutorial 2 validation (`tutorials`)
 
-### Done (54)
+### Done (57)
 
 <details>
-<summary>54 done deliverables</summary>
+<summary>57 done deliverables</summary>
 
 - `hydro-usgs-waterdata-migration`: Migrate the USGS connector to the Water Data APIs and release it
 - `hydro-basin-unit`: Add basin delineation as the unit of analysis
@@ -116,11 +113,14 @@ Proposed, waiting on a dependency, in priority order.
 - `landice-receipt-skills`: Sweep, figures and methods over the nsidc closures, as receipt skills in land-ice
 - `atmos-receipt-skills`: Sweep, figures and methods over the asdc computations, as receipt skills in atmospheric-physics
 - `adr-e-a-computation-is-a-skill`: The decision record, merged by the decision owner
+- `r6-wave-0-specification-and-tools`: Specification 0.7.0 and the tools: planes retired, placement gate replaced, seed kind added, templates reshaped
 - `r6-ocean-science-computations`: ocean-science carries the podaac and Argo computations as skills
 - `r6-land-ice-computations`: land-ice carries the nsidc computations as skills
 - `r6-atmospheric-physics-computations`: atmospheric-physics carries the asdc computations as skills
 - `r6-hydrology-computations`: hydrology's basin water balance code lives in its skill
 - `r6-core-computation`: core's reference computation lives in basic-statistics
+- `r6-bundle-after-the-move`: The provider bundle holds knowledge and evidence only
+- `r6-reconciliation`: Everything that names a path follows the move
 - `atmos-syn1deg-knowledge`: The synoptic radiation product and the surface flux caveat as concepts
 - `atmos-cloud-radiative-effect`: Cloud radiative effect at the top of the atmosphere, as an attested computation
 - `atmos-physics-promotion`: Promote atmospheric-physics out of planned as a wrap-only release
@@ -865,7 +865,7 @@ Every wrapped computation can be swept over its declared parameters, drawn from 
 ### A computation is a skill, and a knowledge bundle holds knowledge
 
 **ID:** `computation-is-a-skill`  
-**Status:** active  
+**Status:** done  
 **Priority:** P1
 
 Every attested computation lives in the capability that runs it, as a concept beside a skill whose scripts are the executor and the attester and whose golden proves them; the provider bundle holds concepts and evidence and no runnable code; the specification says where files go in one sentence and no gate needs seven codes to enforce it.
@@ -875,14 +875,14 @@ Every attested computation lives in the capability that runs it, as a concept be
 | Deliverable | Repository | Status | Priority | Contributor | Issue |
 |---|---|---|---|---|---|
 | `adr-e-a-computation-is-a-skill`: The decision record, merged by the decision owner | `marketplace` | done | P1 | owner-only | none |
-| `r6-wave-0-specification-and-tools`: Specification 0.7.0 and the tools: planes retired, placement gate replaced, seed kind added, templates reshaped | `marketplace` | proposed | P1 | owner-only | none |
+| `r6-wave-0-specification-and-tools`: Specification 0.7.0 and the tools: planes retired, placement gate replaced, seed kind added, templates reshaped | `marketplace` | done | P1 | owner-only | none |
 | `r6-ocean-science-computations`: ocean-science carries the podaac and Argo computations as skills | `ocean-science` | done | P1 | needs-context | none |
 | `r6-land-ice-computations`: land-ice carries the nsidc computations as skills | `land-ice` | done | P1 | needs-context | none |
 | `r6-atmospheric-physics-computations`: atmospheric-physics carries the asdc computations as skills | `atmospheric-physics` | done | P1 | needs-context | none |
 | `r6-hydrology-computations`: hydrology's basin water balance code lives in its skill | `hydrology` | done | P1 | needs-context | none |
 | `r6-core-computation`: core's reference computation lives in basic-statistics | `core` | done | P1 | needs-context | none |
-| `r6-bundle-after-the-move`: The provider bundle holds knowledge and evidence only | `nasa-daac-knowledge` | proposed | P1 | needs-context | none |
-| `r6-reconciliation`: Everything that names a path follows the move | `build-kit` | proposed | P1 | owner-only | none |
+| `r6-bundle-after-the-move`: The provider bundle holds knowledge and evidence only | `nasa-daac-knowledge` | done | P1 | needs-context | none |
+| `r6-reconciliation`: Everything that names a path follows the move | `build-kit` | done | P1 | owner-only | none |
 
 #### Acceptance details
 
@@ -899,6 +899,7 @@ Every attested computation lives in the capability that runs it, as a concept be
 - [ ] plugin-template ships one skill whose scripts hold an executor and an attester with the concept beside them; knowledge-template ships no code.
 - Depends on: `adr-e-a-computation-is-a-skill`
 - Gate: Lands before any migration seed is dispatched, so every seed builds to the rule as written.
+- Evidence: `marketplace: the specification reads 0.7.0 and no plane name survives in any document outside the changelog's older entries, which are history. Sections 11 and 12 are retired and one section takes their place; ADR C and ADR D carry their superseding note and their text stands as written`, `build-kit: osp.py validate carries the two findings and placement-check is retired from the tool, the gate template and every repository gate. seed_brief.py has the migration kind. reattest.py and receipt_identity.py are osp.py subcommands, which is what let the bundle delete them`, `plugin-template and knowledge-template both merged and reshaped: the plugin template ships the computation as a skill, the knowledge template ships no code`, `The stage delivered what it was for, which the round then tested: every capability migration built to the rule as written and none of them needed the rule changed underneath. The defects the round did find were in the qualification harness rather than in this work, and are recorded against r6-reconciliation`
 
 **`r6-ocean-science-computations`**
 
@@ -941,12 +942,14 @@ Every attested computation lives in the capability that runs it, as a concept be
 - [ ] No .py under knowledge/ in any bundle; every concept that cited a moved computation cites its new home; run_checks.sh keeps the knowledge checks; reference_runs.yaml, reattest.py and receipt_identity.py gone; a calendar release cut and re-signed.
 - Depends on: `r6-ocean-science-computations`, `r6-land-ice-computations`, `r6-atmospheric-physics-computations`
 - Gate: After every capability has released, so no capability on main points at a path that does not exist.
+- Evidence: `nasa-daac-knowledge PR 207: 146 files deleted, the 24 computation concepts with their executors, attesters, loaders and derivation scripts, the stamped roots and record files, reference_runs.yaml, reattest.py and receipt_identity.py. The coordinator checked all 146 one by one against the capabilities: 144 have a counterpart there and the two that do not are the tools, which became osp.py reattest and osp.py receipt-identity in build-kit. No dataset, gotcha, convention, recipe or finding was deleted and no .py remains under knowledge/`, `nasa-daac-knowledge PR 209: the release tag refused to be cut and was right twice. The lock committed in the candidate had been computed over four __pycache__ directories that survived the deletion of the .py files that made them, so a clean checkout digested differently; the strays are gone and the lock is regenerated. And 30 concepts the move edited owed a signature that PR 207 merged without paying. All 30 were compared against their pre-move copies, 30 changed and 0 with any number difference, and all 30 are re-signed. Twenty of them also carried debt from two commits predating the previous tag, invisible until 772b4ae fixed signature_check's blindness to a signature written in a merge commit`, `Released as nasa-daac-knowledge--v2026.9.5, the annotated tag peeled to its merge commit 6b0ef00 to confirm it; run_checks ALL GREEN with signature debt enforced, which is what the tag workflow runs`
 
 **`r6-reconciliation`**
 
 - [ ] agent-evals concept_basis paths, evals manifests, marketplace catalog entries and qualification records for the new releases, roadmap evidence, sessions archived and triggers cleared.
 - Depends on: `r6-bundle-after-the-move`, `r6-hydrology-computations`, `r6-core-computation`
 - Gate: The coordinator's close-out.
+- Evidence: `agent-evals PR 38: six cases repointed from the bundle path to the capability path, and the two graders that quoted a bundle path in their prose quote the package path. All 93 concept basis paths across the 41 cases resolve, in the bundle or in the capability that owns the method. The stored transcripts under ecco/results keep the old paths, because they record what an agent said on the day`, `The move left a residue the capability migrations had not caught, found by resolving every cited path against the bundle rather than reading the seeds' reports: ocean-science PR 69 repointed 24 stale computation citations across nine skills, an agent and two verification files, three run commands inside signed concepts, and five citations the move itself had wrongly prefixed with the bundle path; land-ice PR 12 repointed the one cross-package citation and corrected two sentences still calling its concepts draft; atmospheric-physics PR 11 had no wrong path and needed only the retired words removed. Six concepts re-signed across the two, every one verified for moved numbers first and none found`, `Six release candidates, not the three tags first expected, because every capability's release lock was stale on main after the move. Seven tags cut and each verified by peeling the annotated tag to its commit: core 0.6.0, ocean-science 0.9.0, hydrology 0.8.0 and 0.8.1, land-ice 0.2.0, atmospheric-physics 0.2.0, nasa-daac-knowledge 2026.9.5`, `marketplace PR 110: all six catalog entries moved to the new tags, each pin resolved against its own repository, 0 unresolvable. Two of them, land-ice--v0.1.0 and atmospheric-physics--v0.1.0, had never existed at all, so those entries had never resolved for an installing reader`, `The qualification records are the part that did not go as planned and are recorded as they are. Claude Code could not be qualified reliably from the release environment: two runs of one candidate disagreed, once through a concurrent run sharing the plugin cache and once through a denied shell tool. Rather than record a run describing the environment, claude-code is waived for ocean-science, land-ice and atmospheric-physics and its status brought down from supported to tested with evidence naming the version it was last genuinely qualified at; core kept a real qualified record; hydrology went the other way and qualified eleven of eleven at 0.8.1, the first record it has carried at any version`
 
 ### Open the Atmosphere through atmospheric-physics and the energy budget
 
