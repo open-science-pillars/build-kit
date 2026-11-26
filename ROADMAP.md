@@ -46,6 +46,7 @@
 Proposed, every dependency done, in priority order.
 
 - P0 `powered-ablation-run`: Run and publish the powered ablation (`evals`)
+- P1 `adr-f-words-a-scientist-meets`: The decision record, merged by the decision owner (`marketplace`): gate: The decision owner's record; drafted by the coordinator with a reader check as its evidence.
 - P1 `codex-surface-policy`: Define Codex as a supported distribution and behavior runtime (`marketplace`)
 - P1 `conversational-surface-validation`: Complete Cowork qualification of a release (`marketplace`)
 - P1 `hydro-investigation-tutorial`: Write the hydrology investigation tutorial and run it with a non-author reader (`tutorials`)
@@ -64,6 +65,23 @@ Proposed, waiting on a dependency, in priority order.
 - P1 `governed-release`: Cut the first governed, citable OSP release (`build-kit`)
 - P1 `hydro-stewards-and-releases`: Steward scaffolds, CODEOWNERS scopes, and the general-availability flip (`nasa-daac-knowledge`)
 - P1 `r3-dependency-reference`: Validate dependency realization on ocean-science across runtimes (`ocean-science`)
+- P1 `words-agent-evals`: agent-evals: the case type and every concept path a case is graded against (`agent-evals`)
+- P1 `words-atmospheric-physics`: atmospheric-physics: knowledge, skills and tests in the words of ADR F (`atmospheric-physics`)
+- P1 `words-core`: core: knowledge, skills and tests in the words of ADR F (`core`)
+- P1 `words-hydrology`: hydrology: knowledge, skills, tests and stored receipts in the words of ADR F (`hydrology`)
+- P1 `words-land-ice`: land-ice: knowledge, skills and tests in the words of ADR F (`land-ice`)
+- P1 `words-ocean-science`: ocean-science: knowledge, skills, tests and stored receipts in the words of ADR F (`ocean-science`)
+- P1 `words-provider-bundle`: The provider bundle: pitfalls, failed attempts and open questions, and the wording check (`nasa-daac-knowledge`)
+- P1 `words-re-signing-pass`: The knowledge steward's re-signing pass (`nasa-daac-knowledge`)
+- P1 `words-releases`: A release of the provider bundle and of each plugin, with the path mapping in the notes (`marketplace`)
+- P1 `words-rename-tool`: A rename tool with a dry run, and validators that know the new names (`build-kit`)
+- P1 `words-specification-and-glossary`: Specification 0.8.0 and the glossary: the renamed types, the one-line definitions, the wording rule (`marketplace`)
+- P2 `words-archive-observatory`: archive-observatory: kinds of claim and the words of its reports (`archive-observatory`)
+- P2 `words-evals`: evals: the runner and its reports in the words of ADR F (`evals`)
+- P2 `words-knowledge-template`: knowledge-template: the new type names and directories (`knowledge-template`)
+- P2 `words-organization-pages`: The organization's profile, governance and issue forms (`.github`)
+- P2 `words-plugin-template`: plugin-template: the example skill and its guides in the words of ADR F (`plugin-template`)
+- P2 `words-tutorials`: tutorials: the pages a newcomer reads first (`tutorials`)
 
 ### Done (63)
 
@@ -1233,3 +1251,141 @@ The ocean heat content, the Earth energy imbalance, the ice sheet mass balance a
 - [ ] The nwm-gauge-confrontation recipe and its eval case merge on the maintainer's review and reach stable on it; the case is registered in the evals manifests.
 - Depends on: `seed-hydrology-precip-lakes`, `observations-round-three`
 - Evidence: `Round three of seeding (build-kit roadmap/seeds/round-3.yaml), issue #65 in hydrology, opened 2026-09-15`, `hydrology PR #70, built 2026-09-15: the groundwater partition of dS in the attested basin water balance (water-table fluctuation over 58 unconfined USGS wells in the Ohio at Olmsted basin, frozen as a fourth fixture tree with a selection script), bar three on the specific yield and the partition, the NWM gauge confrontation recipe with its methodology eval case; coordinator review ran the golden, the four trees and a tamper suite; fix round attested every receipt field, added the parameter guard, connected-component clustering, the sigma at spread and the term without the largest site; merged 2026-09-16`, `hydrology PR #71: the edited computation concept and recipe re-signed, the NWM recipe stable and signed; the eval case registered in the evals hydrology manifest (evals #40). The groundwater term is +9.75 km3 with a sigma of 15.0, one riverbank well field carrying nearly all of it`
+
+### Words a scientist meets
+
+**ID:** `words-a-scientist-meets`  
+**Status:** proposed  
+**Priority:** P1
+
+A scientist who opens a knowledge page, a skill's output or a finding meets words they already use: the words that overstated trust are corrected, the concept types that misdescribed their own rule are renamed with their directories and keys, the words that stay each have one line in the glossary, and the retired words cannot return.
+
+> **Gate:** The decision owner's record, ADR F. No rule changes: a reference number, tolerance, review requirement or signature rule that differs after the migration is a finding, never an update.
+
+| Deliverable | Repository | Status | Priority | Contributor | Issue |
+|---|---|---|---|---|---|
+| `adr-f-words-a-scientist-meets`: The decision record, merged by the decision owner | `marketplace` | proposed | P1 | owner-only | none |
+| `words-specification-and-glossary`: Specification 0.8.0 and the glossary: the renamed types, the one-line definitions, the wording rule | `marketplace` | proposed | P1 | owner-only | none |
+| `words-rename-tool`: A rename tool with a dry run, and validators that know the new names | `build-kit` | proposed | P1 | needs-context | none |
+| `words-provider-bundle`: The provider bundle: pitfalls, failed attempts and open questions, and the wording check | `nasa-daac-knowledge` | proposed | P1 | needs-context | none |
+| `words-core`: core: knowledge, skills and tests in the words of ADR F | `core` | proposed | P1 | ready | none |
+| `words-hydrology`: hydrology: knowledge, skills, tests and stored receipts in the words of ADR F | `hydrology` | proposed | P1 | ready | none |
+| `words-ocean-science`: ocean-science: knowledge, skills, tests and stored receipts in the words of ADR F | `ocean-science` | proposed | P1 | ready | none |
+| `words-atmospheric-physics`: atmospheric-physics: knowledge, skills and tests in the words of ADR F | `atmospheric-physics` | proposed | P1 | ready | none |
+| `words-land-ice`: land-ice: knowledge, skills and tests in the words of ADR F | `land-ice` | proposed | P1 | ready | none |
+| `words-agent-evals`: agent-evals: the case type and every concept path a case is graded against | `agent-evals` | proposed | P1 | ready | none |
+| `words-evals`: evals: the runner and its reports in the words of ADR F | `evals` | proposed | P2 | ready | none |
+| `words-knowledge-template`: knowledge-template: the new type names and directories | `knowledge-template` | proposed | P2 | ready | none |
+| `words-plugin-template`: plugin-template: the example skill and its guides in the words of ADR F | `plugin-template` | proposed | P2 | ready | none |
+| `words-tutorials`: tutorials: the pages a newcomer reads first | `tutorials` | proposed | P2 | good-first | none |
+| `words-archive-observatory`: archive-observatory: kinds of claim and the words of its reports | `archive-observatory` | proposed | P2 | ready | none |
+| `words-organization-pages`: The organization's profile, governance and issue forms | `.github` | proposed | P2 | ready | none |
+| `words-re-signing-pass`: The knowledge steward's re-signing pass | `nasa-daac-knowledge` | proposed | P1 | owner-only | none |
+| `words-releases`: A release of the provider bundle and of each plugin, with the path mapping in the notes | `marketplace` | proposed | P1 | owner-only | none |
+
+#### Acceptance details
+
+**`adr-f-words-a-scientist-meets`**
+
+- [ ] ADR F merged with its table of words that change and words that stay, and the choice between one pass over signed text and no change to signed text recorded.
+- Gate: The decision owner's record; drafted by the coordinator with a reader check as its evidence.
+
+**`words-specification-and-glossary`**
+
+- [ ] The marketplace README and the glossary say who signs today and that no page is yet provider-confirmed.
+- [ ] The glossary defines every word ADR F keeps (run receipt, attested computation, golden, fixture, concept, confrontation, validity domain, severity, knowledge steward, signature, the trust tiers and provider, merge then sign, eval case) in one line each, and is level with the files on type names.
+- [ ] The specification reads 0.8.0, carries the renamed concept types, directories and keys, states the wording rule and whose words the Open Knowledge Format's are, and its changelog entry names every renamed identifier.
+- [ ] The model page and the guides carry no retired word outside dated records.
+- Depends on: `adr-f-words-a-scientist-meets`
+- Gate: Lands before any repository is migrated, so every migration builds to the words as written. The two sentences that imply a provider's endorsement are corrected first and need not wait for the rest.
+
+**`words-rename-tool`**
+
+- [ ] One command applies ADR F's table to a repository deterministically: words, type values, directories, keys, and every link and citation path that follows a moved concept; a dry run lists every change and changes nothing.
+- [ ] Identifiers the Open Knowledge Format owns, dated records, decision records and changelog entries are left as written.
+- [ ] Run twice, the second run changes nothing.
+- [ ] The metadata validators accept the new type values and report the old ones as errors once a repository has migrated.
+- Depends on: `adr-f-words-a-scientist-meets`
+
+**`words-provider-bundle`**
+
+- [ ] Every concept type, directory, heading and link follows ADR F; the bundle's own check routine passes apart from re-signing due.
+- [ ] The wording check reports a retired word outside the exempt places, in this repository's routine and in every plugin's required checks.
+- [ ] The digest and the confirm-a-concept template say who wrote a page and that none is yet provider-confirmed.
+- Depends on: `words-specification-and-glossary`, `words-rename-tool`
+- Gate: One change carries everything that touches signed text, so that one re-signing pass covers it.
+
+**`words-core`**
+
+- [ ] The rename tool's second run changes nothing; the required checks pass apart from re-signing due; no reference number moved.
+- Depends on: `words-provider-bundle`
+
+**`words-hydrology`**
+
+- [ ] The rename tool's second run changes nothing; the required checks pass apart from re-signing due; no reference number moved.
+- [ ] Stored receipts whose verdict words or paths changed are regenerated, and none carries a path in a home directory.
+- Depends on: `words-provider-bundle`
+
+**`words-ocean-science`**
+
+- [ ] The rename tool's second run changes nothing; the required checks pass apart from re-signing due; no reference number moved.
+- [ ] Stored receipts whose verdict words or paths changed are regenerated, and none carries a path in a home directory.
+- Depends on: `words-provider-bundle`
+
+**`words-atmospheric-physics`**
+
+- [ ] The rename tool's second run changes nothing; the required checks pass apart from re-signing due; no reference number moved.
+- Depends on: `words-provider-bundle`
+
+**`words-land-ice`**
+
+- [ ] The rename tool's second run changes nothing; the required checks pass apart from re-signing due; no reference number moved.
+- Depends on: `words-provider-bundle`
+
+**`words-agent-evals`**
+
+- [ ] Every case names the pitfall type and the new concept paths; the case headers resolve against the migrated bundles.
+- Depends on: `words-provider-bundle`
+
+**`words-evals`**
+
+- [ ] The runner reads the renamed case type; reports a scientist reads say with-and-without comparison; file names in the tooling may stay.
+- Depends on: `words-agent-evals`
+
+**`words-knowledge-template`**
+
+- [ ] A bundle scaffolded from the template passes the validators with the new names and carries no retired word.
+- Depends on: `words-specification-and-glossary`, `words-rename-tool`
+
+**`words-plugin-template`**
+
+- [ ] The template's required checks pass and its pages say analysis script and re-check script in prose, with the standard's keys unchanged.
+- Depends on: `words-specification-and-glossary`, `words-rename-tool`
+
+**`words-tutorials`**
+
+- [ ] Every tutorial page follows ADR F and defines a kept word where it first appears.
+- Depends on: `words-specification-and-glossary`, `words-rename-tool`
+
+**`words-archive-observatory`**
+
+- [ ] The data file and the tools that read it name kinds of claim; its reports follow ADR F.
+- Depends on: `words-specification-and-glossary`, `words-rename-tool`
+
+**`words-organization-pages`**
+
+- [ ] The profile, the governance file and every issue form follow ADR F; a provider asked to confirm is asked to confirm a statement about their product.
+- Depends on: `words-specification-and-glossary`
+
+**`words-re-signing-pass`**
+
+- [ ] The signature check reports nothing due in the provider bundle and in each plugin's own knowledge.
+- Depends on: `words-provider-bundle`, `words-core`, `words-hydrology`, `words-ocean-science`, `words-atmospheric-physics`, `words-land-ice`
+- Gate: By the steward's own hand: a signature is a person's, and no assistant adds one.
+
+**`words-releases`**
+
+- [ ] The provider bundle is released first; each plugin's version floor moves to it; the catalog pins the new tags.
+- [ ] Each release's notes carry the mapping from old concept paths to new ones.
+- Depends on: `words-re-signing-pass`
+- Gate: A release tag lands only on a commit where no re-signing is due, and each plugin passes its qualification.

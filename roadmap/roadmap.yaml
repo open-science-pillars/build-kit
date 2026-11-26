@@ -2525,3 +2525,292 @@ initiatives:
         issue:
           number: 65
           url: https://github.com/open-science-pillars/hydrology/issues/65
+  - id: words-a-scientist-meets
+    title: Words a scientist meets
+    outcome: "A scientist who opens a knowledge page, a skill's output or a finding meets words they already use: the words that overstated trust are corrected, the concept types that misdescribed their own rule are renamed with their directories and keys, the words that stay each have one line in the glossary, and the retired words cannot return."
+    status: proposed
+    priority: P1
+    depends_on: []
+    gate: "The decision owner's record, ADR F. No rule changes: a reference number, tolerance, review requirement or signature rule that differs after the migration is a finding, never an update."
+    deliverables:
+      - id: adr-f-words-a-scientist-meets
+        title: The decision record, merged by the decision owner
+        repo: marketplace
+        status: proposed
+        priority: P1
+        depends_on: []
+        gate: "The decision owner's record; drafted by the coordinator with a reader check as its evidence."
+        acceptance:
+          - "ADR F merged with its table of words that change and words that stay, and the choice between one pass over signed text and no change to signed text recorded."
+        evidence: []
+        contributor:
+          readiness: owner-only
+          champion: PaulMRamirez
+          prerequisites: [the decision owner's merge]
+        labels: [roadmap, "priority:P1"]
+      - id: words-specification-and-glossary
+        title: "Specification 0.8.0 and the glossary: the renamed types, the one-line definitions, the wording rule"
+        repo: marketplace
+        status: proposed
+        priority: P1
+        depends_on: [adr-f-words-a-scientist-meets]
+        gate: "Lands before any repository is migrated, so every migration builds to the words as written. The two sentences that imply a provider's endorsement are corrected first and need not wait for the rest."
+        acceptance:
+          - "The marketplace README and the glossary say who signs today and that no page is yet provider-confirmed."
+          - "The glossary defines every word ADR F keeps (run receipt, attested computation, golden, fixture, concept, confrontation, validity domain, severity, knowledge steward, signature, the trust tiers and provider, merge then sign, eval case) in one line each, and is level with the files on type names."
+          - "The specification reads 0.8.0, carries the renamed concept types, directories and keys, states the wording rule and whose words the Open Knowledge Format's are, and its changelog entry names every renamed identifier."
+          - "The model page and the guides carry no retired word outside dated records."
+        evidence: []
+        contributor:
+          readiness: owner-only
+          champion: PaulMRamirez
+          prerequisites: [the decision]
+        labels: [roadmap, "priority:P1"]
+      - id: words-rename-tool
+        title: A rename tool with a dry run, and validators that know the new names
+        repo: build-kit
+        status: proposed
+        priority: P1
+        depends_on: [adr-f-words-a-scientist-meets]
+        gate: null
+        acceptance:
+          - "One command applies ADR F's table to a repository deterministically: words, type values, directories, keys, and every link and citation path that follows a moved concept; a dry run lists every change and changes nothing."
+          - "Identifiers the Open Knowledge Format owns, dated records, decision records and changelog entries are left as written."
+          - "Run twice, the second run changes nothing."
+          - "The metadata validators accept the new type values and report the old ones as errors once a repository has migrated."
+        evidence: []
+        contributor:
+          readiness: needs-context
+          champion: PaulMRamirez
+          prerequisites: [the decision, Python with uv]
+        labels: [roadmap, "priority:P1"]
+      - id: words-provider-bundle
+        title: "The provider bundle: pitfalls, failed attempts and open questions, and the wording check"
+        repo: nasa-daac-knowledge
+        status: proposed
+        priority: P1
+        depends_on: [words-specification-and-glossary, words-rename-tool]
+        gate: "One change carries everything that touches signed text, so that one re-signing pass covers it."
+        acceptance:
+          - "Every concept type, directory, heading and link follows ADR F; the bundle's own check routine passes apart from re-signing due."
+          - "The wording check reports a retired word outside the exempt places, in this repository's routine and in every plugin's required checks."
+          - "The digest and the confirm-a-concept template say who wrote a page and that none is yet provider-confirmed."
+        evidence: []
+        contributor:
+          readiness: needs-context
+          champion: PaulMRamirez
+          prerequisites: [the rename tool, the specification revision]
+        labels: [roadmap, "priority:P1"]
+      - id: words-core
+        title: "core: knowledge, skills and tests in the words of ADR F"
+        repo: core
+        status: proposed
+        priority: P1
+        depends_on: [words-provider-bundle]
+        gate: null
+        acceptance:
+          - "The rename tool's second run changes nothing; the required checks pass apart from re-signing due; no reference number moved."
+        evidence: []
+        contributor:
+          readiness: ready
+          champion: PaulMRamirez
+          prerequisites: [the rename tool]
+        labels: [roadmap, "priority:P1"]
+      - id: words-hydrology
+        title: "hydrology: knowledge, skills, tests and stored receipts in the words of ADR F"
+        repo: hydrology
+        status: proposed
+        priority: P1
+        depends_on: [words-provider-bundle]
+        gate: null
+        acceptance:
+          - "The rename tool's second run changes nothing; the required checks pass apart from re-signing due; no reference number moved."
+          - "Stored receipts whose verdict words or paths changed are regenerated, and none carries a path in a home directory."
+        evidence: []
+        contributor:
+          readiness: ready
+          champion: PaulMRamirez
+          prerequisites: [the rename tool]
+        labels: [roadmap, "priority:P1"]
+      - id: words-ocean-science
+        title: "ocean-science: knowledge, skills, tests and stored receipts in the words of ADR F"
+        repo: ocean-science
+        status: proposed
+        priority: P1
+        depends_on: [words-provider-bundle]
+        gate: null
+        acceptance:
+          - "The rename tool's second run changes nothing; the required checks pass apart from re-signing due; no reference number moved."
+          - "Stored receipts whose verdict words or paths changed are regenerated, and none carries a path in a home directory."
+        evidence: []
+        contributor:
+          readiness: ready
+          champion: PaulMRamirez
+          prerequisites: [the rename tool]
+        labels: [roadmap, "priority:P1"]
+      - id: words-atmospheric-physics
+        title: "atmospheric-physics: knowledge, skills and tests in the words of ADR F"
+        repo: atmospheric-physics
+        status: proposed
+        priority: P1
+        depends_on: [words-provider-bundle]
+        gate: null
+        acceptance:
+          - "The rename tool's second run changes nothing; the required checks pass apart from re-signing due; no reference number moved."
+        evidence: []
+        contributor:
+          readiness: ready
+          champion: PaulMRamirez
+          prerequisites: [the rename tool]
+        labels: [roadmap, "priority:P1"]
+      - id: words-land-ice
+        title: "land-ice: knowledge, skills and tests in the words of ADR F"
+        repo: land-ice
+        status: proposed
+        priority: P1
+        depends_on: [words-provider-bundle]
+        gate: null
+        acceptance:
+          - "The rename tool's second run changes nothing; the required checks pass apart from re-signing due; no reference number moved."
+        evidence: []
+        contributor:
+          readiness: ready
+          champion: PaulMRamirez
+          prerequisites: [the rename tool]
+        labels: [roadmap, "priority:P1"]
+      - id: words-agent-evals
+        title: "agent-evals: the case type and every concept path a case is graded against"
+        repo: agent-evals
+        status: proposed
+        priority: P1
+        depends_on: [words-provider-bundle]
+        gate: null
+        acceptance:
+          - "Every case names the pitfall type and the new concept paths; the case headers resolve against the migrated bundles."
+        evidence: []
+        contributor:
+          readiness: ready
+          champion: PaulMRamirez
+          prerequisites: [the rename tool]
+        labels: [roadmap, "priority:P1"]
+      - id: words-evals
+        title: "evals: the runner and its reports in the words of ADR F"
+        repo: evals
+        status: proposed
+        priority: P2
+        depends_on: [words-agent-evals]
+        gate: null
+        acceptance:
+          - "The runner reads the renamed case type; reports a scientist reads say with-and-without comparison; file names in the tooling may stay."
+        evidence: []
+        contributor:
+          readiness: ready
+          champion: PaulMRamirez
+          prerequisites: [the rename tool]
+        labels: [roadmap, "priority:P2"]
+      - id: words-knowledge-template
+        title: "knowledge-template: the new type names and directories"
+        repo: knowledge-template
+        status: proposed
+        priority: P2
+        depends_on: [words-specification-and-glossary, words-rename-tool]
+        gate: null
+        acceptance:
+          - "A bundle scaffolded from the template passes the validators with the new names and carries no retired word."
+        evidence: []
+        contributor:
+          readiness: ready
+          champion: PaulMRamirez
+          prerequisites: [the rename tool]
+        labels: [roadmap, "priority:P2"]
+      - id: words-plugin-template
+        title: "plugin-template: the example skill and its guides in the words of ADR F"
+        repo: plugin-template
+        status: proposed
+        priority: P2
+        depends_on: [words-specification-and-glossary, words-rename-tool]
+        gate: null
+        acceptance:
+          - "The template's required checks pass and its pages say analysis script and re-check script in prose, with the standard's keys unchanged."
+        evidence: []
+        contributor:
+          readiness: ready
+          champion: PaulMRamirez
+          prerequisites: [the rename tool]
+        labels: [roadmap, "priority:P2"]
+      - id: words-tutorials
+        title: "tutorials: the pages a newcomer reads first"
+        repo: tutorials
+        status: proposed
+        priority: P2
+        depends_on: [words-specification-and-glossary, words-rename-tool]
+        gate: null
+        acceptance:
+          - "Every tutorial page follows ADR F and defines a kept word where it first appears."
+        evidence: []
+        contributor:
+          readiness: good-first
+          champion: PaulMRamirez
+          prerequisites: [the rename tool]
+        labels: [roadmap, "priority:P2"]
+      - id: words-archive-observatory
+        title: "archive-observatory: kinds of claim and the words of its reports"
+        repo: archive-observatory
+        status: proposed
+        priority: P2
+        depends_on: [words-specification-and-glossary, words-rename-tool]
+        gate: null
+        acceptance:
+          - "The data file and the tools that read it name kinds of claim; its reports follow ADR F."
+        evidence: []
+        contributor:
+          readiness: ready
+          champion: PaulMRamirez
+          prerequisites: [the rename tool]
+        labels: [roadmap, "priority:P2"]
+      - id: words-organization-pages
+        title: "The organization's profile, governance and issue forms"
+        repo: .github
+        status: proposed
+        priority: P2
+        depends_on: [words-specification-and-glossary]
+        gate: null
+        acceptance:
+          - "The profile, the governance file and every issue form follow ADR F; a provider asked to confirm is asked to confirm a statement about their product."
+        evidence: []
+        contributor:
+          readiness: ready
+          champion: PaulMRamirez
+          prerequisites: [the specification revision]
+        labels: [roadmap, "priority:P2"]
+      - id: words-re-signing-pass
+        title: The knowledge steward's re-signing pass
+        repo: nasa-daac-knowledge
+        status: proposed
+        priority: P1
+        depends_on: [words-provider-bundle, words-core, words-hydrology, words-ocean-science, words-atmospheric-physics, words-land-ice]
+        gate: "By the steward's own hand: a signature is a person's, and no assistant adds one."
+        acceptance:
+          - "The signature check reports nothing due in the provider bundle and in each plugin's own knowledge."
+        evidence: []
+        contributor:
+          readiness: owner-only
+          champion: PaulMRamirez
+          prerequisites: [every migration merged]
+        labels: [roadmap, "priority:P1"]
+      - id: words-releases
+        title: A release of the provider bundle and of each plugin, with the path mapping in the notes
+        repo: marketplace
+        status: proposed
+        priority: P1
+        depends_on: [words-re-signing-pass]
+        gate: "A release tag lands only on a commit where no re-signing is due, and each plugin passes its qualification."
+        acceptance:
+          - "The provider bundle is released first; each plugin's version floor moves to it; the catalog pins the new tags."
+          - "Each release's notes carry the mapping from old concept paths to new ones."
+        evidence: []
+        contributor:
+          readiness: owner-only
+          champion: PaulMRamirez
+          prerequisites: [the re-signing pass]
+        labels: [roadmap, "priority:P1"]
